@@ -548,7 +548,7 @@ def _extract_with_claude(file_data, mime_type, system_prompt, user_msg):
         }
 
     response = client.messages.create(
-        model="claude-3-haiku-20240307",
+        model="claude-haiku-4-5-20251001",
         max_tokens=800,
         system=system_prompt,
         messages=[{
@@ -691,7 +691,7 @@ def chat():
             messages = messages[-20:]
 
         response = client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-haiku-4-5-20251001",
             max_tokens=1500,
             system=CHAT_SYSTEM_PROMPT,
             messages=messages,
@@ -707,20 +707,6 @@ def chat():
             "reply": "Lo siento, hubo un error al procesar su consulta. Por favor intente de nuevo."
         }), 500
 
-
-@app.route("/api/debug/models")
-def debug_models():
-    """Endpoint temporal para listar los modelos disponibles en la API key."""
-    import anthropic
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if not api_key or api_key.startswith("sk-ant-api03-xxxx"):
-        return jsonify({"error": "ANTHROPIC_API_KEY no configurada"}), 400
-    try:
-        client = anthropic.Anthropic(api_key=api_key)
-        models = client.models.list()
-        return jsonify({"modelos": [m.id for m in models.data]})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
