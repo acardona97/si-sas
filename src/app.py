@@ -708,6 +708,21 @@ def chat():
         }), 500
 
 
+@app.route("/api/debug/models")
+def debug_models():
+    """Endpoint temporal para listar los modelos disponibles en la API key."""
+    import anthropic
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key or api_key.startswith("sk-ant-api03-xxxx"):
+        return jsonify({"error": "ANTHROPIC_API_KEY no configurada"}), 400
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        models = client.models.list()
+        return jsonify({"modelos": [m.id for m in models.data]})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_ENV", "production") == "development"
