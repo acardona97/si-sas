@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sí S.A.S. — Constitución de Sociedad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260522d">
+</head>
+<body>
+
+<div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>Sí S.A.S.</h1>
+            <p class="brand-sub">Quarta Acompañamiento Legal</p>
+        </div>
+        <nav class="step-nav" id="step-nav">
+            <div class="step-item active" data-step="1">
+                <span class="step-num">1</span>
+                <span class="step-label">Nombre y Domicilio</span>
+            </div>
+            <div class="step-item" data-step="2">
+                <span class="step-num">2</span>
+                <span class="step-label">Accionistas</span>
+            </div>
+            <div class="step-item" data-step="3">
+                <span class="step-num">3</span>
+                <span class="step-label">Representantes Legales</span>
+            </div>
+            <div class="step-item" data-step="4">
+                <span class="step-num">4</span>
+                <span class="step-label">Objeto Social</span>
+            </div>
+            <div class="step-item" data-step="5">
+                <span class="step-num">5</span>
+                <span class="step-label">Capital y Régimen</span>
+            </div>
+            <div class="step-item" data-step="6">
+                <span class="step-num">6</span>
+                <span class="step-label">Condiciones Especiales</span>
+            </div>
+            <div class="step-item" data-step="7">
+                <span class="step-num">7</span>
+                <span class="step-label">Resumen y Generación</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Progress bar (mobile) -->
+        <div class="mobile-progress">
+            <div class="progress-fill" id="progress-fill" style="width: 14.28%"></div>
+        </div>
+
+        <form id="form-sas" onsubmit="return false;">
+
+            <!-- ═══ PASO 1: Nombre y Domicilio ═══ -->
+            <section class="step" id="step1">
+                <h2>Nombre y Domicilio</h2>
+                <p class="step-desc">Datos de identificación y ubicación de la sociedad.</p>
+
+                <div class="form-group">
+                    <label for="nombre_sas">Razón Social *</label>
+                    <input type="text" id="nombre_sas" placeholder="Ej: ACME INNOVACIONES S.A.S." required>
+                    <span class="hint">Debe terminar en S.A.S.</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="direccion">Dirección del domicilio principal *</label>
+                        <input type="text" id="direccion" placeholder="Ej: Carrera 43A #1-50, Oficina 805" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="barrio">Barrio *</label>
+                        <input type="text" id="barrio" placeholder="Ej: El Poblado">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="municipio">Municipio *</label>
+                        <input type="text" id="municipio" value="Medellín">
+                    </div>
+                    <div class="form-group">
+                        <label for="departamento">Departamento *</label>
+                        <input type="text" id="departamento" value="Antioquia">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefono1">Teléfono principal *</label>
+                        <input type="text" id="telefono1" placeholder="Ej: 3001234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo electrónico *</label>
+                        <input type="email" id="email" placeholder="Ej: contacto@empresa.co">
+                        <span class="hint">Máximo 60 caracteres. Sin guión antes del @.</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefono2">Teléfono 2 (opcional)</label>
+                        <input type="text" id="telefono2">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono3">Teléfono 3 (opcional)</label>
+                        <input type="text" id="telefono3">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="zona">Zona</label>
+                        <select id="zona">
+                            <option value="urbana" selected>Urbana</option>
+                            <option value="rural">Rural</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo_local">Tipo de local</label>
+                        <select id="tipo_local">
+                            <option value="oficina">Oficina</option>
+                            <option value="local">Local</option>
+                            <option value="local_y_oficina">Local y oficina</option>
+                            <option value="fabrica">Fábrica</option>
+                            <option value="vivienda">Vivienda</option>
+                            <option value="finca">Finca</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenencia">Tenencia del inmueble</label>
+                        <select id="tenencia">
+                            <option value="arriendo">Arriendo</option>
+                            <option value="propia">Propia</option>
+                            <option value="comodato">Comodato</option>
+                            <option value="prestamo">Préstamo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <div></div>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(1)">Siguiente →</button>
+                </div>
+            </section>
+
+            <!-- ═══ PASO 2: Accionistas ═══ -->
+            <section class="step hidden" id="step2">
+                <h2>Accionistas</h2>
+                <p class="step-desc">Agregue los accionistas de la sociedad. Los porcentajes deben sumar 100%.</p>
+
+                <div id="accionistas-container"></div>
+
+                <div class="pct-bar">
+                    <div class="pct-bar-fill" id="pct-bar-fill"></div>
+                    <span class="pct-bar-label" id="pct-bar-label">0%</span>
+                </div>
+
+                <button type="button" class="btn btn-outline" onclick="addAccionista()">+ Agregar accionista</button>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)">← Anterior</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">Siguiente →</button>
+                </div>
+            </section>
+
+            <!-- ═══ PASO 3: Representantes Legales ═══ -->
+            <section class="step hidden" id="step3">
+                <h2>Representantes Legales</h2>
+                <p class="step-desc">Designe al representante legal principal y, opcionalmente, un suplente.</p>
+
+                <div class="info-box">
+                    Si el representante legal es uno de los accionistas, selecciónelo del menú desplegable para autocompletar sus datos.
+                </div>
+
+                <fieldset>
+                    <legend>Representante Legal Principal</legend>
+                    <div class="upload-doc-section">
+                        <div class="upload-doc-info">
+                            <strong>📷 Autocompletar desde cédula o pasaporte</strong>
+                            <span class="upload-hint">Suba la cédula del Representante Legal Principal y Sí S.A.S. completará nombre, número de documento, ciudad de expedición y género.</span>
+                        </div>
+                        <label class="upload-doc-btn">
+                            Cargar documento
+                            <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'rl_principal', 0)">
+                        </label>
+                        <span class="upload-status" id="rl_principal_upload_status"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Seleccionar de accionistas</label>
+                        <select id="rl_principal_select" onchange="selectRL('principal')">
+                            <option value="">-- Escribir manualmente --</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rl_principal_nombre">Nombre completo *</label>
+                            <input type="text" id="rl_principal_nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="rl_principal_tipo_doc">Tipo documento</label>
+                            <select id="rl_principal_tipo_doc">
+                                <option value="CC">C.C.</option>
+                                <option value="CE">C.E.</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rl_principal_genero">Género</label>
+                            <select id="rl_principal_genero">
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rl_principal_cedula">Número de documento *</label>
+                            <input type="text" id="rl_principal_cedula">
+                        </div>
+                        <div class="form-group">
+                            <label for="rl_principal_expedicion">Ciudad de expedición *</label>
+                            <input type="text" id="rl_principal_expedicion">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Representante Legal Suplente (opcional)</legend>
+                    <div class="upload-doc-section">
+                        <div class="upload-doc-info">
+                            <strong>📷 Autocompletar desde cédula o pasaporte</strong>
+                            <span class="upload-hint">Suba la cédula del Representante Legal Suplente (opcional). Sí S.A.S. completará los campos automáticamente.</span>
+                        </div>
+                        <label class="upload-doc-btn">
+                            Cargar documento
+                            <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'rl_suplente', 0)">
+                        </label>
+                        <span class="upload-status" id="rl_suplente_upload_status"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Seleccionar de accionistas</label>
+                        <select id="rl_suplente_select" onchange="selectRL('suplente')">
+                            <option value="">-- Ninguno --</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rl_suplente_nombre">Nombre completo</label>
+                            <input type="text" id="rl_suplente_nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="rl_suplente_tipo_doc">Tipo documento</label>
+                            <select id="rl_suplente_tipo_doc">
+                                <option value="CC">C.C.</option>
+                                <option value="CE">C.E.</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rl_suplente_genero">Género</label>
+                            <select id="rl_suplente_genero">
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rl_suplente_cedula">Número de documento</label>
+                            <input type="text" id="rl_suplente_cedula">
+                        </div>
+                        <div class="form-group">
+                            <label for="rl_suplente_expedicion">Ciudad de expedición</label>
+                            <input type="text" id="rl_suplente_expedicion">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)">← Anterior</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(3)">Siguiente →</button>
+                </div>
+            </section>
+
+            <!-- ═══ PASO 4: Objeto Social y Actividad ═══ -->
+            <section class="step hidden" id="step4">
+                <h2>Objeto Social y Actividad</h2>
+                <p class="step-desc">Describa la actividad económica. Si no escribe el objeto social, se genera automáticamente.</p>
+
+                <div class="form-group">
+                    <label for="ciiu_search">Código CIIU Principal *</label>
+                    <input type="text" id="ciiu_search" placeholder="Buscar por código o descripción..." oninput="searchCIIU(this.value, 'principal')">
+                    <div class="ciiu-results hidden" id="ciiu_results"></div>
+                    <span class="ciiu-tag hidden" id="ciiu_selected"></span>
+                    <input type="hidden" id="ciiu_code">
+                    <input type="hidden" id="ciiu_description">
+                </div>
+
+                <div class="form-group">
+                    <label for="ciiu_search_sec">Código CIIU Secundario (opcional)</label>
+                    <input type="text" id="ciiu_search_sec" placeholder="Buscar..." oninput="searchCIIU(this.value, 'secundario')">
+                    <div class="ciiu-results hidden" id="ciiu_results_sec"></div>
+                    <span class="ciiu-tag hidden" id="ciiu_selected_sec"></span>
+                    <input type="hidden" id="ciiu_code_sec">
+                    <input type="hidden" id="ciiu_description_sec">
+                </div>
+
+                <div class="form-group">
+                    <label for="objeto_social">Objeto Social (opcional)</label>
+                    <textarea id="objeto_social" rows="5" placeholder="Ej: Se dedicará a operar un restaurante temático inspirado en la saga Harry Potter."></textarea>
+                    <span class="hint">
+                        <strong>Sugerencia:</strong> comience la descripción con expresiones como
+                        <em>"Se dedicará a..."</em>, <em>"Su actividad consistirá en..."</em> o
+                        <em>"Operará..."</em>. <strong>Evite empezar con "La sociedad..."</strong>
+                        para que se integre con fluidez al objeto generado.
+                        <br>Si escribe más de 200 caracteres, se usa tal cual. Si es breve, se elabora profesionalmente.
+                    </span>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(4)">← Anterior</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(4)">Siguiente →</button>
+                </div>
+            </section>
+
+            <!-- ═══ PASO 5: Capital y Régimen ═══ -->
+            <section class="step hidden" id="step5">
+                <h2>Capital y Régimen Tributario</h2>
+
+                <div class="form-group">
+                    <label>Capital Autorizado</label>
+                    <input type="text" value="$1.000.000.000" disabled class="input-disabled">
+                    <span class="hint">Fijo por ley. Mil millones de pesos, dividido en 1.000.000.000 acciones de $1 c/u.</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capital_suscrito">Capital Suscrito *</label>
+                        <input type="text" id="capital_suscrito" value="1.000.000" oninput="formatMoney(this); syncCapital()">
+                        <span class="hint">Mínimo $1. Cada acción vale $1.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="capital_pagado">Capital Pagado (total)</label>
+                        <input type="text" id="capital_pagado" value="1.000.000" oninput="formatMoney(this); onCapitalPagadoTotalChange()">
+                        <span class="hint" id="capital_pagado_hint">Puede ser menor o igual al suscrito. Si en el Paso 2 llenaste el capital pagado de cada accionista, este valor se calcula automáticamente como la suma.</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Régimen Tributario *</label>
+                    <div class="radio-cards">
+                        <label class="radio-card selected" onclick="selectRegimen('ordinario')">
+                            <input type="radio" name="regimen" id="regimen_ordinario" value="ordinario" checked>
+                            <span class="radio-title">Ordinario</span>
+                            <span class="radio-desc">Incluye responsabilidad 05</span>
+                        </label>
+                        <label class="radio-card" onclick="selectRegimen('simple')">
+                            <input type="radio" name="regimen" id="regimen_simple" value="simple">
+                            <span class="radio-title">Simple (SIMPLE)</span>
+                            <span class="radio-desc">Incluye responsabilidad 47</span>
+                        </label>
+                    </div>
+                    <input type="hidden" id="regimen" value="ordinario">
+                </div>
+
+                <div class="form-group">
+                    <label for="ingresos_mensuales">Promedio mensual de ingresos estimado (opcional)</label>
+                    <input type="text" id="ingresos_mensuales" value="100.000" oninput="formatMoney(this)">
+                    <span class="hint">Para el formulario de Otras Entidades.</span>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(5)">← Anterior</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(5)">Siguiente →</button>
+                </div>
+            </section>
+
+            <!-- ═══ PASO 6: Condiciones Especiales ═══ -->
+            <section class="step hidden" id="step6">
+                <h2>Órganos y Condiciones Especiales</h2>
+
+                <div class="form-group">
+                    <label>¿Junta Directiva?</label>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="junta" value="no" checked onchange="toggleJunta(false)">
+                            <span class="radio-title">No</span>
+                            <span class="radio-desc">Sin junta directiva (lo más común en S.A.S.)</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="junta" value="si" onchange="toggleJunta(true)">
+                            <span class="radio-title">Sí</span>
+                            <span class="radio-desc">Con junta directiva</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>¿Revisor Fiscal?</label>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="revisor" value="no" checked>
+                            <span class="radio-title">No</span>
+                            <span class="radio-desc">Sin revisor fiscal (lo más común)</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="revisor" value="si">
+                            <span class="radio-title">Sí</span>
+                            <span class="radio-desc">Con revisor fiscal</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>¿Es emprendimiento social? (Ley 2234 de 2022)</label>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="emprendimiento" value="no" checked>
+                            <span class="radio-title">No</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="emprendimiento" value="si">
+                            <span class="radio-title">Sí</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="grupo_etnico">¿Algún accionista pertenece a un grupo étnico?</label>
+                    <select id="grupo_etnico">
+                        <option value="">No aplica</option>
+                        <option value="indigena">Indígena</option>
+                        <option value="afrocolombiano">Afrocolombiano</option>
+                        <option value="raizal">Raizal</option>
+                        <option value="palenquero">Palenquero</option>
+                        <option value="rom">Rom (Gitano)</option>
+                    </select>
+                    <span class="hint">Pregunta facultativa para fines estadísticos (Circular Supersociedades).</span>
+                </div>
+
+                <div style="margin: 2rem 0 1rem 0; padding: 1rem; background: var(--surface-2, #f5f5f7); border-left: 4px solid var(--accent, #b8860b); border-radius: 4px;">
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">Apoderado para trámites</h3>
+                    <p style="margin: 0; color: var(--text-2, #555); font-size: 0.9rem;">
+                        Esta sección habilita el Artículo Tercero y Cuarto Transitorios del documento de estatutos.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label>¿Desea designar un apoderado para los trámites de constitución?</label>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="tiene_apoderado" value="no" checked onchange="toggleApoderado(false)">
+                            <span class="radio-title">No</span>
+                            <span class="radio-desc">Sin apoderado (los accionistas realizan los trámites directamente)</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="tiene_apoderado" value="si" onchange="toggleApoderado(true)">
+                            <span class="radio-title">Sí</span>
+                            <span class="radio-desc">Designar un abogado como apoderado</span>
+                        </label>
+                    </div>
+                </div>
+
+                <fieldset id="apoderado-fields" class="hidden">
+                    <legend>Datos del Apoderado</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="apoderado_nombre">Nombre completo *</label>
+                            <input type="text" id="apoderado_nombre" placeholder="Ej: Andrés Felipe Cardona Mesa">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="apoderado_tipo_doc">Tipo documento</label>
+                            <select id="apoderado_tipo_doc">
+                                <option value="CC">C.C.</option>
+                                <option value="CE">C.E.</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="apoderado_id_num">Número de documento *</label>
+                            <input type="text" id="apoderado_id_num" placeholder="Ej: 1.152.456.789">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="apoderado_ciudad">Ciudad de domicilio *</label>
+                            <input type="text" id="apoderado_ciudad" value="Medellín">
+                        </div>
+                        <div class="form-group">
+                            <label for="apoderado_departamento">Departamento *</label>
+                            <input type="text" id="apoderado_departamento" value="Antioquia">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(6)">← Anterior</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(6)">Siguiente →</button>
+                </div>
+            </section>
+
+            <!-- ═══ PASO 7: Resumen y Generación ═══ -->
+            <section class="step hidden" id="step7">
+                <h2>Resumen y Generación</h2>
+                <p class="step-desc">Revise los datos antes de generar el paquete de documentos.</p>
+
+                <div id="summary-content" class="summary-content"></div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(7)">← Anterior</button>
+                    <button type="button" class="btn btn-generate" id="btn-generate" onclick="generateDocuments()">
+                        Generar Documentos 📄
+                    </button>
+                </div>
+
+                <div id="generation-status" class="generation-status hidden"></div>
+            </section>
+
+        </form>
+    </main>
+</div>
+
+<!-- ═══ Chat Sidebar ═══ -->
+<div id="chat-panel" class="chat-panel">
+    <div class="chat-header">
+        <div class="chat-header-info">
+            <span class="chat-avatar">Q</span>
+            <div>
+                <h3>Asistente Legal</h3>
+                <span class="chat-status">Quarta Legal &middot; Claude Sonnet</span>
+            </div>
+        </div>
+        <button type="button" class="chat-close" onclick="toggleChat()" title="Cerrar chat">&times;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg assistant">
+            <div class="chat-bubble">
+                Hola, soy el asistente legal de <strong>Quarta</strong>. Puedo ayudarte con cualquier duda sobre la constitución de tu S.A.S. — capital, objeto social, representante legal, régimen tributario, CIIU, o cualquier otro aspecto del formulario. ¿En qué te puedo ayudar?
+            </div>
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <textarea id="chat-input" rows="1" placeholder="Escribe tu pregunta..." onkeydown="chatKeyDown(event)"></textarea>
+        <button type="button" class="chat-send" id="chat-send-btn" onclick="sendChat()" title="Enviar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- Chat Toggle Button -->
+<button type="button" class="chat-toggle" id="chat-toggle" onclick="toggleChat()" title="Asistente Legal">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="chat-toggle-label">Asistente</span>
+</button>
+
+<script src="/static/js/app.js?v=20260522d"></script>
+</body>
+</html>

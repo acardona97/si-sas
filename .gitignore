@@ -1,0 +1,32 @@
+# Secretos — NUNCA subir al repositorio
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+
+# Archivos generados
+output/
+acroforms_output/
+*.zip
+
+# Node
+node_modules/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
