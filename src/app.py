@@ -548,7 +548,7 @@ def _extract_with_claude(file_data, mime_type, system_prompt, user_msg):
         }
 
     response = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-3-5-sonnet-20241022",
         max_tokens=800,
         system=system_prompt,
         messages=[{
@@ -691,7 +691,7 @@ def chat():
             messages = messages[-20:]
 
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-3-5-sonnet-20241022",
             max_tokens=1500,
             system=CHAT_SYSTEM_PROMPT,
             messages=messages,
