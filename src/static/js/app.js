@@ -230,12 +230,14 @@ function addAccionista() {
         <div class="form-row">
             <div class="form-group">
                 <label>Porcentaje accionario (%)</label>
-                <input type="number" name="acc${n}_porcentaje" min="0" max="100" step="0.01" placeholder="Ej: 50">
+                <input type="number" name="acc${n}_porcentaje" min="0" max="100" step="0.01" placeholder="Ej: 50"
+                       oninput="syncPorcentaje(this, ${n})">
             </div>
             <div class="form-group">
                 <label>Capital pagado ($)</label>
-                <input type="text" name="acc${n}_capital_pagado" placeholder="Ej: 500.000" oninput="formatMoney(this)">
-                <span class="hint">Vacío = 100% del suscrito</span>
+                <input type="text" name="acc${n}_capital_pagado" placeholder="Se calcula al ingresar %"
+                       oninput="formatMoney(this); this.dataset.userEdited='1'; recalcCapitalPagadoTotal()">
+                <span class="hint">Auto-calculado al ingresar %. Puede modificarlo si este accionista pagó menos.</span>
             </div>
         </div>
     `;
@@ -384,7 +386,12 @@ async function extractFromCedula(input, prefix, n) {
         // Mapeo de campos según el contexto (accionista vs RL)
         const filled = [];
 
-        if (prefix.startsWith('rl_')) {
+        if (prefix === 'apoderado') {
+            // Apoderado — campos con id= fijo
+            _fillIfPresent('apoderado_nombre', data.nombre_completo, filled, 'Nombre');
+            _fillSelectIfPresent('apoderado_tipo_doc', _normTipoDoc(data.tipo_documento), filled, 'Tipo doc');
+            _fillIfPresent('apoderado_id_num', data.numero_documento, filled, 'Documento');
+        } else if (prefix.startsWith('rl_')) {
             // Representante legal (principal o suplente)
             _fillIfPresent(`${prefix}_nombre`, data.nombre_completo, filled, 'Nombre');
             _fillSelectIfPresent(`${prefix}_tipo_doc`, _normTipoDoc(data.tipo_documento), filled, 'Tipo doc');
@@ -540,72 +547,67 @@ function _parseCop(str) {
     return parseInt((str || '').replace(/\D/g, ''), 10) || 0;
 }
 
-// Flag: si el usuario está escribiendo en el campo total, no lo sobrescribimos
-// al recalcular desde los individuales (a menos que existan individuales).
-let _userTypingTotalPagado = false;
-
 function syncCapital() {
-    // Cuando cambia el capital suscrito, ajustamos el total pagado si excede
-    // y recalculamos en caso de que existan valores individuales.
+    // Cuando el usuario cambia el capital suscrito, actualizar los capital_pagado
+    // individuales que aún no han sido editados manualmente por el usuario.
     const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
-    const pagadoEl = document.getElementById('capital_pagado');
-    const totalActual = _parseCop(pagadoEl.value);
-    // Si no hay individuales llenos y el total > suscrito, ajustar al suscrito
-    const anyIndividual = _anyIndividualPagadoFilled();
-    if (!anyIndividual && totalActual > suscrito) {
-        pagadoEl.value = suscrito.toLocaleString('es-CO');
+    document.querySelectorAll('.accionista-card').forEach(card => {
+        const pctInput = card.querySelector('input[name$="_porcentaje"]');
+        const pagadoInput = card.querySelector('input[name$="_capital_pagado"]');
+        if (pctInput && pagadoInput && !pagadoInput.dataset.userEdited) {
+            const pct = parseFloat(pctInput.value) || 0;
+            const nuevoPagado = Math.round(suscrito * pct / 100);
+            pagadoInput.value = nuevoPagado > 0 ? nuevoPagado.toLocaleString('es-CO') : '';
+        }
+    });
+    recalcCapitalPagadoTotal();
+}
+
+function syncPorcentaje(input, n) {
+    // Al ingresar el porcentaje, pre-llenar capital_pagado si el usuario no lo ha editado.
+    const pct = parseFloat(input.value) || 0;
+    const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
+    const pagadoInput = document.querySelector(`[name="acc${n}_capital_pagado"]`);
+    if (pagadoInput && !pagadoInput.dataset.userEdited) {
+        const pagadoAcc = Math.round(suscrito * pct / 100);
+        pagadoInput.value = pagadoAcc > 0 ? pagadoAcc.toLocaleString('es-CO') : '';
     }
     recalcCapitalPagadoTotal();
 }
 
-function _anyIndividualPagadoFilled() {
-    const accs = getAccionistasData();
-    return accs.some(a => a.capital_pagado && _parseCop(a.capital_pagado) > 0);
-}
-
 function onCapitalPagadoTotalChange() {
-    // El usuario está editando el total directamente.
-    // Si NO hay individuales llenos, este valor es la fuente de verdad.
-    // Si hay individuales, mostramos un aviso visual pero no sobrescribimos.
+    // El usuario está editando el total directamente (modo global).
     const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
     const pagadoEl = document.getElementById('capital_pagado');
-    const total = _parseCop(pagadoEl.value);
-    // Tope: no puede exceder al suscrito
-    if (total > suscrito) {
+    if (_parseCop(pagadoEl.value) > suscrito) {
         pagadoEl.value = suscrito.toLocaleString('es-CO');
     }
 }
 
 function recalcCapitalPagadoTotal() {
-    // Solo recalcula el total a partir de individuales SI hay al menos uno lleno.
-    // Si no hay ninguno, respeta lo que el usuario tipeó en el campo total.
+    // Suma los capital_pagado individuales de los accionistas y muestra el total.
+    // Si un accionista tiene el campo vacío, se asume que pagó su porción completa.
     const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
     const pagadoDisplay = document.getElementById('capital_pagado');
     if (!pagadoDisplay) return;
     const accionistas = getAccionistasData();
-    const anyIndividual = accionistas.some(a => a.capital_pagado && _parseCop(a.capital_pagado) > 0);
-    if (!anyIndividual) {
-        // Conservar lo que el usuario tipeó (o el default).
-        // Solo asegurar que no exceda suscrito.
-        const cur = _parseCop(pagadoDisplay.value);
-        if (cur > suscrito) {
-            pagadoDisplay.value = suscrito.toLocaleString('es-CO');
-        }
-        return;
-    }
-    // Hay individuales → la suma es la fuente de verdad.
+    if (accionistas.length === 0) return;
+
     let total = 0;
+    let hayAlgunPorcentaje = false;
     for (const acc of accionistas) {
         const pct = acc.porcentaje || 0;
+        if (pct <= 0) continue;
+        hayAlgunPorcentaje = true;
         const suscAcc = Math.round(suscrito * pct / 100);
-        if (acc.capital_pagado) {
-            const pagAcc = _parseCop(acc.capital_pagado);
-            total += Math.min(pagAcc, suscAcc);  // nunca mayor que su suscrito
-        } else {
-            total += suscAcc;  // vacío = 100% pagado
-        }
+        const pagAcc = acc.capital_pagado
+            ? Math.min(_parseCop(acc.capital_pagado), suscAcc)
+            : suscAcc;  // vacío = pagó su porción completa
+        total += pagAcc;
     }
-    pagadoDisplay.value = total > 0 ? total.toLocaleString('es-CO') : suscrito.toLocaleString('es-CO');
+    if (hayAlgunPorcentaje) {
+        pagadoDisplay.value = total > 0 ? total.toLocaleString('es-CO') : '';
+    }
 }
 
 function selectRegimen(valor) {

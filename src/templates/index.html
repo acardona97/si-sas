@@ -6,7 +6,7 @@
     <title>Sí S.A.S. — Constitución de Sociedad</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260522d">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260522e">
 </head>
 <body>
 
@@ -348,8 +348,8 @@
                     </div>
                     <div class="form-group">
                         <label for="capital_pagado">Capital Pagado (total)</label>
-                        <input type="text" id="capital_pagado" value="1.000.000" oninput="formatMoney(this); onCapitalPagadoTotalChange()">
-                        <span class="hint" id="capital_pagado_hint">Puede ser menor o igual al suscrito. Si en el Paso 2 llenaste el capital pagado de cada accionista, este valor se calcula automáticamente como la suma.</span>
+                        <input type="text" id="capital_pagado" value="" placeholder="Se calcula desde los accionistas" oninput="formatMoney(this); onCapitalPagadoTotalChange()">
+                        <span class="hint" id="capital_pagado_hint">Se calcula automáticamente sumando el capital pagado de cada accionista (Paso 2). Puede editarlo manualmente si prefiere un valor global.</span>
                     </div>
                 </div>
 
@@ -470,6 +470,20 @@
 
                 <fieldset id="apoderado-fields" class="hidden">
                     <legend>Datos del Apoderado</legend>
+
+                    <div class="upload-doc-section">
+                        <div class="upload-doc-info">
+                            <strong>📷 Autocompletar desde cédula o pasaporte</strong>
+                            <span class="upload-hint">Opcional — suba el documento del apoderado y Sí S.A.S. extrae nombre y número automáticamente.</span>
+                        </div>
+                        <label class="upload-doc-btn">
+                            Cargar documento
+                            <input type="file" accept="image/*,application/pdf"
+                                   onchange="extractFromCedula(this, 'apoderado', 0)">
+                        </label>
+                        <span class="upload-status" id="apoderado_upload_status"></span>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="apoderado_nombre">Nombre completo *</label>
@@ -562,6 +576,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260522d"></script>
+<script src="/static/js/app.js?v=20260522e"></script>
 </body>
 </html>
