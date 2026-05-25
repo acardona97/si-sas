@@ -600,9 +600,9 @@ function recalcCapitalPagadoTotal() {
         if (pct <= 0) continue;
         hayAlgunPorcentaje = true;
         const suscAcc = Math.round(suscrito * pct / 100);
-        const pagAcc = acc.capital_pagado
+        const pagAcc = (acc.capital_pagado && _parseCop(acc.capital_pagado) > 0)
             ? Math.min(_parseCop(acc.capital_pagado), suscAcc)
-            : suscAcc;  // vacío = pagó su porción completa
+            : 0;  // vacío o cero = no ha pagado
         total += pagAcc;
     }
     if (hayAlgunPorcentaje) {

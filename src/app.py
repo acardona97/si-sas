@@ -216,31 +216,28 @@ def generate():
         )
 
         if any_individual:
-            # MODO A
+            # MODO A: suma de individuales. Vacío = 0 (no ha pagado).
             capital_pagado_total = 0
             for acc in accionistas:
                 pct = float(acc.get("porcentaje", 0))
                 susc_acc = int(capital_suscrito * pct / 100)
                 cp_raw = str(acc.get("capital_pagado", "")).strip()
-                if cp_raw:
-                    cp_acc = min(parse_money(cp_raw), susc_acc)
-                else:
-                    cp_acc = susc_acc  # vacío = 100% pagado
+                cp_acc = min(parse_money(cp_raw), susc_acc) if cp_raw else 0
                 acc["capital_pagado_num"] = cp_acc
                 capital_pagado_total += cp_acc
-            capital_pagado = capital_pagado_total if capital_pagado_total > 0 else capital_suscrito
+            capital_pagado = capital_pagado_total  # se respeta aunque sea 0
         else:
-            # MODO B: usar total global, distribuir proporcionalmente
-            capital_pagado_global = parse_money(data.get("capital_pagado", capital_suscrito))
-            capital_pagado_global = min(capital_pagado_global, capital_suscrito)
-            if capital_pagado_global <= 0:
-                capital_pagado_global = capital_suscrito
+            # MODO B: total global. Vacío → default suscrito; explícito → respetar.
+            cp_raw_global = str(data.get("capital_pagado", "")).strip()
+            if cp_raw_global:
+                capital_pagado_global = min(parse_money(cp_raw_global), capital_suscrito)
+            else:
+                capital_pagado_global = capital_suscrito  # no ingresó nada → 100%
             acumulado = 0
             n = len(accionistas)
             for i, acc in enumerate(accionistas):
                 pct = float(acc.get("porcentaje", 0))
                 if i == n - 1:
-                    # Último accionista recibe el resto para evitar pérdidas por redondeo
                     cp_acc = capital_pagado_global - acumulado
                 else:
                     cp_acc = int(capital_pagado_global * pct / 100)
