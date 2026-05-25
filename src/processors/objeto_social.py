@@ -107,7 +107,7 @@ def _generar_con_claude(ciiu_code, ciiu_desc, ciiu_code_sec="", ciiu_desc_sec=""
 
     try:
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-haiku-4-5-20251001",
             max_tokens=2000,
             system=SYSTEM_PROMPT_OBJETO,
             messages=[{"role": "user", "content": user_msg}],
@@ -897,17 +897,9 @@ def generar_objeto_social(ciiu_code, ciiu_desc, ciiu_code_sec="", ciiu_desc_sec=
     2. Intenta generar con Claude Sonnet (si la API key esta configurada).
     3. Si Claude no esta disponible o falla, usa el generador deterministico.
     """
-    texto = texto_usuario.strip()
-
-    # Si el usuario ya redacto un objeto social largo y detallado, respetarlo
-    if len(texto) > 200:
-        if ("actividades lícitas" not in texto.lower()
-                and "actividades licitas" not in texto.lower()
-                and "objeto social" not in texto[-100:].lower()):
-            texto = texto.rstrip(". ") + ". " + CLAUSULA_CATCHALL
-        return texto
-
-    # Intentar con Claude API
+    # Siempre intentar con Claude primero, sin importar la longitud del texto.
+    # El usuario puede escribir algo largo pero mal redactado — Claude siempre
+    # produce texto jurídico profesional correcto.
     resultado_claude = _generar_con_claude(
         ciiu_code, ciiu_desc, ciiu_code_sec, ciiu_desc_sec, texto_usuario
     )
@@ -915,7 +907,7 @@ def generar_objeto_social(ciiu_code, ciiu_desc, ciiu_code_sec="", ciiu_desc_sec=
         logger.info("Objeto social generado con Claude API")
         return resultado_claude
 
-    # Fallback: generador deterministico
+    # Fallback: generador deterministico (sin API key o error de red)
     logger.info("Objeto social generado con fallback deterministico")
     return _generar_deterministico(
         ciiu_code, ciiu_desc, ciiu_code_sec, ciiu_desc_sec, texto_usuario
