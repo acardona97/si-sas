@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración — Sí S.A.S.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260525a">
+</head>
+<body class="admin-body">
+
+<div class="adm-layout">
+
+    <!-- Sidebar -->
+    <aside class="adm-sidebar">
+        <div class="adm-brand">
+            <h1>Sí S.A.S.</h1>
+            <p>Panel Admin</p>
+        </div>
+        <nav class="adm-nav">
+            <a href="/admin" class="adm-nav-item active">
+                <span class="adm-nav-icon">👥</span> Usuarios
+            </a>
+            <a href="/app" class="adm-nav-item">
+                <span class="adm-nav-icon">📝</span> Formulario
+            </a>
+        </nav>
+        <div class="adm-nav-footer">
+            <a href="/logout" class="adm-logout">Cerrar sesión</a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="adm-main">
+        <div class="adm-topbar">
+            <div>
+                <h2 class="adm-title">Gestión de usuarios</h2>
+                <p class="adm-subtitle">{{ users|length }} usuario(s) registrado(s)</p>
+            </div>
+        </div>
+
+        <div class="adm-card">
+            {% if users %}
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Plan</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="{{ 'adm-row-inactive' if not user.active else '' }}">
+                        <td class="adm-cell-name">{{ user.nombre or '—' }}</td>
+                        <td class="adm-cell-email">{{ user.email }}</td>
+                        <td>
+                            <form method="post" action="/admin/update-plan" class="adm-inline-form">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <select name="plan" class="adm-plan-select" onchange="this.form.submit()">
+                                    {% for p, label in plan_labels.items() %}
+                                    <option value="{{ p }}" {% if user.plan == p %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                            <span class="adm-status {{ 'adm-active' if user.active else 'adm-inactive' }}">
+                                {{ 'Activo' if user.active else 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td class="adm-cell-date">
+                            {{ user.created_at[:10] if user.created_at else '—' }}
+                        </td>
+                        <td>
+                            <form method="post" action="/admin/toggle-active" class="adm-inline-form">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <input type="hidden" name="active"  value="{{ user.active }}">
+                                <button type="submit"
+                                        class="adm-action-btn {{ 'adm-deactivate' if user.active else 'adm-activate' }}">
+                                    {{ 'Desactivar' if user.active else 'Activar' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="adm-empty">No hay usuarios registrados aún.</p>
+            {% endif %}
+        </div>
+
+        <!-- Info configuración -->
+        <div class="adm-info-box">
+            <strong>Configuración de Railway recomendada:</strong>
+            <ul>
+                <li><code>ADMIN_EMAIL</code> — correo del administrador</li>
+                <li><code>ADMIN_PASSWORD</code> — contraseña del administrador (mín. 12 chars)</li>
+                <li><code>SECRET_KEY</code> — clave secreta para sesiones (genere una aleatoria)</li>
+                <li><code>ANTHROPIC_API_KEY</code> — clave de la API de Claude</li>
+            </ul>
+            <p style="margin-top:0.5rem;color:var(--text-muted);font-size:0.82rem;">
+                ⚠️ Para persistencia de usuarios en Railway, agregue un <strong>Volume</strong> montado en
+                <code>/app/data</code> (o ajuste la ruta del proyecto). Sin volumen, los usuarios se pierden al redesplegar.
+            </p>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

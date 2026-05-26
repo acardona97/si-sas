@@ -10,13 +10,21 @@ import json
 import zipfile
 import tempfile
 import re
+import functools
 from datetime import date, datetime
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import (
+    Flask, request, jsonify, send_file, render_template,
+    session, redirect, url_for
+)
 
 # Cargar variables de entorno desde .env
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
+from auth import (
+    init_db, seed_admin, get_user_by_id, verify_password, create_user,
+    get_all_users, update_user_plan, set_user_active, PLAN_LABELS
+)
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
 from processors.pdf_filler import (
@@ -30,6 +38,7 @@ from processors.pdf_filler import (
 )
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "quarta-si-sas-dev-secret-2026")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(BASE_DIR)  # si_sas_proyecto/
@@ -130,12 +139,145 @@ def determinar_situacion_control(accionistas):
 
 
 # ═══════════════════════════════════════════════════════════
-# RUTAS
+# INICIALIZACIÓN DB + ADMIN
+# ═══════════════════════════════════════════════════════════
+
+with app.app_context():
+    init_db()
+    seed_admin(
+        os.environ.get("ADMIN_EMAIL", ""),
+        os.environ.get("ADMIN_PASSWORD", "")
+    )
+
+
+# ═══════════════════════════════════════════════════════════
+# DECORADORES AUTH
+# ═══════════════════════════════════════════════════════════
+
+def login_required(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        if "user_id" not in session:
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Sesión requerida. Por favor inicie sesión."}), 401
+            return redirect(url_for("login_page"))
+        return f(*args, **kwargs)
+    return decorated
+
+
+def admin_required(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get("plan") != "admin":
+            return redirect(url_for("login_page"))
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ═══════════════════════════════════════════════════════════
+# RUTAS PÚBLICAS
 # ═══════════════════════════════════════════════════════════
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def landing():
+    if "user_id" in session:
+        return redirect(url_for("app_main"))
+    return render_template("landing.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login_page():
+    if "user_id" in session:
+        return redirect(url_for("app_main"))
+    error = None
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        user = verify_password(email, password)
+        if user:
+            session["user_id"]     = user["id"]
+            session["user_email"]  = user["email"]
+            session["user_nombre"] = user["nombre"]
+            session["plan"]        = user["plan"]
+            return redirect(url_for("app_main"))
+        error = "Correo o contraseña incorrectos."
+    return render_template("auth.html", mode="login", error=error)
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register_page():
+    if "user_id" in session:
+        return redirect(url_for("app_main"))
+    error = None
+    if request.method == "POST":
+        email    = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        confirm  = request.form.get("confirm_password", "")
+        nombre   = request.form.get("nombre", "").strip()
+        if not email or not password:
+            error = "Correo y contraseña son obligatorios."
+        elif len(password) < 8:
+            error = "La contraseña debe tener mínimo 8 caracteres."
+        elif password != confirm:
+            error = "Las contraseñas no coinciden."
+        else:
+            user = create_user(email, password, nombre)
+            if user:
+                session["user_id"]     = user["id"]
+                session["user_email"]  = user["email"]
+                session["user_nombre"] = user["nombre"]
+                session["plan"]        = user["plan"]
+                return redirect(url_for("app_main"))
+            error = "Ese correo ya está registrado."
+    return render_template("auth.html", mode="register", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("landing"))
+
+
+# ═══════════════════════════════════════════════════════════
+# RUTAS PROTEGIDAS
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/app")
+@login_required
+def app_main():
+    user = get_user_by_id(session["user_id"])
+    return render_template("index.html", user=user)
+
+
+# ═══════════════════════════════════════════════════════════
+# ADMIN
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/admin")
+@admin_required
+def admin_panel():
+    users = get_all_users()
+    return render_template("admin.html", users=users, plan_labels=PLAN_LABELS)
+
+
+@app.route("/admin/update-plan", methods=["POST"])
+@admin_required
+def admin_update_plan():
+    user_id = request.form.get("user_id")
+    plan    = request.form.get("plan")
+    if user_id and plan in PLAN_LABELS:
+        update_user_plan(user_id, plan)
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/admin/toggle-active", methods=["POST"])
+@admin_required
+def admin_toggle_active():
+    user_id = request.form.get("user_id")
+    active  = request.form.get("active")
+    if user_id:
+        set_user_active(user_id, 0 if active == "1" else 1)
+    return redirect(url_for("admin_panel"))
 
 
 @app.route("/api/ciiu/search")
@@ -161,6 +303,7 @@ def ciiu_search():
 
 
 @app.route("/api/generate", methods=["POST"])
+@login_required
 def generate():
     """Genera el paquete completo de constitución S.A.S."""
     data = request.get_json()
@@ -569,6 +712,7 @@ def _extract_with_claude(file_data, mime_type, system_prompt, user_msg):
 
 
 @app.route("/api/extract/cedula", methods=["POST"])
+@login_required
 def extract_cedula():
     """Extrae datos de cédula/pasaporte mediante Claude Vision."""
     if "file" not in request.files:
@@ -599,6 +743,7 @@ def extract_cedula():
 
 
 @app.route("/api/extract/certificado", methods=["POST"])
+@login_required
 def extract_certificado():
     """Extrae datos de Certificado de Existencia y Representación Legal."""
     if "file" not in request.files:
@@ -661,6 +806,7 @@ Reglas:
 
 
 @app.route("/api/chat", methods=["POST"])
+@login_required
 def chat():
     """Endpoint para el chat asistente legal con Claude Sonnet."""
     data = request.get_json()

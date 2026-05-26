@@ -79,10 +79,11 @@ def _fill_acroform(template_path, output_path, field_values, checkbox_fields=Non
             for annot_ref in annots_list:
                 annot = annot_ref.get_object() if hasattr(annot_ref, "get_object") else annot_ref
                 da = str(annot.get("/DA", ""))
-                if "/F" in da:
-                    # Extraer nombre de fuente (ej: "/F0" de "/F0 0 Tf")
+                if "Tf" in da:
+                    # Extraer nombre de fuente del operador Tf: /NombreFuente tamaño Tf
+                    # Captura /Helv, /F0, /Arial, /BAAAA+Arial, etc.
                     import re as _re
-                    m = _re.search(r"(/F\w+)", da)
+                    m = _re.search(r"(/[\w+]+)\s+[\d.]+\s+Tf", da)
                     if m:
                         template_font = m.group(1)
                         break

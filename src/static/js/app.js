@@ -235,9 +235,9 @@ function addAccionista() {
             </div>
             <div class="form-group">
                 <label>Capital pagado ($)</label>
-                <input type="text" name="acc${n}_capital_pagado" placeholder="Se calcula al ingresar %"
-                       oninput="formatMoney(this); this.dataset.userEdited='1'; recalcCapitalPagadoTotal()">
-                <span class="hint">Auto-calculado al ingresar %. Puede modificarlo si este accionista pagó menos.</span>
+                <input type="text" name="acc${n}_capital_pagado" placeholder="0"
+                       oninput="formatMoney(this); recalcCapitalPagadoTotal()">
+                <span class="hint">Monto pagado por este accionista. Deje en 0 si aún no ha pagado nada.</span>
             </div>
         </div>
     `;
@@ -548,30 +548,12 @@ function _parseCop(str) {
 }
 
 function syncCapital() {
-    // Cuando el usuario cambia el capital suscrito, actualizar los capital_pagado
-    // individuales que aún no han sido editados manualmente por el usuario.
-    const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
-    document.querySelectorAll('.accionista-card').forEach(card => {
-        const pctInput = card.querySelector('input[name$="_porcentaje"]');
-        const pagadoInput = card.querySelector('input[name$="_capital_pagado"]');
-        if (pctInput && pagadoInput && !pagadoInput.dataset.userEdited) {
-            const pct = parseFloat(pctInput.value) || 0;
-            const nuevoPagado = Math.round(suscrito * pct / 100);
-            pagadoInput.value = nuevoPagado > 0 ? nuevoPagado.toLocaleString('es-CO') : '';
-        }
-    });
+    // Al cambiar capital suscrito solo recalcula el total; el pagado lo maneja el usuario.
     recalcCapitalPagadoTotal();
 }
 
 function syncPorcentaje(input, n) {
-    // Al ingresar el porcentaje, pre-llenar capital_pagado si el usuario no lo ha editado.
-    const pct = parseFloat(input.value) || 0;
-    const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
-    const pagadoInput = document.querySelector(`[name="acc${n}_capital_pagado"]`);
-    if (pagadoInput && !pagadoInput.dataset.userEdited) {
-        const pagadoAcc = Math.round(suscrito * pct / 100);
-        pagadoInput.value = pagadoAcc > 0 ? pagadoAcc.toLocaleString('es-CO') : '';
-    }
+    // Al ingresar porcentaje solo recalcula el total; el pagado lo maneja el usuario.
     recalcCapitalPagadoTotal();
 }
 

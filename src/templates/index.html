@@ -48,6 +48,18 @@
                 <span class="step-label">Resumen y Generación</span>
             </div>
         </nav>
+        {% if user %}
+        <div class="sidebar-user">
+            <div class="sidebar-user-name">{{ user.nombre or user.email }}</div>
+            <div class="sidebar-user-plan plan-badge-{{ user.plan }}">
+                {{ {'basic':'Básico','standard':'Estándar','premium':'Premium','admin':'Admin'}.get(user.plan, user.plan) }}
+            </div>
+            {% if user.plan == 'admin' %}
+            <a href="/admin" class="sidebar-user-link">Panel admin</a>
+            {% endif %}
+            <a href="/logout" class="sidebar-user-link sidebar-logout">Cerrar sesión</a>
+        </div>
+        {% endif %}
     </aside>
 
     <!-- Main Content -->
@@ -574,6 +586,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260522g"></script>
+<script src="/static/js/app.js?v=20260525a"></script>
 </body>
 </html>
