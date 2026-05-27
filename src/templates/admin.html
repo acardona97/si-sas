@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260525a">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260527a">
 </head>
 <body class="admin-body">
 
@@ -16,8 +16,8 @@
     <!-- Sidebar -->
     <aside class="adm-sidebar">
         <div class="adm-brand">
-            <h1>Sí S.A.S.</h1>
-            <p>Panel Admin</p>
+            <a href="/admin"><img src="/static/img/logo_quarta_white.svg" alt="Quarta" class="sidebar-logo-img"></a>
+            <p class="adm-brand-sub">Panel Admin</p>
         </div>
         <nav class="adm-nav">
             <a href="/admin" class="adm-nav-item active">
@@ -34,11 +34,24 @@
 
     <!-- Main -->
     <main class="adm-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="adm-flash-list">
+            {% for category, message in messages %}
+            <div class="adm-flash adm-flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
         <div class="adm-topbar">
             <div>
                 <h2 class="adm-title">Gestión de usuarios</h2>
                 <p class="adm-subtitle">{{ users|length }} usuario(s) registrado(s)</p>
             </div>
+            <button class="adm-add-btn" onclick="document.getElementById('modalAddUser').style.display='flex'">
+                + Agregar usuario
+            </button>
         </div>
 
         <div class="adm-card">
@@ -49,6 +62,7 @@
                         <th>Nombre</th>
                         <th>Correo</th>
                         <th>Plan</th>
+                        <th>Generaciones</th>
                         <th>Estado</th>
                         <th>Registro</th>
                         <th>Acciones</th>
@@ -69,6 +83,22 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="/admin/set-generaciones" class="adm-gen-form">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                {% if user.generaciones_disponibles is none %}
+                                    <span class="adm-gen-unlimited" title="Ilimitado">∞</span>
+                                {% else %}
+                                    <span class="adm-gen-count {{ 'adm-gen-zero' if user.generaciones_disponibles == 0 else '' }}">
+                                        {{ user.generaciones_disponibles }}
+                                    </span>
+                                {% endif %}
+                                <input type="number" name="generaciones" class="adm-gen-input"
+                                       min="0" max="999" placeholder="N"
+                                       title="Nuevo valor (vacío = ilimitado)">
+                                <button type="submit" class="adm-gen-btn" title="Actualizar">✓</button>
                             </form>
                         </td>
                         <td>
@@ -113,6 +143,42 @@
             </p>
         </div>
     </main>
+</div>
+
+<!-- Modal: Agregar usuario -->
+<div id="modalAddUser" class="adm-modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="adm-modal">
+        <div class="adm-modal-header">
+            <h3 class="adm-modal-title">Agregar usuario</h3>
+            <button class="adm-modal-close" onclick="document.getElementById('modalAddUser').style.display='none'">&times;</button>
+        </div>
+        <form method="post" action="/admin/add-user" class="adm-modal-form">
+            <div class="adm-field">
+                <label class="adm-label">Nombre completo</label>
+                <input type="text" name="nombre" class="adm-input" placeholder="Ej: María Camila Torres">
+            </div>
+            <div class="adm-field">
+                <label class="adm-label">Correo electrónico <span class="adm-required">*</span></label>
+                <input type="email" name="email" class="adm-input" placeholder="cliente@ejemplo.com" required>
+            </div>
+            <div class="adm-field">
+                <label class="adm-label">Contraseña <span class="adm-required">*</span></label>
+                <input type="password" name="password" class="adm-input" placeholder="Mínimo 8 caracteres" required minlength="8">
+            </div>
+            <div class="adm-field">
+                <label class="adm-label">Plan</label>
+                <select name="plan" class="adm-plan-select" style="width:100%">
+                    {% for p, label in plan_labels.items() %}
+                    <option value="{{ p }}" {% if p == 'basic' %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="adm-modal-actions">
+                <button type="button" class="adm-action-btn adm-activate" onclick="document.getElementById('modalAddUser').style.display='none'">Cancelar</button>
+                <button type="submit" class="adm-add-btn">Crear usuario</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>

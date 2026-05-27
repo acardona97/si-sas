@@ -708,49 +708,68 @@ def generar_rues(data, template_path, output_path):
 
 def generar_otras_entidades(data, template_path, output_path):
     """
-    Llena el Formulario de Otras Entidades usando AcroForm + overlay.
-    Campos AcroForm mapeados desde plantilla (Button1-Button100, Text30-Text102).
-    Firma del RL via overlay (sin campo AcroForm).
+    Llena el Formulario de Otras Entidades usando overlay de texto.
+
+    Usa reportlab para estampar texto directamente sobre el PDF template,
+    garantizando renderizado correcto en TODOS los visores PDF (Chrome,
+    Acrobat, Preview, móviles). Coordenadas extraídas de los AcroForm
+    Rects del template original.
     """
-    nombre_sas = data["nombre_sas"]
+    nombre_sas = _strip_tildes(data["nombre_sas"])
     ciiu_code = data.get("ciiu_code", "")
     ingresos = data.get("ingresos_mensuales", "100.000")
-    nombre_rl = data.get("nombre_rl", "")
+    nombre_rl = _strip_tildes(data.get("nombre_rl", ""))
     cc_rl = data.get("cc_rl", "")
 
-    # ─── AcroForm Fields ───
-    fields = {}
+    overlay_items = []
 
-    # Campo 3: Razón social (Text30)
-    fields["Text30"] = nombre_sas
+    # ─── Razón social (Text30: x=205.5 y=628.2 w=348.8 h=16.3) ───
+    overlay_items.append(
+        {"page": 0, "x": 208, "y": 631, "text": nombre_sas, "size": 8}
+    )
 
-    # Campo 5: CIIU dígitos (Text32-Text35)
-    if ciiu_code and len(ciiu_code) == 4:
-        fields["Text32"] = ciiu_code[0]
-        fields["Text33"] = ciiu_code[1]
-        fields["Text34"] = ciiu_code[2]
-        fields["Text35"] = ciiu_code[3]
-
-    # Campo 7.2: Promedio mensual ingresos (Text101)
-    fields["Text101"] = str(ingresos)
-
-    # Firma: Número de identificación (Text102)
-    fields["Text102"] = cc_rl
-
-    # ─── Checkboxes ───
-    checkbox_fields = {
-        "Button1": True,     # Inscripción RUT Primera Vez = Sí
-        "Button97": True,    # Sí industria y comercio
-        "Button99": True,    # No avisos (por defecto)
-    }
-
-    # ─── Escribir AcroForm ───
-    _fill_acroform(template_path, output_path, fields, checkbox_fields=checkbox_fields,
-                   font_size=8)
-
-    # ─── Overlay: Firma nombre RL (no hay campo AcroForm para esto) ───
-    if nombre_rl:
-        overlay_items = [
-            {"page": 0, "x": 100, "y": 202, "text": _strip_tildes(nombre_rl), "size": 9},
+    # ─── CIIU dígitos (Text32-Text35: ~13.9x13.5 each) ───
+    if ciiu_code and len(ciiu_code) >= 4:
+        ciiu_positions = [
+            (371, 588),   # Text32
+            (386, 588),   # Text33
+            (401, 588),   # Text34
+            (416, 588),   # Text35
         ]
-        _overlay_text(output_path, output_path, overlay_items)
+        for i, (cx, cy) in enumerate(ciiu_positions):
+            overlay_items.append(
+                {"page": 0, "x": cx, "y": cy, "text": ciiu_code[i], "size": 9}
+            )
+
+    # ─── Promedio mensual ingresos (Text101: x=250.1 y=353.6) ───
+    overlay_items.append(
+        {"page": 0, "x": 253, "y": 357, "text": str(ingresos), "size": 8}
+    )
+
+    # ─── Checkboxes como "X" ───
+    # Button1: Inscripción RUT Primera Vez = Sí (x=279.8 y=681.6 w=13.5)
+    overlay_items.append(
+        {"page": 0, "x": 282, "y": 684, "text": "X", "size": 10}
+    )
+    # Button97: Industria y Comercio = Sí (x=158.4 y=388.4 w=10.1)
+    overlay_items.append(
+        {"page": 0, "x": 160, "y": 390, "text": "X", "size": 7}
+    )
+    # Button99: Avisos y Tableros = No (x=155.2 y=370.8 w=9.4)
+    overlay_items.append(
+        {"page": 0, "x": 157, "y": 373, "text": "X", "size": 7}
+    )
+
+    # ─── Firma: nombre del RL (sin campo AcroForm, zona firma ~y=210) ───
+    if nombre_rl:
+        overlay_items.append(
+            {"page": 0, "x": 100, "y": 212, "text": nombre_rl, "size": 9}
+        )
+
+    # ─── Firma: CC del RL (Text102: x=318.4 y=193.9) ───
+    if cc_rl:
+        overlay_items.append(
+            {"page": 0, "x": 321, "y": 197, "text": cc_rl, "size": 8}
+        )
+
+    _overlay_text(template_path, output_path, overlay_items)

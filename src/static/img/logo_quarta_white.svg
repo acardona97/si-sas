@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 72" width="260" height="72">
+  <!-- Origami bird icon -->
+  <polygon points="2,50 38,6 46,50" fill="#5BBCD6"/>
+  <polygon points="26,50 46,22 56,50" fill="#3DA8C8"/>
+  <polygon points="38,44 56,44 50,50 40,50" fill="#2E96B8"/>
+
+  <!-- "quarta" wordmark — blanco para fondo oscuro -->
+  <text x="64" y="46"
+        font-family="'Gill Sans', 'Optima', 'Segoe UI', 'Trebuchet MS', Arial, sans-serif"
+        font-size="36"
+        font-weight="300"
+        fill="#FFFFFF"
+        letter-spacing="1">quarta</text>
+
+  <!-- tagline -->
+  <text x="90" y="62"
+        font-family="'Gill Sans', 'Segoe UI', Arial, sans-serif"
+        font-size="11"
+        font-weight="400"
+        fill="rgba(255,255,255,0.65)"
+        letter-spacing="0.5">acompañamiento legal</text>
+</svg>

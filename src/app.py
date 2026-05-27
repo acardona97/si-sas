@@ -15,15 +15,16 @@ from datetime import date, datetime
 from dotenv import load_dotenv
 from flask import (
     Flask, request, jsonify, send_file, render_template,
-    session, redirect, url_for
+    session, redirect, url_for, flash, get_flashed_messages
 )
 
 # Cargar variables de entorno desde .env
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 from auth import (
-    init_db, seed_admin, get_user_by_id, verify_password, create_user,
-    get_all_users, update_user_plan, set_user_active, PLAN_LABELS
+    init_db, seed_admin, seed_staff_user, get_user_by_id, verify_password,
+    create_user, get_all_users, update_user_plan, set_user_active,
+    check_puede_generar, decrement_generacion, set_generaciones, PLAN_LABELS
 )
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
@@ -44,6 +45,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(BASE_DIR)  # si_sas_proyecto/
 PLANTILLAS_DIR = os.path.join(PROJECT_DIR, "plantillas")
 DATA_DIR = os.path.join(PROJECT_DIR, "data")
+# Datos estáticos dentro de src/ — no se ven afectados por el Volume de Railway
+STATIC_DATA_DIR = os.path.join(BASE_DIR, "data")
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "output")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -147,6 +150,16 @@ with app.app_context():
     seed_admin(
         os.environ.get("ADMIN_EMAIL", ""),
         os.environ.get("ADMIN_PASSWORD", "")
+    )
+    seed_staff_user(
+        os.environ.get("STAFF_EMAIL_1", "acardona@quarta.co"),
+        os.environ.get("STAFF_PASSWORD_1", ""),
+        "Andrés Cardona",
+    )
+    seed_staff_user(
+        os.environ.get("STAFF_EMAIL_2", "info.2@quarta.co"),
+        os.environ.get("STAFF_PASSWORD_2", ""),
+        "Quarta Info",
     )
 
 
@@ -280,6 +293,42 @@ def admin_toggle_active():
     return redirect(url_for("admin_panel"))
 
 
+@app.route("/admin/set-generaciones", methods=["POST"])
+@admin_required
+def admin_set_generaciones():
+    user_id = request.form.get("user_id")
+    valor   = request.form.get("generaciones", "").strip()
+    if user_id:
+        n = None if valor == "" else int(valor)
+        set_generaciones(user_id, n)
+        flash(f"Generaciones actualizadas.", "success")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/admin/add-user", methods=["POST"])
+@admin_required
+def admin_add_user():
+    email    = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "")
+    nombre   = request.form.get("nombre", "").strip()
+    plan     = request.form.get("plan", "basic")
+
+    if not email or not password:
+        flash("Correo y contraseña son obligatorios.", "error")
+    elif len(password) < 8:
+        flash("La contraseña debe tener mínimo 8 caracteres.", "error")
+    elif plan not in PLAN_LABELS:
+        flash("Plan inválido.", "error")
+    else:
+        user = create_user(email, password, nombre, plan)
+        if user:
+            flash(f"Usuario {email} creado exitosamente.", "success")
+        else:
+            flash(f"El correo {email} ya está registrado.", "error")
+
+    return redirect(url_for("admin_panel"))
+
+
 @app.route("/api/ciiu/search")
 def ciiu_search():
     q = request.args.get("q", "").strip().lower()
@@ -287,7 +336,7 @@ def ciiu_search():
         return jsonify([])
 
     results = []
-    ciiu_path = os.path.join(DATA_DIR, "listado_ciiu.json")
+    ciiu_path = os.path.join(STATIC_DATA_DIR, "listado_ciiu.json")
     try:
         with open(ciiu_path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -306,6 +355,11 @@ def ciiu_search():
 @login_required
 def generate():
     """Genera el paquete completo de constitución S.A.S."""
+    if not check_puede_generar(session["user_id"]):
+        return jsonify({
+            "error": "Sin generaciones disponibles. Adquiera un plan para generar sus documentos."
+        }), 403
+
     data = request.get_json()
     if not data:
         return jsonify({"error": "No se recibieron datos"}), 400
@@ -588,6 +642,8 @@ def generate():
 
         if errors:
             app.logger.warning(f"Errores parciales: {errors}")
+
+        decrement_generacion(session["user_id"])
 
         return send_file(
             zip_path,

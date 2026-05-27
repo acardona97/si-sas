@@ -1,0 +1,2006 @@
+{
+  "estatutos_template.docx": {
+    "{{NOMBRE_SOCIEDAD}}": {
+      "fuente": "cuestionario",
+      "origen": "Nombre completo de la sociedad (debe terminar en S.A.S.)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Aparece en encabezado, Art. 1 y bloque de firmas. Normalizar variantes (SAS, S A S) a S.A.S."
+    },
+    "{{DOMICILIO_MUNICIPIO}}": {
+      "fuente": "cuestionario",
+      "origen": "Municipio del domicilio principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Aparece en encabezado de comparecencia y Art. 1"
+    },
+    "{{DOMICILIO_DEPARTAMENTO}}": {
+      "fuente": "cuestionario",
+      "origen": "Departamento del domicilio principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "{{FECHA_LITERAL}}": {
+      "fuente": "derivada",
+      "origen": "Fecha de hoy en formato literal completo",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Formato: 'veinticinco (25) días del mes de abril de 2026'. Generar a partir de Date.now()."
+    },
+    "{{BLOQUE_COMPARECENCIA_ACCIONISTAS}}": {
+      "fuente": "derivada",
+      "origen": "Lista de accionistas",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Construir un párrafo numerado por cada accionista: PN usa 'mayor de edad, identificado/a con C.C. No. X, expedida en Y, domiciliado/a en Z'; PJ usa 'sociedad comercial identificada con NIT X, domiciliada en Y, representada legalmente por Z, mayor de edad, identificado/a con C.C. No. W'. Conjugar género."
+    },
+    "{{OBJETO_SOCIAL_DESARROLLADO}}": {
+      "fuente": "cuestionario+IA",
+      "origen": "Descripción del objeto social del usuario, desarrollada por el agente",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Si el usuario dio descripción vaga, el agente la elabora con coherencia legal manteniendo correspondencia con CIIU declarado."
+    },
+    "{{CAPITAL_AUTORIZADO_MONTO_LETRAS_Y_CIFRAS}}": {
+      "fuente": "constante",
+      "origen": "Constante: mil millones de pesos",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 'MIL MILLONES DE PESOS (COP $1.000.000.000)'."
+    },
+    "{{CAPITAL_AUTORIZADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": {
+      "fuente": "constante",
+      "origen": "Constante: mil millones de acciones",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 'mil millones (1.000.000.000)'."
+    },
+    "{{CAPITAL_SUSCRITO_MONTO_LETRAS_Y_CIFRAS}}": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Capital suscrito (monto en COP)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Convertir el número a letras y cifras. Ej: 'UN MILLÓN DE PESOS (COP $1.000.000)'. Si usuario no lo da, usar 1.000.000."
+    },
+    "{{CAPITAL_SUSCRITO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": {
+      "fuente": "derivada",
+      "origen": "Capital suscrito / 1 (valor nominal)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Igual al monto del suscrito en acciones. Ej: 'un millón (1.000.000)'."
+    },
+    "{{CAPITAL_PAGADO_MONTO_LETRAS_Y_CIFRAS}}": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Capital pagado (monto en COP)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Validar que <= capital suscrito. Si usuario no lo da, igualar al suscrito."
+    },
+    "{{CAPITAL_PAGADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": {
+      "fuente": "derivada",
+      "origen": "Capital pagado / 1",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "{{RL_PRINCIPAL_NOMBRE}}": {
+      "fuente": "cuestionario",
+      "origen": "Nombre completo del representante legal principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "{{RL_PRINCIPAL_TIPO_DOC}}": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de identificación del RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Usar 'C.C.' para cédula, 'C.E.' para cédula de extranjería, 'Pasaporte' para pasaporte."
+    },
+    "{{RL_PRINCIPAL_NUM_DOC}}": {
+      "fuente": "cuestionario",
+      "origen": "Número de identificación del RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Formatear con separadores de miles. Ej: 1.037.657.432"
+    },
+    "{{RL_PRINCIPAL_CIUDAD_EXPEDICION}}": {
+      "fuente": "cuestionario",
+      "origen": "Ciudad de expedición del documento del RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "{{RL_SUPLENTE_LINEA}}": {
+      "fuente": "condicional",
+      "origen": "Datos del RL suplente o la palabra 'vacante'",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Si hay suplente: '[NOMBRE], identificado con [TIPO] No. [NUM], expedida en [CIUDAD]'. Si no hay: 'vacante'."
+    },
+    "{{BLOQUE_PODER_APODERADA}}": {
+      "fuente": "condicional",
+      "origen": "Cláusula de poder a apoderado externo",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Si hay apoderado externo, construir el bloque. Si no, dejar vacío Y eliminar también los párrafos entre {{INICIO_TEXTO_PODER}} y {{FIN_TEXTO_PODER}}."
+    },
+    "{{INICIO_TEXTO_PODER}}": {
+      "fuente": "condicional",
+      "origen": "Marcador de inicio del bloque de poder",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Si hay apoderado: dejar vacío (que pase el texto fijo del modelo). Si no: el agente debe eliminar todo entre {{INICIO_TEXTO_PODER}} y {{FIN_TEXTO_PODER}} incluidos."
+    },
+    "{{FIN_TEXTO_PODER}}": {
+      "fuente": "condicional",
+      "origen": "Marcador de fin del bloque de poder",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Ver INICIO_TEXTO_PODER"
+    },
+    "{{BLOQUE_FIRMAS_FINALES}}": {
+      "fuente": "derivada",
+      "origen": "Bloque de firmas adaptado al caso",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Construir según número y tipo de accionistas. Caso 1 (un PN que también es RL): '[NOMBRE]\\nC.C. No. [NUM]\\nEn calidad de constituyente y representante legal principal de [SOCIEDAD]'. Caso 2 (múltiples accionistas): un bloque por cada uno."
+    }
+  },
+  "emprendimientos_sociales_form.pdf": {
+    "razon_social": {
+      "fuente": "cuestionario",
+      "origen": "Nombre de la sociedad",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "nit": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución (no hay NIT aún)",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Dejar en blanco"
+    },
+    "es_emprendimiento_social_si": {
+      "fuente": "cuestionario",
+      "origen": "Pregunta: ¿es emprendimiento social Ley 2234/2022?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si la respuesta fue Sí. Mutuamente exclusivo con _no."
+    },
+    "es_emprendimiento_social_no": {
+      "fuente": "cuestionario",
+      "origen": "Pregunta: ¿es emprendimiento social Ley 2234/2022?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si la respuesta fue No. Por defecto es No."
+    }
+  },
+  "grupo_etnico_form.pdf": {
+    "razon_social": {
+      "fuente": "cuestionario",
+      "origen": "Nombre de la sociedad",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "nit": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Dejar en blanco"
+    },
+    "p1_no": {
+      "fuente": "cuestionario",
+      "origen": "¿Hay accionistas de grupos étnicos?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto Sí (No = sin participación étnica)"
+    },
+    "p1_si": {
+      "fuente": "cuestionario",
+      "origen": "¿Hay accionistas de grupos étnicos?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "p1_pct_gitano": {
+      "fuente": "condicional",
+      "origen": "% capital de accionistas gitano/ROM",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p1_si"
+    },
+    "p1_pct_raizal": {
+      "fuente": "condicional",
+      "origen": "% capital de accionistas raizal",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p1_si"
+    },
+    "p1_pct_palenquero": {
+      "fuente": "condicional",
+      "origen": "% capital de accionistas palenquero",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p1_si"
+    },
+    "p1_pct_negro": {
+      "fuente": "condicional",
+      "origen": "% capital de accionistas negro/a",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p1_si"
+    },
+    "p1_pct_afrodescendiente": {
+      "fuente": "condicional",
+      "origen": "% capital afrodescendiente",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p1_si"
+    },
+    "p1_pct_indigena": {
+      "fuente": "condicional",
+      "origen": "% capital indígena",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p1_si"
+    },
+    "p1_comunidad_indigena": {
+      "fuente": "condicional",
+      "origen": "Nombre comunidad indígena",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Solo si hay accionistas indígenas"
+    },
+    "p2_no": {
+      "fuente": "constante",
+      "origen": "Empleados de grupos étnicos",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto No (sociedad recién constituida sin empleados)"
+    },
+    "p2_si": {
+      "fuente": "constante",
+      "origen": "Empleados de grupos étnicos",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto vacío"
+    },
+    "p2_num_gitano": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p2_num_raizal": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p2_num_palenquero": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p2_num_negro": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p2_num_afrodescendiente": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p2_num_indigena": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p2_comunidad_indigena": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_no": {
+      "fuente": "cuestionario",
+      "origen": "¿RL/directivos pertenecen a grupos étnicos?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto No"
+    },
+    "p3_si": {
+      "fuente": "cuestionario",
+      "origen": "¿RL/directivos pertenecen a grupos étnicos?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "p3_total_cargos_directivos": {
+      "fuente": "condicional",
+      "origen": "Total cargos directivos",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": "Solo si p3_si. En constitución típicamente es 1 (RL principal)."
+    },
+    "p3_num_gitano": {
+      "fuente": "condicional",
+      "origen": "# directivos gitanos",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_num_raizal": {
+      "fuente": "condicional",
+      "origen": "# directivos raizal",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_num_palenquero": {
+      "fuente": "condicional",
+      "origen": "# directivos palenquero",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_num_negro": {
+      "fuente": "condicional",
+      "origen": "# directivos negro/a",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_num_afrodescendiente": {
+      "fuente": "condicional",
+      "origen": "# directivos afrodescendiente",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_num_indigena": {
+      "fuente": "condicional",
+      "origen": "# directivos indígena",
+      "tipo_valor": "number",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "p3_comunidad_indigena": {
+      "fuente": "condicional",
+      "origen": "Nombre comunidad indígena",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    }
+  },
+  "situacion_de_control_form.pdf": {
+    "fecha_dia": {
+      "fuente": "derivada",
+      "origen": "Día actual (DD)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_mes": {
+      "fuente": "derivada",
+      "origen": "Mes actual (MM)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_anio": {
+      "fuente": "derivada",
+      "origen": "Año actual (AAAA)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "camara_comercio_ciudad": {
+      "fuente": "constante",
+      "origen": "Medellín",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Constante 'Medellín' (CCMA)"
+    },
+    "nombre_sociedad_subordinada": {
+      "fuente": "cuestionario",
+      "origen": "Nombre de la sociedad que se constituye",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "domicilio_sociedad_subordinada": {
+      "fuente": "cuestionario",
+      "origen": "Domicilio (municipio, departamento)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "actividad_sociedad_subordinada": {
+      "fuente": "derivada",
+      "origen": "Objeto social desarrollado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "controlante_nombre": {
+      "fuente": "cuestionario",
+      "origen": "Nombre del accionista mayoritario (>50%)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "controlante_domicilio": {
+      "fuente": "cuestionario",
+      "origen": "Domicilio del controlante",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "controlante_nacionalidad": {
+      "fuente": "cuestionario",
+      "origen": "Nacionalidad del controlante",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Por defecto 'Colombiana'"
+    },
+    "controlante_actividad": {
+      "fuente": "cuestionario",
+      "origen": "Actividad del controlante",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Si es PJ: su CIIU. Si es PN: 'Persona natural' o actividad económica si la informó."
+    }
+  },
+  "ley_1780_form.pdf": {
+    "municipio": {
+      "fuente": "cuestionario",
+      "origen": "Municipio del domicilio",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_dia": {
+      "fuente": "derivada",
+      "origen": "Día actual",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_mes": {
+      "fuente": "derivada",
+      "origen": "Mes actual",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_anio": {
+      "fuente": "derivada",
+      "origen": "Año actual",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "rl_nombre": {
+      "fuente": "cuestionario",
+      "origen": "Nombre RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "razon_social": {
+      "fuente": "cuestionario",
+      "origen": "Nombre de la sociedad",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "acc1_nombre": {
+      "fuente": "derivada",
+      "origen": "Accionista joven 1",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Solo accionistas PN <=35 años"
+    },
+    "acc1_id": {
+      "fuente": "derivada",
+      "origen": "ID accionista joven 1",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc2_nombre": {
+      "fuente": "derivada",
+      "origen": "Accionista joven 2",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc2_id": {
+      "fuente": "derivada",
+      "origen": "ID accionista joven 2",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc3_nombre": {
+      "fuente": "derivada",
+      "origen": "Accionista joven 3",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc3_id": {
+      "fuente": "derivada",
+      "origen": "ID accionista joven 3",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc4_nombre": {
+      "fuente": "derivada",
+      "origen": "Accionista joven 4",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc4_id": {
+      "fuente": "derivada",
+      "origen": "ID accionista joven 4",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc5_nombre": {
+      "fuente": "derivada",
+      "origen": "Accionista joven 5",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "acc5_id": {
+      "fuente": "derivada",
+      "origen": "ID accionista joven 5",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab1_nombre": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab1_id": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab2_nombre": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab2_id": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab3_nombre": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab3_id": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab4_nombre": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab4_id": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab5_nombre": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "trab5_id": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "rl_nombre_pie": {
+      "fuente": "cuestionario",
+      "origen": "Nombre RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "rl_id_pie": {
+      "fuente": "cuestionario",
+      "origen": "Número de identificación RL",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    }
+  },
+  "otras_entidades_form.pdf": {
+    "rut_primera_vez": {
+      "fuente": "constante",
+      "origen": "Constitución = primera vez",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Siempre marcado en constitución"
+    },
+    "rut_actualizacion": {
+      "fuente": "constante",
+      "origen": "No aplica en constitución",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "nit": {
+      "fuente": "constante",
+      "origen": "No hay NIT aún",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "nit_dv": {
+      "fuente": "constante",
+      "origen": "No hay DV aún",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "nombre": {
+      "fuente": "cuestionario",
+      "origen": "Razón social",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "nombre_establecimiento": {
+      "fuente": "constante",
+      "origen": "Vacío",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío salvo nombre comercial distinto"
+    },
+    "ciiu_principal": {
+      "fuente": "cuestionario",
+      "origen": "CIIU principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "4 dígitos"
+    },
+    "contador_tipo_doc": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío en constitución"
+    },
+    "contador_num_doc": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_dv": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_fecha_dia": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_fecha_mes": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_fecha_anio": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_tarjeta_prof": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_apellidos_nom": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_emp_nit": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_emp_nit_dv": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "contador_emp_razonsoc": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "ica_si": {
+      "fuente": "constante",
+      "origen": "Por defecto sí (sociedad operará en municipio)",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado por defecto"
+    },
+    "ica_no": {
+      "fuente": "constante",
+      "origen": "Inverso de ica_si",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "avisos_si": {
+      "fuente": "constante",
+      "origen": "En constitución no hay avisos",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "avisos_no": {
+      "fuente": "constante",
+      "origen": "En constitución no hay avisos",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado por defecto"
+    },
+    "promedio_mensual": {
+      "fuente": "cuestionario",
+      "origen": "Promedio mensual ingresos estimado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Mínimo $100.000 (formulario exige > 0)"
+    },
+    "firma_rl_nombre": {
+      "fuente": "cuestionario",
+      "origen": "Nombre RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "firma_rl_id": {
+      "fuente": "cuestionario",
+      "origen": "Número identificación RL",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    }
+  },
+  "responsabilidades_tributarias_form.pdf": {
+    "fecha_dia": {
+      "fuente": "derivada",
+      "origen": "Día actual",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_mes": {
+      "fuente": "derivada",
+      "origen": "Mes actual",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "fecha_anio": {
+      "fuente": "derivada",
+      "origen": "Año actual",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "rl_nombre": {
+      "fuente": "cuestionario",
+      "origen": "Nombre RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "razon_social": {
+      "fuente": "cuestionario",
+      "origen": "Razón social",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "resp1_num": {
+      "fuente": "derivada",
+      "origen": "Primera responsabilidad (núm)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Régimen ordinario: 05. Régimen simple: 47."
+    },
+    "resp1_nombre": {
+      "fuente": "derivada",
+      "origen": "Primera responsabilidad (nombre)",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Impuesto sobre la Renta y Complementarios Régimen Ordinario' o '...Régimen SIMPLE'"
+    },
+    "resp2_num": {
+      "fuente": "constante",
+      "origen": "Segunda responsabilidad",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 07"
+    },
+    "resp2_nombre": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Retención en la Fuente a título de renta'"
+    },
+    "resp3_num": {
+      "fuente": "constante",
+      "origen": "Tercera",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 14"
+    },
+    "resp3_nombre": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Informante de Exógena'"
+    },
+    "resp4_num": {
+      "fuente": "constante",
+      "origen": "Cuarta",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 42"
+    },
+    "resp4_nombre": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Obligado a llevar contabilidad'"
+    },
+    "resp5_num": {
+      "fuente": "constante",
+      "origen": "Quinta",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 48"
+    },
+    "resp5_nombre": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Impuesto sobre las ventas'"
+    },
+    "resp6_num": {
+      "fuente": "constante",
+      "origen": "Sexta",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre 55"
+    },
+    "resp6_nombre": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Informante de Beneficiarios Finales'"
+    },
+    "resp7_num": {
+      "fuente": "condicional",
+      "origen": "Séptima (impuesto al consumo)",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Solo si actividad gravada con consumo: 33"
+    },
+    "resp7_nombre": {
+      "fuente": "condicional",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "'Impuesto Nacional al Consumo'"
+    },
+    "resp8_num": {
+      "fuente": "condicional",
+      "origen": "Espacio adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío salvo necesidad"
+    },
+    "resp8_nombre": {
+      "fuente": "condicional",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "resp9_num": {
+      "fuente": "condicional",
+      "origen": "Espacio adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "resp9_nombre": {
+      "fuente": "condicional",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "resp10_num": {
+      "fuente": "condicional",
+      "origen": "Espacio adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "resp10_nombre": {
+      "fuente": "condicional",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "nombre_legible_rl": {
+      "fuente": "cuestionario",
+      "origen": "Nombre RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "numero_identificacion": {
+      "fuente": "cuestionario",
+      "origen": "Número identificación RL",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "tipo_id_cc": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si es C.C."
+    },
+    "tipo_id_ce": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si es C.E."
+    },
+    "tipo_id_ti": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si es T.I."
+    },
+    "tipo_id_pasaporte": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si es Pasaporte"
+    },
+    "pep": {
+      "fuente": "constante",
+      "origen": "Persona Expuesta Políticamente",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío en constitución (no aplica a sociedad recién creada)"
+    },
+    "ppt": {
+      "fuente": "constante",
+      "origen": "Permiso por Protección Temporal",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío en constitución"
+    }
+  },
+  "rues_form.pdf": {
+    "matricula_inscripcion": {
+      "fuente": "constante",
+      "origen": "Constitución = matrícula",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Siempre marcado"
+    },
+    "renovacion": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "traslado_domicilio": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "ajuste_info_financiera": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "num_matricula_inscripcion": {
+      "fuente": "constante",
+      "origen": "No aplica en constitución",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "anio_renueva": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "tipo_general_organizacion": {
+      "fuente": "constante",
+      "origen": "S.A.S. = Sociedad Comercial",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre '02'"
+    },
+    "tipo_especifico_organizacion": {
+      "fuente": "constante",
+      "origen": "S.A.S.",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre '16'"
+    },
+    "condicion_sociedad_bic": {
+      "fuente": "cuestionario",
+      "origen": "¿Es sociedad BIC?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto vacío"
+    },
+    "razon_social": {
+      "fuente": "cuestionario",
+      "origen": "Nombre de la sociedad",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "sigla": {
+      "fuente": "cuestionario",
+      "origen": "Sigla (opcional)",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "primer_apellido": {
+      "fuente": "constante",
+      "origen": "No aplica para PJ",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío (es PJ)"
+    },
+    "segundo_apellido": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "primer_nombre": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "segundo_nombre": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "genero_f": {
+      "fuente": "constante",
+      "origen": "No aplica para PJ",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "genero_m": {
+      "fuente": "constante",
+      "origen": "No aplica para PJ",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "nit": {
+      "fuente": "constante",
+      "origen": "No hay NIT aún",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "nit_dv": {
+      "fuente": "constante",
+      "origen": "No hay DV aún",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "identificacion_num": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "identificacion_fecha_exp": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "identificacion_lugar_exp": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "tipo_doc_cc": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "tipo_doc_ce": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "tipo_doc_ti": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "tipo_doc_pasaporte": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "pais": {
+      "fuente": "constante",
+      "origen": "No aplica",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "direccion_domicilio": {
+      "fuente": "cuestionario",
+      "origen": "Dirección domicilio principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "zona_urbana": {
+      "fuente": "cuestionario",
+      "origen": "Zona urbana o rural",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto urbana"
+    },
+    "zona_rural": {
+      "fuente": "cuestionario",
+      "origen": "Zona urbana o rural",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío salvo si rural"
+    },
+    "codigo_postal": {
+      "fuente": "cuestionario",
+      "origen": "Código postal (opcional)",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "ubicacion_local": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar uno solo de los seis"
+    },
+    "ubicacion_oficina": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "ubicacion_local_oficina": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "ubicacion_fabrica": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "ubicacion_vivienda": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "ubicacion_finca": {
+      "fuente": "cuestionario",
+      "origen": "Tipo de inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "municipio": {
+      "fuente": "cuestionario",
+      "origen": "Municipio",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "departamento": {
+      "fuente": "cuestionario",
+      "origen": "Departamento",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "barrio": {
+      "fuente": "cuestionario",
+      "origen": "Barrio/localidad/vereda",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "pais_3": {
+      "fuente": "constante",
+      "origen": "Colombia",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Constante 'Colombia'"
+    },
+    "telefono_1": {
+      "fuente": "cuestionario",
+      "origen": "Teléfono principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "telefono_2": {
+      "fuente": "cuestionario",
+      "origen": "Teléfono adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Opcional"
+    },
+    "telefono_3": {
+      "fuente": "cuestionario",
+      "origen": "Teléfono adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Opcional"
+    },
+    "correo_electronico": {
+      "fuente": "cuestionario",
+      "origen": "Correo electrónico",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Validar máx 60 chars, sin guion antes del @"
+    },
+    "dir_notif_judicial": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Dirección notificación",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Por defecto = direccion_domicilio"
+    },
+    "zona_urbana_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Zona notificación",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Por defecto = zona_urbana"
+    },
+    "zona_rural_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Zona notificación",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "codigo_postal_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "CP notificación",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "municipio_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Municipio notificación",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "departamento_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Depto notificación",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "barrio_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Barrio notificación",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "pais_notif": {
+      "fuente": "constante",
+      "origen": "Colombia",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "tel_notif_1": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Tel notificación",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "tel_notif_2": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Tel notificación",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "tel_notif_3": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Tel notificación",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "correo_notif": {
+      "fuente": "cuestionario+derivada",
+      "origen": "Correo notificación",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "sede_propia": {
+      "fuente": "cuestionario",
+      "origen": "Tenencia inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar uno solo de los cuatro"
+    },
+    "sede_arriendo": {
+      "fuente": "cuestionario",
+      "origen": "Tenencia inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "sede_comodato": {
+      "fuente": "cuestionario",
+      "origen": "Tenencia inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "sede_prestamo": {
+      "fuente": "cuestionario",
+      "origen": "Tenencia inmueble",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "notif_electronica_si": {
+      "fuente": "constante",
+      "origen": "Por defecto sí",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Siempre Sí"
+    },
+    "notif_electronica_no": {
+      "fuente": "constante",
+      "origen": "Inverso",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "ciiu_1": {
+      "fuente": "cuestionario",
+      "origen": "CIIU principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "4 dígitos"
+    },
+    "shd_1": {
+      "fuente": "constante",
+      "origen": "Solo Bogotá",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío en Medellín"
+    },
+    "ciiu_2": {
+      "fuente": "cuestionario",
+      "origen": "CIIU secundario",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "shd_2": {
+      "fuente": "constante",
+      "origen": "Solo Bogotá",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "ciiu_3": {
+      "fuente": "cuestionario",
+      "origen": "CIIU adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "shd_3": {
+      "fuente": "constante",
+      "origen": "Solo Bogotá",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "ciiu_4": {
+      "fuente": "cuestionario",
+      "origen": "CIIU adicional",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": ""
+    },
+    "shd_4": {
+      "fuente": "constante",
+      "origen": "Solo Bogotá",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "fecha_inicio_primaria": {
+      "fuente": "derivada",
+      "origen": "Fecha actual AAAAMMDD",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Formato 20260425"
+    },
+    "fecha_inicio_secundaria": {
+      "fuente": "derivada",
+      "origen": "Fecha actual AAAAMMDD",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Solo si hay CIIU 2"
+    },
+    "importador": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "exportador": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "usuario_aduanero": {
+      "fuente": "constante",
+      "origen": "Vacío en constitución",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "descripcion_actividad": {
+      "fuente": "constante",
+      "origen": "Solo personas naturales",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío para PJ"
+    },
+    "ciiu_mayores_ingresos": {
+      "fuente": "constante",
+      "origen": "Solo en renovaciones",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío en constitución"
+    },
+    "shd_mayores_ingresos": {
+      "fuente": "constante",
+      "origen": "Solo en renovaciones",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "activo_corriente": {
+      "fuente": "derivada",
+      "origen": "= capital pagado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Igual al capital pagado"
+    },
+    "pasivo_corriente": {
+      "fuente": "constante",
+      "origen": "Sin deudas en constitución",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "ingresos_actividad_ord": {
+      "fuente": "constante",
+      "origen": "Sin movimientos",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "activo_no_corriente": {
+      "fuente": "constante",
+      "origen": "Sin activos no corrientes",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "pasivo_no_corriente": {
+      "fuente": "constante",
+      "origen": "Sin deudas LP",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "otros_ingresos": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "activo_total": {
+      "fuente": "derivada",
+      "origen": "= capital pagado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "pasivo_total": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "costo_ventas": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "patrimonio_neto": {
+      "fuente": "derivada",
+      "origen": "= capital pagado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "gastos_operacionales": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "pasivo_mas_patrimonio": {
+      "fuente": "derivada",
+      "origen": "= capital pagado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "otros_gastos": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "balance_social": {
+      "fuente": "constante",
+      "origen": "Solo ESAL",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "gastos_impuestos": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "utilidad_operacional": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "resultado_periodo": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "grupo_niif": {
+      "fuente": "constante",
+      "origen": "Microempresa por defecto",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre '3'"
+    },
+    "nacional_publico_pct": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "nacional_privado_pct": {
+      "fuente": "derivada",
+      "origen": "% capital nacional privado",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Si todos accionistas son colombianos: 100"
+    },
+    "extranjero_publico_pct": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "extranjero_privado_pct": {
+      "fuente": "derivada",
+      "origen": "% capital extranjero",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Si hay accionista extranjero: prorratear"
+    },
+    "pct_mujeres_capital": {
+      "fuente": "derivada",
+      "origen": "% capital de mujeres",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Sumar % de accionistas mujeres"
+    },
+    "codigo_estado_actual": {
+      "fuente": "constante",
+      "origen": "Activa",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Siempre '02'"
+    },
+    "estado_otro_cual": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "numero_empleados": {
+      "fuente": "constante",
+      "origen": "Sin empleados",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "num_mujeres_directivos": {
+      "fuente": "derivada",
+      "origen": "# mujeres en cargos directivos",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "Contar RL principal y suplente que sean mujer"
+    },
+    "num_empleadas_mujeres": {
+      "fuente": "constante",
+      "origen": "Sin empleadas",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "tiene_establecimientos_si": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "tiene_establecimientos_no": {
+      "fuente": "constante",
+      "origen": "Por defecto no",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado"
+    },
+    "cuantos_establecimientos": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "string",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "proceso_innovacion_si": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "proceso_innovacion_no": {
+      "fuente": "constante",
+      "origen": "Por defecto no",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado"
+    },
+    "empresa_familiar_si": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "empresa_familiar_no": {
+      "fuente": "constante",
+      "origen": "Por defecto no",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado"
+    },
+    "pct_empleados_temporales": {
+      "fuente": "constante",
+      "origen": "Sin empleados",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "0"
+    },
+    "ley_1780_si": {
+      "fuente": "derivada",
+      "origen": "¿Aplica Ley 1780?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si accionistas <=35 años > 50% capital"
+    },
+    "ley_1780_no": {
+      "fuente": "derivada",
+      "origen": "¿Aplica Ley 1780?",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcar si NO aplica"
+    },
+    "ley_1780_cumplo": {
+      "fuente": "constante",
+      "origen": "Solo en renovaciones",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío en constitución"
+    },
+    "ley_1780_no_cumplo": {
+      "fuente": "constante",
+      "origen": "Solo en renovaciones",
+      "tipo_valor": "checkbox",
+      "obligatorio": false,
+      "notas": "Vacío"
+    },
+    "aportante_si": {
+      "fuente": "constante",
+      "origen": "Por defecto sí",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado"
+    },
+    "aportante_no": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "aportante_200_o_mas": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "aportante_menos_200": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "aportante_beneficiario_1429": {
+      "fuente": "constante",
+      "origen": "",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Vacío"
+    },
+    "aportante_independiente": {
+      "fuente": "constante",
+      "origen": "Por defecto independiente",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": "Marcado"
+    },
+    "nombre_rl_pie": {
+      "fuente": "cuestionario",
+      "origen": "Nombre RL principal",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "documento_id_num": {
+      "fuente": "cuestionario",
+      "origen": "Número identificación RL",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "doc_cc": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "doc_ce": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "doc_ti": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "doc_pasaporte": {
+      "fuente": "cuestionario",
+      "origen": "Tipo doc del RL",
+      "tipo_valor": "checkbox",
+      "obligatorio": true,
+      "notas": ""
+    },
+    "doc_pais": {
+      "fuente": "constante",
+      "origen": "Colombia",
+      "tipo_valor": "string",
+      "obligatorio": true,
+      "notas": "'Colombia'"
+    }
+  }
+}

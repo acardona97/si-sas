@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260525a">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260527a">
 </head>
 <body class="landing-body">
 
@@ -15,8 +15,7 @@
 <nav class="l-nav">
     <div class="l-nav-inner">
         <div class="l-nav-brand">
-            <span class="l-nav-logo">Sí S.A.S.</span>
-            <span class="l-nav-by">por Quarta</span>
+            <a href="/"><img src="/static/img/logo_quarta.svg" alt="Quarta Acompañamiento Legal" class="l-nav-logo-img"></a>
         </div>
         <div class="l-nav-actions">
             <a href="/login" class="l-nav-login">Iniciar sesión</a>
@@ -58,7 +57,7 @@
             <div class="l-step">
                 <div class="l-step-num">02</div>
                 <h3>Descargue el paquete completo</h3>
-                <p>En segundos recibe todos los documentos: estatutos, actas, pre-RUT, RUES, y formularios DIAN.</p>
+                <p>En segundos recibe todos los documentos: estatutos, acta de constitución, pre-RUT, RUES y formularios DIAN.</p>
             </div>
             <div class="l-step-arrow">→</div>
             <div class="l-step">
@@ -85,11 +84,11 @@
                 <div class="l-plan-note">COP · pago único</div>
                 <ul class="l-plan-features">
                     <li class="has">Generación automática de documentos</li>
-                    <li class="has">Estatutos, actas y formularios completos</li>
+                    <li class="has">Estatutos, acta de constitución y formularios completos</li>
                     <li class="has">Asistente legal IA integrado</li>
                     <li class="has">Extracción de datos desde cédula (IA)</li>
                     <li class="has-not">Sin revisión de abogado</li>
-                    <li class="has-not">Sin garantía ante devoluciones</li>
+                    <li class="has-not">Sin garantía de reingreso</li>
                     <li class="has-not">Sin acompañamiento en radicación</li>
                 </ul>
                 <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
@@ -104,10 +103,11 @@
                 <ul class="l-plan-features">
                     <li class="has">Todo lo del plan Básico</li>
                     <li class="has">Reunión de revisión con abogado</li>
-                    <li class="has">Garantía ante devoluciones DIAN / CC</li>
+                    <li class="has">Garantía de reingreso con acompañamiento de abogado ante DIAN / CC</li>
                     <li class="has">Asistencia virtual durante el proceso</li>
                     <li class="has-not">Sin radicación presencial por nosotros</li>
                 </ul>
+                <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
                 <a href="/register" class="btn l-btn-primary">Seleccionar plan</a>
             </div>
 
@@ -120,9 +120,10 @@
                     <li class="has">Todo lo del plan Estándar</li>
                     <li class="has">Revisión completa por abogado</li>
                     <li class="has">Radicación ante Cámara de Comercio</li>
-                    <li class="has">Garantía completa de constitución</li>
-                    <li class="has">Acompañamiento post-constitución</li>
+                    <li class="has">Garantía de reingreso con acompañamiento de abogado</li>
+                    <li class="has-not">No incluye acompañamiento post-constitución</li>
                 </ul>
+                <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
                 <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
             </div>
 
@@ -183,7 +184,9 @@
 <!-- ── Footer ── -->
 <footer class="l-footer">
     <div class="l-container">
-        <div class="l-footer-brand">Sí S.A.S.</div>
+        <div class="l-footer-brand">
+            <img src="/static/img/logo_quarta.svg" alt="Quarta" class="l-footer-logo-img">
+        </div>
         <div class="l-footer-by">
             Una herramienta de <strong>Quarta Acompañamiento Legal S.A.S.</strong> · Medellín, Colombia
         </div>

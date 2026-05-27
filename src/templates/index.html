@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260522h">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260527a">
 </head>
 <body>
 
@@ -15,8 +15,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand">
-            <h1>Sí S.A.S.</h1>
-            <p class="brand-sub">Quarta Acompañamiento Legal</p>
+            <a href="/"><img src="/static/img/logo_quarta_white.svg" alt="Quarta" class="sidebar-logo-img"></a>
         </div>
         <nav class="step-nav" id="step-nav">
             <div class="step-item active" data-step="1">
@@ -309,20 +308,27 @@
 
                 <div class="form-group">
                     <label for="ciiu_search">Código CIIU Principal *</label>
-                    <input type="text" id="ciiu_search" placeholder="Buscar por código o descripción..." oninput="searchCIIU(this.value, 'principal')">
+                    <input type="text" id="ciiu_search" placeholder="Ej: 6201, restaurante, software, construcción..." oninput="searchCIIU(this.value, 'principal')" autocomplete="off">
                     <div class="ciiu-results hidden" id="ciiu_results"></div>
                     <span class="ciiu-tag hidden" id="ciiu_selected"></span>
                     <input type="hidden" id="ciiu_code">
                     <input type="hidden" id="ciiu_description">
+                    <span class="hint">
+                        🔍 Escriba mínimo 2 letras o dígitos y seleccione de la lista. El CIIU identifica su actividad económica principal ante la DIAN y Cámara de Comercio.<br>
+                        <strong>Ejemplos:</strong> <em>restaurante</em> → 5611 | <em>software</em> → 6201 | <em>construcción</em> → 4111 | <em>tienda</em> → 4711 | <em>consultoría</em> → 7020<br>
+                        ¿No sabe cuál le corresponde? Consulte al <strong>chat de Sí S.A.S.</strong> (abajo) o busque en
+                        <a href="https://www.dane.gov.co/files/nomenclaturas/CIIU_Rev4ac.pdf" target="_blank" rel="noopener">la tabla CIIU del DANE</a>.
+                    </span>
                 </div>
 
                 <div class="form-group">
                     <label for="ciiu_search_sec">Código CIIU Secundario (opcional)</label>
-                    <input type="text" id="ciiu_search_sec" placeholder="Buscar..." oninput="searchCIIU(this.value, 'secundario')">
+                    <input type="text" id="ciiu_search_sec" placeholder="Actividad secundaria si aplica..." oninput="searchCIIU(this.value, 'secundario')" autocomplete="off">
                     <div class="ciiu-results hidden" id="ciiu_results_sec"></div>
                     <span class="ciiu-tag hidden" id="ciiu_selected_sec"></span>
                     <input type="hidden" id="ciiu_code_sec">
                     <input type="hidden" id="ciiu_description_sec">
+                    <span class="hint">Solo si la sociedad tiene una segunda actividad económica relevante.</span>
                 </div>
 
                 <div class="form-group">

@@ -1759,3 +1759,104 @@ fieldset legend {
     font-size: 0.82rem;
     font-family: 'Courier New', monospace;
 }
+
+/* ─── Logo Quarta ─── */
+.l-nav-logo-img        { height: 44px; width: auto; display: block; }
+.l-footer-logo-img     { height: 36px; width: auto; display: block; margin: 0 auto 0.5rem; filter: opacity(0.75); }
+.auth-logo-img         { height: 60px; width: auto; display: block; margin: 0 auto; }
+.sidebar-logo-img      { height: 54px; width: auto; display: block; max-width: 100%; }
+.adm-brand-sub         { font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.2rem; }
+
+/* ─── Landing: plan legal note ─── */
+.l-plan-note-legal {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* ─── Admin: topbar button ─── */
+.adm-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.adm-add-btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.55rem 1.25rem;
+    background: var(--gold); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-family: var(--font-body); font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s;
+}
+.adm-add-btn:hover { background: var(--gold-hover); }
+
+/* ─── Admin: generaciones cell ─── */
+.adm-gen-form { display: flex; align-items: center; gap: 0.3rem; }
+.adm-gen-unlimited { font-size: 1.1rem; font-weight: 700; color: var(--success); min-width: 1.5rem; text-align: center; }
+.adm-gen-count { font-weight: 600; color: var(--navy); min-width: 1.5rem; text-align: center; }
+.adm-gen-zero { color: var(--danger); }
+.adm-gen-input {
+    width: 3.5rem; padding: 0.25rem 0.4rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 0.78rem; color: var(--text); text-align: center;
+}
+.adm-gen-input:focus { outline: none; border-color: var(--gold); }
+.adm-gen-btn {
+    background: var(--gold); color: #fff; border: none;
+    border-radius: var(--radius); padding: 0.2rem 0.45rem;
+    font-size: 0.78rem; cursor: pointer; line-height: 1;
+}
+.adm-gen-btn:hover { background: var(--gold-hover); }
+
+/* ─── Admin: flash messages ─── */
+.adm-flash-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
+.adm-flash {
+    padding: 0.7rem 1rem; border-radius: var(--radius);
+    font-size: 0.875rem; font-weight: 500;
+}
+.adm-flash-success { background: rgba(30,122,74,0.1); color: var(--success); border: 1px solid rgba(30,122,74,0.25); }
+.adm-flash-error   { background: rgba(192,57,43,0.08); color: var(--danger);  border: 1px solid rgba(192,57,43,0.2); }
+
+/* ─── Admin: modal ─── */
+.adm-modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(12,30,53,0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+}
+.adm-modal {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 440px;
+    padding: 2rem;
+}
+.adm-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+.adm-modal-title {
+    font-family: var(--font-display); font-size: 1.25rem;
+    font-weight: 600; color: var(--navy);
+}
+.adm-modal-close {
+    background: none; border: none; font-size: 1.5rem; line-height: 1;
+    color: var(--text-muted); cursor: pointer; padding: 0 0.25rem;
+}
+.adm-modal-close:hover { color: var(--text); }
+.adm-modal-form { display: flex; flex-direction: column; gap: 1rem; }
+.adm-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.adm-label { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); }
+.adm-required { color: var(--danger); }
+.adm-input {
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-body); font-size: 0.875rem; color: var(--text);
+    background: var(--bg); transition: border-color 0.15s;
+}
+.adm-input:focus { outline: none; border-color: var(--gold); }
+.adm-input::placeholder { color: var(--text-muted); }
+.adm-modal-actions {
+    display: flex; gap: 0.75rem; justify-content: flex-end;
+    margin-top: 0.5rem;
+}
