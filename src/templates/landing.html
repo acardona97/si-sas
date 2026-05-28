@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260527a">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260528b">
 </head>
 <body class="landing-body">
 
@@ -37,9 +37,33 @@
             <a href="/register" class="btn l-btn-primary">Comenzar ahora →</a>
             <a href="#planes" class="btn l-btn-ghost">Ver planes</a>
         </div>
-        <p class="l-hero-note">
-            Incluye estatutos, acta de constitución, pre-RUT, formulario RUES, Otras Entidades y más.
-        </p>
+        <div class="l-trust">
+            <div class="l-trust-item">
+                <span class="l-trust-icon">⚖️</span> Ley 1258 de 2008
+            </div>
+            <div class="l-trust-item">
+                <span class="l-trust-icon">🤖</span> Asistente IA integrado
+            </div>
+            <div class="l-trust-item">
+                <span class="l-trust-icon">🔒</span> Datos protegidos
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Estadísticas ── -->
+<section class="l-stats">
+    <div class="l-stat">
+        <div class="l-stat-num">7</div>
+        <div class="l-stat-label">Documentos generados</div>
+    </div>
+    <div class="l-stat">
+        <div class="l-stat-num">< 5 min</div>
+        <div class="l-stat-label">Tiempo promedio</div>
+    </div>
+    <div class="l-stat">
+        <div class="l-stat-num">100%</div>
+        <div class="l-stat-label">Digital y remoto</div>
     </div>
 </section>
 
@@ -47,6 +71,7 @@
 <section class="l-how">
     <div class="l-container">
         <h2 class="l-section-title">¿Cómo funciona?</h2>
+        <p class="l-section-sub">Tres pasos simples para constituir su empresa</p>
         <div class="l-steps">
             <div class="l-step">
                 <div class="l-step-num">01</div>
@@ -63,7 +88,7 @@
             <div class="l-step">
                 <div class="l-step-num">03</div>
                 <h3>Radique ante la Cámara</h3>
-                <p>Con Premium, nuestros abogados radican por usted y gestionan toda la constitución.</p>
+                <p>Con los planes Premium y Corporativo, nuestros abogados radican por usted y gestionan toda la constitución.</p>
             </div>
         </div>
     </div>
@@ -73,60 +98,122 @@
 <section class="l-plans" id="planes">
     <div class="l-container">
         <h2 class="l-section-title">Planes de servicio</h2>
-        <p class="l-section-sub">Elija el nivel de acompañamiento que su empresa necesita</p>
+        <p class="l-section-sub">Elija el nivel de acompañamiento que necesita</p>
 
-        <div class="l-plans-grid">
+        <!-- Tabs -->
+        <div class="l-plans-tabs">
+            <button class="l-plans-tab active" data-tab="particulares">Particulares</button>
+            <button class="l-plans-tab" data-tab="profesionales">Profesionales</button>
+        </div>
 
-            <!-- Básico -->
-            <div class="l-plan-card">
-                <div class="l-plan-name">Básico</div>
-                <div class="l-plan-price">$ 350.000</div>
-                <div class="l-plan-note">COP · pago único</div>
-                <ul class="l-plan-features">
-                    <li class="has">Generación automática de documentos</li>
-                    <li class="has">Estatutos, acta de constitución y formularios completos</li>
-                    <li class="has">Asistente legal IA integrado</li>
-                    <li class="has">Extracción de datos desde cédula (IA)</li>
-                    <li class="has-not">Sin revisión de abogado</li>
-                    <li class="has-not">Sin garantía de reingreso</li>
-                    <li class="has-not">Sin acompañamiento en radicación</li>
-                </ul>
-                <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
+        <!-- Panel: Particulares (Básico, Estándar, Premium) -->
+        <div class="l-plans-panel active" id="tab-particulares">
+            <div class="l-plans-grid">
+
+                <!-- Básico -->
+                <div class="l-plan-card">
+                    <div class="l-plan-icon">📄</div>
+                    <div class="l-plan-name">Básico</div>
+                    <div class="l-plan-desc">Ideal para quienes quieren generar sus documentos de forma autónoma.</div>
+                    <div class="l-plan-price">$ 350.000</div>
+                    <div class="l-plan-note">COP · pago único · 1 constitución</div>
+                    <ul class="l-plan-features">
+                        <li class="has">Generación automática de documentos</li>
+                        <li class="has">Estatutos, acta de constitución y formularios</li>
+                        <li class="has">Asistente legal IA integrado</li>
+                        <li class="has">Extracción de datos desde cédula (IA)</li>
+                        <li class="has-not">Sin revisión de abogado</li>
+                        <li class="has-not">Sin garantía de reingreso</li>
+                        <li class="has-not">Sin acompañamiento en radicación</li>
+                    </ul>
+                    <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
+                </div>
+
+                <!-- Estándar (destacado) -->
+                <div class="l-plan-card l-plan-featured">
+                    <div class="l-plan-pop">Más popular</div>
+                    <div class="l-plan-icon">⭐</div>
+                    <div class="l-plan-name">Estándar</div>
+                    <div class="l-plan-desc">Documentos + revisión profesional y garantía de reingreso ante DIAN/CC.</div>
+                    <div class="l-plan-price">$ 750.000</div>
+                    <div class="l-plan-note">COP · pago único · 1 constitución</div>
+                    <ul class="l-plan-features">
+                        <li class="has">Todo lo del plan Básico</li>
+                        <li class="has">Reunión de revisión con abogado</li>
+                        <li class="has">Garantía de reingreso con abogado ante DIAN / CC</li>
+                        <li class="has">Asistencia virtual durante el proceso</li>
+                        <li class="has-not">Sin radicación presencial</li>
+                    </ul>
+                    <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
+                    <a href="/register" class="btn l-btn-primary">Seleccionar plan</a>
+                </div>
+
+                <!-- Premium -->
+                <div class="l-plan-card">
+                    <div class="l-plan-icon">👑</div>
+                    <div class="l-plan-name">Premium</div>
+                    <div class="l-plan-desc">Servicio completo: generación, revisión y radicación ante Cámara de Comercio.</div>
+                    <div class="l-plan-price">$1.600.000</div>
+                    <div class="l-plan-note">COP · pago único · 1 constitución</div>
+                    <ul class="l-plan-features">
+                        <li class="has">Todo lo del plan Estándar</li>
+                        <li class="has">Revisión completa por abogado</li>
+                        <li class="has">Radicación ante Cámara de Comercio</li>
+                        <li class="has">Garantía de reingreso con abogado</li>
+                        <li class="has-not">No incluye acompañamiento post-constitución</li>
+                    </ul>
+                    <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
+                    <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
+                </div>
+
             </div>
+        </div>
 
-            <!-- Estándar (destacado) -->
-            <div class="l-plan-card l-plan-featured">
-                <div class="l-plan-pop">Más popular</div>
-                <div class="l-plan-name">Estándar</div>
-                <div class="l-plan-price">$ 750.000</div>
-                <div class="l-plan-note">COP · pago único</div>
-                <ul class="l-plan-features">
-                    <li class="has">Todo lo del plan Básico</li>
-                    <li class="has">Reunión de revisión con abogado</li>
-                    <li class="has">Garantía de reingreso con acompañamiento de abogado ante DIAN / CC</li>
-                    <li class="has">Asistencia virtual durante el proceso</li>
-                    <li class="has-not">Sin radicación presencial por nosotros</li>
-                </ul>
-                <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
-                <a href="/register" class="btn l-btn-primary">Seleccionar plan</a>
+        <!-- Panel: Profesionales (Abogado, Corporativo) -->
+        <div class="l-plans-panel" id="tab-profesionales">
+            <div class="l-plans-grid-pro">
+
+                <!-- Abogado -->
+                <div class="l-plan-card">
+                    <div class="l-plan-icon">⚖️</div>
+                    <div class="l-plan-name">Abogado</div>
+                    <div class="l-plan-desc">Para abogados que constituyen sociedades para sus clientes. 6 constituciones en un solo paquete.</div>
+                    <div class="l-plan-price">$1.000.000</div>
+                    <div class="l-plan-note">COP · pago único · 6 constituciones</div>
+                    <ul class="l-plan-features">
+                        <li class="has">6 constituciones incluidas</li>
+                        <li class="has">Generación automática de documentos</li>
+                        <li class="has">Asistente legal IA integrado</li>
+                        <li class="has">Extracción de datos desde cédula (IA)</li>
+                        <li class="has">Precio por constitución: $166.667</li>
+                        <li class="has-not">Sin revisión de abogado (usted es el abogado)</li>
+                        <li class="has-not">Sin garantía de reingreso</li>
+                    </ul>
+                    <p class="l-plan-note-legal">* En una fase futura se requerirá autenticación con tarjeta profesional.</p>
+                    <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
+                </div>
+
+                <!-- Corporativo -->
+                <div class="l-plan-card l-plan-featured">
+                    <div class="l-plan-pop">Empresas</div>
+                    <div class="l-plan-icon">🏢</div>
+                    <div class="l-plan-name">Corporativo</div>
+                    <div class="l-plan-desc">Para empresas y grupos que necesitan constituir múltiples sociedades con acompañamiento completo.</div>
+                    <div class="l-plan-price">$1.800.000</div>
+                    <div class="l-plan-note">COP · pago único · 3 constituciones</div>
+                    <ul class="l-plan-features">
+                        <li class="has">3 constituciones incluidas</li>
+                        <li class="has">Generación automática de documentos</li>
+                        <li class="has">Revisión completa por abogado</li>
+                        <li class="has">Garantía de reingreso con abogado ante DIAN / CC</li>
+                        <li class="has">Asistencia virtual durante el proceso</li>
+                        <li class="has">Precio por constitución: $600.000</li>
+                    </ul>
+                    <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
+                    <a href="/register" class="btn l-btn-primary">Seleccionar plan</a>
+                </div>
+
             </div>
-
-            <!-- Premium -->
-            <div class="l-plan-card">
-                <div class="l-plan-name">Premium</div>
-                <div class="l-plan-price">$1.600.000</div>
-                <div class="l-plan-note">COP · pago único</div>
-                <ul class="l-plan-features">
-                    <li class="has">Todo lo del plan Estándar</li>
-                    <li class="has">Revisión completa por abogado</li>
-                    <li class="has">Radicación ante Cámara de Comercio</li>
-                    <li class="has">Garantía de reingreso con acompañamiento de abogado</li>
-                    <li class="has-not">No incluye acompañamiento post-constitución</li>
-                </ul>
-                <p class="l-plan-note-legal">* La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</p>
-                <a href="/register" class="btn l-btn-outline">Seleccionar plan</a>
-            </div>
-
         </div>
     </div>
 </section>
@@ -181,6 +268,15 @@
     </div>
 </section>
 
+<!-- ── CTA Final ── -->
+<section class="l-cta-banner">
+    <div class="l-container">
+        <h2>Constituya su empresa hoy mismo</h2>
+        <p>Únase a quienes ya confían en Sí S.A.S. para crear su sociedad de forma rápida y segura.</p>
+        <a href="/register" class="btn l-btn-primary" style="position:relative">Crear cuenta gratuita →</a>
+    </div>
+</section>
+
 <!-- ── Footer ── -->
 <footer class="l-footer">
     <div class="l-container">
@@ -200,6 +296,18 @@
         </div>
     </div>
 </footer>
+
+<script>
+// Plan tabs switching
+document.querySelectorAll('.l-plans-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.l-plans-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.l-plans-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+});
+</script>
 
 </body>
 </html>

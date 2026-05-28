@@ -13,17 +13,21 @@ DATA_DIR = os.path.join(PROJECT_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "users.db")
 
 PLAN_LABELS = {
-    "basic":    "Básico",
-    "standard": "Estándar",
-    "premium":  "Premium",
-    "admin":    "Administrador",
+    "basic":       "Básico",
+    "standard":    "Estándar",
+    "abogado":     "Abogado",
+    "premium":     "Premium",
+    "corporativo": "Corporativo",
+    "admin":       "Administrador",
 }
 
 PLAN_PRICES = {
-    "basic":    "$ 350.000",
-    "standard": "$ 750.000",
-    "premium":  "$1.600.000",
-    "admin":    "—",
+    "basic":       "$ 350.000",
+    "standard":    "$ 750.000",
+    "abogado":     "$1.000.000",
+    "premium":     "$1.600.000",
+    "corporativo": "$1.800.000",
+    "admin":       "—",
 }
 
 
