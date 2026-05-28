@@ -745,10 +745,7 @@ def generar_otras_entidades(data, template_path, output_path):
         for i, cx in enumerate([371, 386, 401, 416]):
             overlay_items.append({"page": 0, "x": cx, "y": 588, "text": ciiu_code[i], "size": 9})
 
-    # ─── Descripción CIIU (línea debajo de dígitos, ~y=568) ───
-    ciiu_desc = _strip_tildes(data.get("ciiu_description", ""))
-    if ciiu_desc:
-        overlay_items.append({"page": 0, "x": 150, "y": 568, "text": ciiu_desc[:80], "size": 7})
+
 
     # ─── 7. Autoriza ICA = Sí  (Button97: x=158 y=388) ───
     overlay_items.append({"page": 0, "x": 161, "y": 391, "text": "X", "size": 7})
