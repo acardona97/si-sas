@@ -541,6 +541,7 @@ def generate():
                 "ciiu_code": ciiu_code, "ciiu_description": ciiu_desc,
                 "ingresos_mensuales": str(ingresos),
                 "nombre_rl": rl_principal.get("nombre", ""),
+                "tipo_doc_rl": rl_principal.get("tipo_doc", "C.C."),
                 "cc_rl": rl_principal.get("cc", ""),
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Formulario_Otras_Entidades.pdf")

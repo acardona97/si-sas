@@ -163,10 +163,15 @@ def _fmt_money(n):
     return f"{int(n):,}".replace(",", ".")
 
 
-def _overlay_text(template_path, output_path, text_items):
+def _overlay_text(template_path, output_path, text_items, strip_fields=False):
     """
     Coloca texto en coordenadas específicas sobre un PDF existente.
-    text_items: lista de dicts con keys: page, x, y, text, size (opcional), font (opcional)
+
+    Args:
+        text_items: lista de dicts con keys: page, x, y, text, size (opcional), font (opcional)
+        strip_fields: si True, elimina las anotaciones AcroForm de las páginas
+                      que reciben overlay. Necesario cuando los campos tienen
+                      fondos blancos que cubren el texto superpuesto.
     """
     reader = PdfReader(template_path)
     writer = PdfWriter()
@@ -179,6 +184,10 @@ def _overlay_text(template_path, output_path, text_items):
 
     for i, page in enumerate(reader.pages):
         if i in by_page:
+            # Eliminar anotaciones de formulario para que no cubran el overlay
+            if strip_fields and "/Annots" in page:
+                del page["/Annots"]
+
             # Crear overlay
             pw = float(page.mediabox.width)
             ph = float(page.mediabox.height)
@@ -708,68 +717,54 @@ def generar_rues(data, template_path, output_path):
 
 def generar_otras_entidades(data, template_path, output_path):
     """
-    Llena el Formulario de Otras Entidades usando overlay de texto.
+    Llena el Formulario de Otras Entidades.
 
-    Usa reportlab para estampar texto directamente sobre el PDF template,
-    garantizando renderizado correcto en TODOS los visores PDF (Chrome,
-    Acrobat, Preview, móviles). Coordenadas extraídas de los AcroForm
-    Rects del template original.
+    Usa overlay puro (reportlab) + strip de anotaciones AcroForm.
+    Los campos AcroForm del template tienen fondos blancos que cubren
+    cualquier texto overlay, así que se eliminan las anotaciones y
+    se estampa el texto directamente sobre la página.
+    Coordenadas extraídas de los Rect de cada campo AcroForm original.
     """
     nombre_sas = _strip_tildes(data["nombre_sas"])
     ciiu_code = data.get("ciiu_code", "")
     ingresos = data.get("ingresos_mensuales", "100.000")
     nombre_rl = _strip_tildes(data.get("nombre_rl", ""))
     cc_rl = data.get("cc_rl", "")
+    tipo_doc_rl = data.get("tipo_doc_rl", "C.C.")
 
     overlay_items = []
 
-    # ─── Razón social (Text30: x=205.5 y=628.2 w=348.8 h=16.3) ───
-    overlay_items.append(
-        {"page": 0, "x": 208, "y": 631, "text": nombre_sas, "size": 8}
-    )
+    # ─── 1. Inscripción RUT = Primera Vez  (Button1: y=681.6) ───
+    overlay_items.append({"page": 0, "x": 283, "y": 684, "text": "X", "size": 10})
 
-    # ─── CIIU dígitos (Text32-Text35: ~13.9x13.5 each) ───
+    # ─── 3. Razón social  (Text30: x=205.5 y=628.2 w=348) ───
+    overlay_items.append({"page": 0, "x": 208, "y": 632, "text": nombre_sas, "size": 8})
+
+    # ─── 5. CIIU  (Text32-35: x=367-426 y≈585 ~14x14 each) ───
     if ciiu_code and len(ciiu_code) >= 4:
-        ciiu_positions = [
-            (371, 588),   # Text32
-            (386, 588),   # Text33
-            (401, 588),   # Text34
-            (416, 588),   # Text35
-        ]
-        for i, (cx, cy) in enumerate(ciiu_positions):
-            overlay_items.append(
-                {"page": 0, "x": cx, "y": cy, "text": ciiu_code[i], "size": 9}
-            )
+        for i, cx in enumerate([371, 386, 401, 416]):
+            overlay_items.append({"page": 0, "x": cx, "y": 588, "text": ciiu_code[i], "size": 9})
 
-    # ─── Promedio mensual ingresos (Text101: x=250.1 y=353.6) ───
-    overlay_items.append(
-        {"page": 0, "x": 253, "y": 357, "text": str(ingresos), "size": 8}
-    )
+    # ─── Descripción CIIU (línea debajo de dígitos, ~y=568) ───
+    ciiu_desc = _strip_tildes(data.get("ciiu_description", ""))
+    if ciiu_desc:
+        overlay_items.append({"page": 0, "x": 150, "y": 568, "text": ciiu_desc[:80], "size": 7})
 
-    # ─── Checkboxes como "X" ───
-    # Button1: Inscripción RUT Primera Vez = Sí (x=279.8 y=681.6 w=13.5)
-    overlay_items.append(
-        {"page": 0, "x": 282, "y": 684, "text": "X", "size": 10}
-    )
-    # Button97: Industria y Comercio = Sí (x=158.4 y=388.4 w=10.1)
-    overlay_items.append(
-        {"page": 0, "x": 160, "y": 390, "text": "X", "size": 7}
-    )
-    # Button99: Avisos y Tableros = No (x=155.2 y=370.8 w=9.4)
-    overlay_items.append(
-        {"page": 0, "x": 157, "y": 373, "text": "X", "size": 7}
-    )
+    # ─── 7. Autoriza ICA = Sí  (Button97: x=158 y=388) ───
+    overlay_items.append({"page": 0, "x": 161, "y": 391, "text": "X", "size": 7})
 
-    # ─── Firma: nombre del RL (sin campo AcroForm, zona firma ~y=210) ───
+    # ─── 7.1 Avisos y Tableros = No  (Button99: x=155 y=371) ───
+    overlay_items.append({"page": 0, "x": 158, "y": 373, "text": "X", "size": 7})
+
+    # ─── Base gravable mensual  (Text101: x=250 y=353.6 w=300) ───
+    overlay_items.append({"page": 0, "x": 253, "y": 357, "text": str(ingresos), "size": 8})
+
+    # ─── Nombre del RL al pie de firma  (sin campo AcroForm, ~y=212) ───
     if nombre_rl:
-        overlay_items.append(
-            {"page": 0, "x": 100, "y": 212, "text": nombre_rl, "size": 9}
-        )
+        overlay_items.append({"page": 0, "x": 100, "y": 212, "text": nombre_rl, "size": 9})
 
-    # ─── Firma: CC del RL (Text102: x=318.4 y=193.9) ───
+    # ─── Tipo doc + No. identificación del RL  (Text102: x=318 y=194 w=190) ───
     if cc_rl:
-        overlay_items.append(
-            {"page": 0, "x": 321, "y": 197, "text": cc_rl, "size": 8}
-        )
+        overlay_items.append({"page": 0, "x": 321, "y": 197, "text": f"{tipo_doc_rl} {cc_rl}", "size": 8})
 
-    _overlay_text(template_path, output_path, overlay_items)
+    _overlay_text(template_path, output_path, overlay_items, strip_fields=True)

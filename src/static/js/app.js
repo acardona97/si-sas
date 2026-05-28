@@ -143,7 +143,7 @@ function addAccionista() {
             <div class="form-row">
                 <div class="form-group">
                     <label>Número de documento</label>
-                    <input type="text" name="acc${n}_id_num" placeholder="Ej: 1.037.657.432">
+                    <input type="text" name="acc${n}_id_num" placeholder="No. de identificación">
                 </div>
                 <div class="form-group">
                     <label>Ciudad de expedición</label>
@@ -209,7 +209,7 @@ function addAccionista() {
                 </div>
                 <div class="form-group">
                     <label>Cédula del RL</label>
-                    <input type="text" name="acc${n}_rl_cc" placeholder="Ej: 1.234.567.890">
+                    <input type="text" name="acc${n}_rl_cc" placeholder="No. de identificación">
                 </div>
             </div>
             <div class="form-row">
@@ -568,7 +568,8 @@ function onCapitalPagadoTotalChange() {
 
 function recalcCapitalPagadoTotal() {
     // Suma los capital_pagado individuales de los accionistas y muestra el total.
-    // Si un accionista tiene el campo vacío, se asume que pagó su porción completa.
+    // Si un accionista tiene el campo vacío, se asume que NO ha pagado (0).
+    // Si NINGÚN accionista llenó el campo, se deja vacío → backend usa suscrito.
     const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
     const pagadoDisplay = document.getElementById('capital_pagado');
     if (!pagadoDisplay) return;
@@ -577,18 +578,27 @@ function recalcCapitalPagadoTotal() {
 
     let total = 0;
     let hayAlgunPorcentaje = false;
+    let hayAlgunCapPagado = false;
     for (const acc of accionistas) {
         const pct = acc.porcentaje || 0;
         if (pct <= 0) continue;
         hayAlgunPorcentaje = true;
         const suscAcc = Math.round(suscrito * pct / 100);
-        const pagAcc = (acc.capital_pagado && _parseCop(acc.capital_pagado) > 0)
+        // Detectar si el accionista llenó el campo (incluye "0" explícito)
+        if (acc.capital_pagado !== '') hayAlgunCapPagado = true;
+        const pagAcc = (acc.capital_pagado !== '' && _parseCop(acc.capital_pagado) >= 0)
             ? Math.min(_parseCop(acc.capital_pagado), suscAcc)
-            : 0;  // vacío o cero = no ha pagado
+            : 0;
         total += pagAcc;
     }
     if (hayAlgunPorcentaje) {
-        pagadoDisplay.value = total > 0 ? total.toLocaleString('es-CO') : '';
+        if (hayAlgunCapPagado) {
+            // Al menos un accionista especificó capital pagado → mostrar total exacto
+            pagadoDisplay.value = total.toLocaleString('es-CO');
+        } else {
+            // Nadie llenó el campo → dejar vacío (backend usará suscrito como default)
+            pagadoDisplay.value = '';
+        }
     }
 }
 

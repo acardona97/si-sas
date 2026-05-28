@@ -103,7 +103,7 @@
       "origen": "Número de identificación del RL principal",
       "tipo_valor": "string",
       "obligatorio": true,
-      "notas": "Formatear con separadores de miles. Ej: 1.037.657.432"
+      "notas": "Formatear con separadores de miles. Ej: 1.000.000"
     },
     "{{RL_PRINCIPAL_CIUDAD_EXPEDICION}}": {
       "fuente": "cuestionario",

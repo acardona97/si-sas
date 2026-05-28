@@ -305,7 +305,7 @@ def _detect_gender_from_name(nombre):
     Retorna 'F', 'M' o None (si no se puede determinar).
 
     Ejemplos:
-      "Yaneth Mesa Morales" → 'F'
+      "Andrea López Ríos"   → 'F'
       "María Camila Torres" → 'F'
       "Juan Pablo García"   → 'M'
       "Madonna"             → None (no está en la lista)
@@ -639,6 +639,26 @@ def _split_comparecencia_paragraph(doc):
             insert_after = clon
 
         return  # Solo procesar el primer párrafo de comparecencia
+
+
+def _enable_auto_hyphenation(doc):
+    """
+    Habilita silabeo automático en el documento.
+
+    En texto justificado (jc="both"), Word distribuye el espacio sobrante
+    entre las palabras de cada línea.  Cuando una palabra larga no cabe al
+    final, la línea queda con pocas palabras y espacios muy anchos.
+
+    El silabeo automático permite que Word corte palabras en sílabas,
+    llenando mejor cada línea y reduciendo los huecos antiestéticos.
+    """
+    settings = doc.settings._element
+    # <w:autoHyphenation w:val="true"/>
+    auto_hyph = settings.find(qn("w:autoHyphenation"))
+    if auto_hyph is None:
+        auto_hyph = OxmlElement("w:autoHyphenation")
+        settings.append(auto_hyph)
+    auto_hyph.set(qn("w:val"), "true")
 
 
 def _post_process_doc(doc, nombre_sas):
@@ -1029,10 +1049,16 @@ def _fill_apoderado_section(all_paras, apoderado, rl_principal, nombre_sas, gene
 
     # ── Artículo Tercero Transitorio: Otorgamiento de poder ──
     # Todos los suscriptores (constituyentes y RL) confieren el poder
+    # Detectar género del apoderado
+    ap_genero = _resolve_gender(apoderado.get("nombre", ""), "M")
+    _ident = _genero(ap_genero, "identificado", "identificada")
+    _domic = _genero(ap_genero, "domiciliado", "domiciliada")
+
     art3_text = (
         f"Los suscriptores de este documento, conferimos poder especial, "
-        f"amplio y suficiente a: {ap_nombre} identificado(a) con la cédula "
-        f"de ciudadanía nro. {ap_id} de {ap_ciudad}/{ap_depto} "
+        f"amplio y suficiente a: {ap_nombre}, {_ident} con la cédula "
+        f"de ciudadanía nro. {ap_id} de {ap_ciudad}, "
+        f"{_domic} en {ap_ciudad}, {ap_depto} "
         f"(en adelante el \"Apoderado\")."
     )
 
@@ -1168,6 +1194,9 @@ def generar_estatutos(data, template_path, output_path):
     Reemplaza los tokens {{...}} en todos los párrafos del documento.
     """
     doc = Document(template_path)
+
+    # ── Habilitar silabeo automático para mejorar espaciado en texto justificado ──
+    _enable_auto_hyphenation(doc)
 
     nombre_sas = data["nombre_sas"].upper()
     fecha = data["fecha"]
