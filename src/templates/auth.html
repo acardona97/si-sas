@@ -1,85 +1,212 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ "Iniciar sesión" if mode == "login" else "Crear cuenta" }} — Sí S.A.S.</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260528c">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SÍ S.A.S. by Quarta — {{ "Iniciar sesión" if mode == "login" else "Crear cuenta" }}</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "navy-deep": "#0C1E35",
+          "parchment": "#F7F5F2",
+          "silver-slate": "#64748B",
+          "gold-leaf": "#B8920A",
+          "outline-variant": "#c4c6ce",
+          "surface-variant": "#e5e2e1",
+          "surface-container": "#f0eded",
+          "on-surface-variant": "#44474d",
+          "success-emerald": "#15803D",
+          "error": "#ba1a1a"
+        },
+        borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+        spacing: {
+          "margin-desktop": "64px",
+          "unit": "8px",
+          "margin-mobile": "20px",
+          "gutter": "24px",
+          "container-max": "1200px"
+        },
+        fontFamily: {
+          "display-lg": ["Playfair Display"],
+          "body-lg": ["Inter"],
+          "headline-sm": ["Playfair Display"],
+          "headline-md": ["Playfair Display"],
+          "body-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "label-caps": ["Inter"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-display-lg, .font-headline-sm, .font-headline-md { font-family: 'Playfair Display', serif; }
+  .text-display-lg { font-size: 48px; line-height: 1.1; letter-spacing: -0.02em; font-weight: 700; }
+  .text-body-lg { font-size: 18px; line-height: 1.6; font-weight: 400; }
+  .text-body-md { font-size: 16px; line-height: 1.5; font-weight: 400; }
+  .text-body-sm { font-size: 14px; line-height: 1.5; font-weight: 400; }
+  .text-label-caps { font-size: 12px; line-height: 1; letter-spacing: 0.08em; font-weight: 600; }
+  .form-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+  .left-border-focus:focus-within { border-left: 2px solid #B8920A; }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
 </head>
-<body class="auth-body">
+<body class="bg-parchment min-h-screen flex flex-col text-navy-deep antialiased">
 
-<div class="auth-wrapper">
-    <div class="auth-card">
+<!-- Header — Logo only (transactional focus) -->
+<header class="w-full py-unit h-24 flex items-center justify-center bg-transparent">
+  <a href="/" class="font-display-lg text-display-lg font-bold text-navy-deep tracking-tight no-underline">
+    SÍ S.A.S. <span class="text-gold-leaf text-body-sm font-normal align-top ml-1">by Quarta</span>
+  </a>
+</header>
 
-        <!-- Logo -->
-        <div class="auth-header">
-            <a href="/"><img src="/static/img/logo_quarta.svg" alt="Quarta Acompañamiento Legal" class="auth-logo-img"></a>
-        </div>
+<main class="flex-grow flex items-center justify-center px-margin-mobile md:px-margin-desktop py-12">
+  <div class="max-w-container-max w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
 
-        <!-- Tabs -->
-        <div class="auth-tabs">
-            <a href="/login"    class="auth-tab {% if mode == 'login'    %}active{% endif %}">Iniciar sesión</a>
-            <a href="/register" class="auth-tab {% if mode == 'register' %}active{% endif %}">Crear cuenta</a>
-        </div>
-
-        <!-- Error -->
-        {% if error %}
-        <div class="auth-error">{{ error }}</div>
-        {% endif %}
-
-        <!-- Login -->
-        {% if mode == "login" %}
-        <form method="post" action="/login" class="auth-form">
-            <div class="form-group">
-                <label for="email">Correo electrónico</label>
-                <input type="email" id="email" name="email" required
-                       placeholder="correo@empresa.com" autocomplete="email">
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" required
-                       placeholder="••••••••" autocomplete="current-password">
-            </div>
-            <button type="submit" class="btn auth-btn-submit">Ingresar →</button>
-        </form>
-        <p class="auth-switch">¿No tiene cuenta? <a href="/register">Registrarse gratis</a></p>
-
-        <!-- Register -->
-        {% else %}
-        <form method="post" action="/register" class="auth-form">
-            <div class="form-group">
-                <label for="nombre">Nombre completo</label>
-                <input type="text" id="nombre" name="nombre"
-                       placeholder="Nombre y apellidos" autocomplete="name">
-            </div>
-            <div class="form-group">
-                <label for="email">Correo electrónico *</label>
-                <input type="email" id="email" name="email" required
-                       placeholder="correo@empresa.com" autocomplete="email">
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña * <span class="auth-hint">(mínimo 8 caracteres)</span></label>
-                <input type="password" id="password" name="password" required
-                       placeholder="••••••••" autocomplete="new-password">
-            </div>
-            <div class="form-group">
-                <label for="confirm_password">Confirmar contraseña *</label>
-                <input type="password" id="confirm_password" name="confirm_password" required
-                       placeholder="••••••••" autocomplete="new-password">
-            </div>
-            <button type="submit" class="btn auth-btn-submit">Crear cuenta →</button>
-        </form>
-        <p class="auth-switch">¿Ya tiene cuenta? <a href="/login">Iniciar sesión</a></p>
-        {% endif %}
-
-        <div class="auth-back">
-            <a href="/">← Volver al inicio</a>
-        </div>
+    <!-- Left: Atmospheric Brand Image -->
+    <div class="hidden lg:block lg:col-span-6 h-[600px] relative overflow-hidden rounded-lg shadow-xl">
+      <div class="absolute inset-0 bg-navy-deep/20 z-10"></div>
+      <img alt="SÍ S.A.S. Legal Excellence" class="absolute inset-0 w-full h-full object-cover grayscale-[20%] brightness-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvAyZ5WPgO7z8leGEvwg8j_CofJKocriFc6hj1RdSPnrKLAJ8UYYaBf8nIQcNuEnQlj4LeBSGzlTfPz5bDUVFiS6aUP7KNqmCLe8_jA_OM6nB8-4QmKJaUMNrQwFlXiRilShrVy9YqL9eapuJ4xI0W8ZP26uWb7K_nBrvqiL-GYdsiYl7ne_n7ZSSsqKdP9GGuvW7NY6KZ8NEU6PjfMvh5CnAO441eMxm6t_WpxTUylxFfo-IrSppWJ5axOFKbpbuRgm37pMy5EXDX"/>
+      <div class="absolute bottom-12 left-12 z-20 max-w-md">
+        <h2 class="font-display-lg text-display-lg text-white mb-4">Seguridad Jurídica y Excelencia Técnica.</h2>
+        <p class="font-body-lg text-body-lg text-surface-variant/90 leading-relaxed">
+          Acceda a su ecosistema de constitución legal premium y gestione la creación de su sociedad con la diligencia que merece.
+        </p>
+      </div>
     </div>
-</div>
+
+    <!-- Right: Interaction Form -->
+    <div class="lg:col-span-6 flex flex-col items-center justify-center">
+      <div class="w-full max-w-[480px] bg-white p-10 rounded-lg shadow-sm border border-navy-deep/10 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gold-leaf"></div>
+
+        <!-- Form Tabs (links to /login or /register) -->
+        <div class="flex border-b border-outline-variant mb-8">
+          <a href="/login" class="flex-1 text-center py-4 font-label-caps text-label-caps tracking-widest transition-all duration-300 no-underline {{ 'text-gold-leaf border-b-2 border-gold-leaf' if mode == 'login' else 'text-silver-slate hover:text-navy-deep' }}">
+            INICIAR SESIÓN
+          </a>
+          <a href="/register" class="flex-1 text-center py-4 font-label-caps text-label-caps tracking-widest transition-all duration-300 no-underline {{ 'text-gold-leaf border-b-2 border-gold-leaf' if mode == 'register' else 'text-silver-slate hover:text-navy-deep' }}">
+            REGISTRARSE
+          </a>
+        </div>
+
+        {% if error %}
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded text-error text-body-sm">
+          {{ error }}
+        </div>
+        {% endif %}
+
+        {% if mode == "login" %}
+        <!-- Login Form -->
+        <form method="POST" action="/login" class="space-y-6">
+          <div>
+            <label class="block font-label-caps text-label-caps mb-2 text-silver-slate">CORREO ELECTRÓNICO</label>
+            <div class="relative left-border-focus">
+              <input name="email" class="w-full bg-parchment border-none py-4 px-4 focus:ring-0 focus:bg-white transition-all text-body-md text-navy-deep" placeholder="ejemplo@correo.com" required type="email"/>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="block font-label-caps text-label-caps text-silver-slate">CONTRASEÑA</label>
+              <a class="text-[10px] font-label-caps text-gold-leaf hover:underline" href="mailto:info.2@quarta.co?subject=Recuperar%20contrase%C3%B1a">¿OLVIDÓ SU CONTRASEÑA?</a>
+            </div>
+            <div class="relative left-border-focus">
+              <input name="password" class="w-full bg-parchment border-none py-4 px-4 focus:ring-0 focus:bg-white transition-all text-body-md text-navy-deep" placeholder="••••••••••••" required type="password"/>
+            </div>
+          </div>
+          <button class="w-full bg-navy-deep text-white py-4 font-label-caps text-label-caps tracking-widest hover:bg-gold-leaf transition-all duration-500 shadow-md rounded" type="submit">
+            INGRESAR AL SISTEMA
+          </button>
+        </form>
+        {% else %}
+        <!-- Register Form -->
+        <form method="POST" action="/register" class="space-y-6">
+          <div>
+            <label class="block font-label-caps text-label-caps mb-2 text-silver-slate">NOMBRE COMPLETO</label>
+            <div class="relative left-border-focus">
+              <input name="nombre" class="w-full bg-parchment border-none py-4 px-4 focus:ring-0 focus:bg-white transition-all text-body-md text-navy-deep" placeholder="Nombres y apellidos" type="text"/>
+            </div>
+          </div>
+          <div>
+            <label class="block font-label-caps text-label-caps mb-2 text-silver-slate">CORREO ELECTRÓNICO</label>
+            <div class="relative left-border-focus">
+              <input name="email" class="w-full bg-parchment border-none py-4 px-4 focus:ring-0 focus:bg-white transition-all text-body-md text-navy-deep" placeholder="contacto@empresa.com" required type="email"/>
+            </div>
+          </div>
+          <div>
+            <label class="block font-label-caps text-label-caps mb-2 text-silver-slate">CONTRASEÑA</label>
+            <div class="relative left-border-focus">
+              <input name="password" id="reg-password" minlength="8" class="w-full bg-parchment border-none py-4 px-4 focus:ring-0 focus:bg-white transition-all text-body-md text-navy-deep" placeholder="Mínimo 8 caracteres" required type="password"/>
+            </div>
+            <p class="mt-2 text-[10px] text-silver-slate italic">Mínimo 8 caracteres alfanuméricos.</p>
+          </div>
+          <div>
+            <label class="block font-label-caps text-label-caps mb-2 text-silver-slate">CONFIRMAR CONTRASEÑA</label>
+            <div class="relative left-border-focus">
+              <input name="confirm_password" minlength="8" class="w-full bg-parchment border-none py-4 px-4 focus:ring-0 focus:bg-white transition-all text-body-md text-navy-deep" placeholder="Repita la contraseña" required type="password"/>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <input class="mt-1 rounded border-outline-variant text-gold-leaf focus:ring-gold-leaf" id="terms" required type="checkbox"/>
+            <label class="text-[11px] text-on-surface-variant leading-tight" for="terms">
+              Acepto los <a href="#" class="text-gold-leaf underline cursor-pointer">Términos y Condiciones</a> y la <a href="#" class="text-gold-leaf underline cursor-pointer">Política de Privacidad</a> de SÍ S.A.S. by Quarta.
+            </label>
+          </div>
+          <button class="w-full bg-navy-deep text-white py-4 font-label-caps text-label-caps tracking-widest hover:bg-gold-leaf transition-all duration-500 shadow-md rounded" type="submit">
+            CREAR CUENTA
+          </button>
+        </form>
+        {% endif %}
+
+        <!-- Secondary Options -->
+        <div class="mt-8 pt-8 border-t border-outline-variant text-center">
+          <p class="text-body-sm text-silver-slate mb-4">¿Necesita ayuda para acceder?</p>
+          <a href="mailto:info.2@quarta.co" class="inline-flex items-center gap-2 text-gold-leaf font-label-caps text-label-caps hover:underline no-underline">
+            <span class="material-symbols-outlined text-sm">mail</span> Contactar a Quarta
+          </a>
+        </div>
+      </div>
+      <p class="mt-8 font-label-caps text-label-caps text-silver-slate">© 2026 SÍ S.A.S. BY QUARTA · EXCELENCIA LEGAL</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-12 px-margin-desktop bg-parchment border-t border-outline-variant mt-auto">
+  <div class="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-gutter items-start">
+    <div>
+      <div class="font-display-lg text-3xl font-bold text-navy-deep mb-4">SÍ S.A.S.</div>
+      <p class="text-body-sm text-silver-slate leading-relaxed">
+        Constitución legal digital de Sociedades por Acciones Simplificadas, respaldada por Quarta Acompañamiento Legal S.A.S.
+      </p>
+    </div>
+    <div class="flex flex-col space-y-3">
+      <span class="font-label-caps text-label-caps text-navy-deep mb-2">RECURSOS</span>
+      <a class="text-body-sm text-silver-slate hover:text-gold-leaf transition-colors duration-200 no-underline" href="/#planes">Planes</a>
+      <a class="text-body-sm text-silver-slate hover:text-gold-leaf transition-colors duration-200 no-underline" href="/#servicios">Servicios</a>
+      <a class="text-body-sm text-silver-slate hover:text-gold-leaf transition-colors duration-200 no-underline" href="/">Volver al inicio</a>
+    </div>
+    <div class="flex flex-col space-y-3">
+      <span class="font-label-caps text-label-caps text-navy-deep mb-2">CONTACTO</span>
+      <p class="text-body-sm text-silver-slate">Medellín, Colombia</p>
+      <a class="text-body-sm text-silver-slate hover:text-gold-leaf transition-colors duration-200 no-underline" href="mailto:info.2@quarta.co">info.2@quarta.co</a>
+      <p class="text-body-sm text-silver-slate">+57 300 2766132</p>
+    </div>
+  </div>
+  <div class="max-w-container-max mx-auto mt-12 pt-8 border-t border-outline-variant/30 text-center">
+    <p class="text-body-sm text-silver-slate">© 2026 SÍ S.A.S. by Quarta. Todos los derechos reservados.</p>
+  </div>
+</footer>
 
 </body>
 </html>
