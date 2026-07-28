@@ -155,20 +155,45 @@ def determinar_situacion_control(accionistas):
 # INICIALIZACIÓN DB + ADMIN
 # ═══════════════════════════════════════════════════════════
 
+def _sembrar(descripcion, email, password, sembrador, *args):
+    """Siembra una cuenta interna y avisa cuando no puede hacerlo.
+
+    Los sembradores no hacen nada si falta la contraseña. Sin este aviso el
+    arranque no deja rastro alguno: la cuenta simplemente no queda creada y
+    el problema aparece mucho después, cuando esa persona intenta generar y
+    recibe "Sin generaciones disponibles" sin explicación.
+    """
+    if not email or not password:
+        app.logger.warning(
+            "Cuenta %s (%s) NO sembrada: falta su contraseña en las variables "
+            "de entorno. No tendrá plan admin ni generaciones ilimitadas; "
+            "habrá que asignárselas desde /admin.",
+            descripcion, email or "correo sin definir",
+        )
+        return
+    sembrador(email, password, *args)
+
+
 with app.app_context():
     init_db()
-    seed_admin(
+    _sembrar(
+        "administrador",
         os.environ.get("ADMIN_EMAIL", ""),
-        os.environ.get("ADMIN_PASSWORD", "")
+        os.environ.get("ADMIN_PASSWORD", ""),
+        seed_admin,
     )
-    seed_staff_user(
+    _sembrar(
+        "staff 1",
         os.environ.get("STAFF_EMAIL_1", "acardona@quarta.co"),
         os.environ.get("STAFF_PASSWORD_1", ""),
+        seed_staff_user,
         "Andrés Cardona",
     )
-    seed_staff_user(
+    _sembrar(
+        "staff 2",
         os.environ.get("STAFF_EMAIL_2", "info.2@quarta.co"),
         os.environ.get("STAFF_PASSWORD_2", ""),
+        seed_staff_user,
         "Quarta Info",
     )
 
