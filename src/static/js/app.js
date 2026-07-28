@@ -38,7 +38,7 @@ function showStep(n) {
     currentStep = n;
     if (n === 3) populateRLSelects();
     if (n === 5) syncCapital();
-    if (n === 6) { refreshControlBlock(); renderNucleoFamiliar(); }
+    if (n === 6) { refreshControlBlock(); renderNucleoFamiliar(); populateJuntaSelects(); }
     if (n === 7) buildSummary();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -64,17 +64,31 @@ function validateStep(step) {
             const atIdx = email.indexOf('@');
             if (atIdx > 0 && email[atIdx - 1] === '-') { alert('El correo no puede tener guión antes del @ (regla DIAN)'); return false; }
         }
-        // Homonimia: se exige la declaración, nunca se bloquea por el resultado.
+        // Homonimia: se exige haber abierto la consulta Y declarar el resultado.
+        // El resultado en sí nunca bloquea; solo el riesgo máximo pide un
+        // reconocimiento expreso.
+        const irAlBloque = () => document.getElementById('homonimia-block')
+            ?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+
+        const distintivo = nombreDistintivo(document.getElementById('nombre_sas').value);
+        if (_distintivoConsultado !== distintivo) {
+            alert('Antes de continuar debe consultar la razón social en el RUES.\n\n'
+                  + 'Pulse "Consultar en el RUES", revise lo que aparece y vuelva a marcar '
+                  + 'el resultado.');
+            irAlBloque();
+            return false;
+        }
         const homonimia = getHomonimiaData();
         if (!homonimia) {
-            alert('Consulte la razón social en el RUES y declare qué encontró antes de continuar.');
-            document.getElementById('homonimia-block')
-                ?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+            alert('Ya abrió el RUES. Ahora marque cuál de los cuatro resultados le apareció.');
+            irAlBloque();
             return false;
         }
         if (homonimia.resultado === 'identica_activa' && !homonimia.riesgo_aceptado) {
-            alert('Existe una sociedad activa con el mismo nombre distintivo. Marque que entiende '
-                  + 'el riesgo de devolución por homonimia, o cambie la razón social.');
+            alert('El nombre NO está disponible: ya existe una sociedad activa que se llama igual.\n\n'
+                  + 'Lo recomendable es cambiar la razón social. Si aun así quiere seguir, marque '
+                  + 'la casilla donde acepta el riesgo de que la Cámara devuelva el trámite.');
+            irAlBloque();
             return false;
         }
     }
@@ -466,6 +480,12 @@ async function extractFromCedula(input, prefix, n) {
             _fillIfPresent(`${prefix}_cedula`, data.numero_documento, filled, 'Cédula');
             _fillIfPresent(`${prefix}_expedicion`, data.ciudad_expedicion, filled, 'Ciudad expedición');
             _fillSelectIfPresent(`${prefix}_genero`, data.genero, filled, 'Género');
+        } else if (prefix === 'revisor' || prefix === 'revisor_contador') {
+            // Revisor fiscal persona natural, o contador designado por la
+            // persona jurídica. Estos campos van por id=, no por name=.
+            _fillIfPresent(`${prefix}_nombre`, data.nombre_completo, filled, 'Nombre');
+            _fillSelectIfPresent(`${prefix}_tipo_doc`, _normTipoDoc(data.tipo_documento), filled, 'Tipo doc');
+            _fillIfPresent(`${prefix}_id_num`, data.numero_documento, filled, 'Documento');
         } else {
             // Accionista persona natural — campos por name=
             _fillByNameIfPresent(`${prefix}_nombre`, data.nombre_completo, filled, 'Nombre');
@@ -488,6 +508,55 @@ async function extractFromCedula(input, prefix, n) {
         console.error('extractFromCedula error:', e);
     } finally {
         input.value = '';  // permitir resubir el mismo archivo
+    }
+}
+
+/**
+ * Extrae el número de la tarjeta profesional de contador público.
+ * `prefix` es 'revisor' (persona natural) o 'revisor_contador' (el contador
+ * que designa la firma de revisoría).
+ */
+async function extractFromTarjeta(input, prefix) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const statusEl = document.getElementById(`${prefix}_tarjeta_upload_status`);
+    _setStatus(statusEl, 'processing', '<span class="spinner"></span> Leyendo la tarjeta profesional...');
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const resp = await fetch('/api/extract/tarjeta', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (!resp.ok || data.error) throw new Error(data.error || 'Error desconocido');
+
+        const filled = [];
+        _fillIfPresent(`${prefix}_tarjeta`, data.numero_tarjeta, filled, 'Tarjeta profesional');
+        // El nombre y la cédula solo se completan si aún están vacíos, para no
+        // pisar lo que ya se extrajo de la cédula.
+        const elNombre = document.getElementById(`${prefix}_nombre`);
+        if (elNombre && !elNombre.value.trim() && data.nombre_completo) {
+            elNombre.value = data.nombre_completo;
+            filled.push('Nombre');
+        }
+        const elDoc = document.getElementById(`${prefix}_id_num`);
+        if (elDoc && !elDoc.value.trim() && data.numero_documento) {
+            elDoc.value = data.numero_documento;
+            filled.push('Documento');
+        }
+
+        if (filled.length === 0) {
+            _setStatus(statusEl, 'error',
+                '⚠ No se pudo leer el número de la tarjeta. Verifique la imagen o escríbalo a mano.');
+        } else {
+            _setStatus(statusEl, 'success', `✓ Datos extraídos: ${filled.join(', ')}.`);
+        }
+    } catch (e) {
+        _setStatus(statusEl, 'error', `✗ Error al procesar: ${e.message}`);
+        console.error('extractFromTarjeta error:', e);
+    } finally {
+        input.value = '';
     }
 }
 
@@ -666,8 +735,11 @@ function nombreDistintivo(razonSocial) {
 }
 
 // Nombre distintivo sobre el que se declaró el último resultado. Si el usuario
-// cambia la razón social, la declaración anterior deja de ser válida.
+// cambia la razón social, tanto la consulta como la declaración caducan.
 let _distintivoDeclarado = null;
+// Nombre distintivo que efectivamente se abrió en el RUES. Sin esto no se
+// puede avanzar: la declaración sola no prueba que se haya consultado.
+let _distintivoConsultado = null;
 
 function onRazonSocialInput() {
     const razon = document.getElementById('nombre_sas').value.trim();
@@ -677,23 +749,25 @@ function onRazonSocialInput() {
     if (!termino || !link) return;
 
     if (!distintivo) {
-        termino.innerHTML = '<em>Escriba la razón social para habilitar la consulta.</em>';
+        termino.innerHTML = '<em>Escriba primero la razón social.</em>';
         link.href = 'https://www.rues.org.co/';
         link.classList.add('hidden');
     } else {
-        termino.innerHTML = 'Se buscará en el RUES: <strong>' + distintivo + '</strong>';
+        termino.innerHTML = '<span class="homo-termino">' + distintivo + '</span>';
         link.href = 'https://www.rues.org.co/buscar/RM/' + encodeURIComponent(distintivo);
         link.classList.remove('hidden');
     }
 
-    // La declaración corresponde a un nombre concreto: si cambia, se reinicia.
-    if (_distintivoDeclarado !== null && distintivo !== _distintivoDeclarado) {
+    // Consulta y declaración corresponden a un nombre concreto: si el nombre
+    // distintivo cambia, ambas dejan de valer y hay que repetir la consulta.
+    if (_distintivoConsultado !== null && distintivo !== _distintivoConsultado) {
         resetHomonimia();
     }
 }
 
 function resetHomonimia() {
     _distintivoDeclarado = null;
+    _distintivoConsultado = null;
     document.querySelectorAll('input[name="homonimia"]').forEach(r => {
         r.checked = false;
         r.closest('.radio-card').classList.remove('selected');
@@ -703,32 +777,67 @@ function resetHomonimia() {
     document.getElementById('homonimia-declaracion').classList.add('hidden');
     document.getElementById('homonimia-resultado').classList.add('hidden');
     document.getElementById('homonimia-ack-wrap').classList.add('hidden');
+
+    const btn = document.getElementById('homonimia-link');
+    if (btn) btn.classList.remove('consultado');
+    const estado = document.getElementById('homonimia-estado-consulta');
+    if (estado) {
+        estado.textContent = 'Se abre en una pestaña nueva con la búsqueda ya escrita. '
+                           + 'No tiene que digitar nada.';
+    }
+    ['homo-paso-1', 'homo-paso-2', 'homo-paso-3'].forEach(id => {
+        document.getElementById(id)?.classList.remove('done');
+    });
 }
 
 function marcarConsultaRues() {
-    // El enlace abre el RUES en otra pestaña; al volver, el usuario declara.
+    // Solo se llega aquí al pulsar el enlace, así que registra que la consulta
+    // se abrió de verdad para el nombre que hay escrito en este momento.
+    const distintivo = nombreDistintivo(document.getElementById('nombre_sas').value);
+    if (!distintivo) return;
+    _distintivoConsultado = distintivo;
+
     document.getElementById('homonimia-declaracion').classList.remove('hidden');
+    document.getElementById('homonimia-link').classList.add('consultado');
+    document.getElementById('homo-paso-1')?.classList.add('done');
+    document.getElementById('homo-paso-2')?.classList.add('done');
+    const estado = document.getElementById('homonimia-estado-consulta');
+    if (estado) {
+        estado.innerHTML = 'Consulta abierta para <strong>' + distintivo + '</strong>. '
+                         + 'Revise el RUES y marque abajo lo que vio.';
+    }
 }
 
 const HOMONIMIA_RIESGO = {
     min: {
-        nivel: 'mínimo', color: 'var(--success)',
-        texto: 'El nombre está disponible. Puede continuar con la constitución.',
+        nivel: 'mínimo', clase: 'ok', icono: '✓',
+        titulo: 'NOMBRE DISPONIBLE',
+        texto: 'El RUES no encontró ninguna sociedad con este nombre. '
+             + 'Puede continuar con la constitución.',
     },
     similar: {
-        nivel: 'medio', color: '#B8860B',
-        texto: 'Existen nombres parecidos. La Cámara podría objetar el registro; '
-             + 'considere ajustar la razón social para diferenciarla mejor.',
+        nivel: 'medio', clase: 'aviso', icono: '!',
+        titulo: 'ATENCIÓN — puede haber objeción',
+        texto: 'Hay sociedades con nombres parecidos. Como ninguna se llama exactamente '
+             + 'igual, el trámite normalmente pasa, pero la Cámara puede objetarlo si '
+             + 'considera que se presta a confusión. <strong>Si puede, agregue una palabra '
+             + 'que lo diferencie más.</strong>',
     },
     identica_cancelada: {
-        nivel: 'medio', color: '#B8860B',
-        texto: 'El nombre exacto existe pero la sociedad no está activa. Suele admitirse, '
-             + 'aunque la Cámara puede pedir aclaración. Verifique el estado del registro.',
+        nivel: 'medio', clase: 'aviso', icono: '!',
+        titulo: 'ATENCIÓN — el nombre existió antes',
+        texto: 'Existe el nombre exacto, pero la sociedad ya no está activa. En general se '
+             + 'admite, aunque la Cámara puede pedir aclaración. '
+             + '<strong>Confirme en el RUES que el estado dice Cancelada o Liquidada</strong> '
+             + 'y no Activa: si estuviera activa, el riesgo es máximo.',
     },
     identica_activa: {
-        nivel: 'máximo', color: 'var(--danger)',
-        texto: 'Existe una sociedad activa con el mismo nombre distintivo. '
-             + 'La Cámara devolverá el trámite por homonimia. Se recomienda cambiar la razón social.',
+        nivel: 'máximo', clase: 'alto', icono: '✕',
+        titulo: 'NOMBRE NO DISPONIBLE',
+        texto: 'Ya existe una sociedad activa con este mismo nombre distintivo. '
+             + '<strong>La Cámara va a devolver el trámite por homonimia.</strong> '
+             + 'Lo recomendable es volver arriba y cambiar la razón social ahora, '
+             + 'antes de llenar el resto del formulario.',
     },
 };
 
@@ -740,11 +849,16 @@ function onHomonimiaChange() {
 
     const r = HOMONIMIA_RIESGO[sel.value];
     _distintivoDeclarado = nombreDistintivo(document.getElementById('nombre_sas').value);
+    document.getElementById('homo-paso-3')?.classList.add('done');
 
-    caja.className = 'info-box';
-    caja.style.borderLeftColor = r.color;
-    caja.innerHTML = '<strong style="color:' + r.color + '">Riesgo de homonimia ' + r.nivel
-                   + '.</strong> ' + r.texto;
+    caja.className = 'homo-veredicto ' + r.clase;
+    caja.innerHTML =
+        '<span class="homo-veredicto-icono">' + r.icono + '</span>' +
+        '<span class="homo-veredicto-cuerpo">' +
+        '<span class="homo-veredicto-titulo">' + r.titulo + '</span>' +
+        '<div class="homo-veredicto-texto">' + r.texto +
+        '<br><br>Riesgo de homonimia: <strong>' + r.nivel + '</strong>.</div>' +
+        '</span>';
     caja.classList.remove('hidden');
 
     // Solo el riesgo máximo exige reconocimiento expreso; nunca bloquea.
@@ -758,6 +872,8 @@ function getHomonimiaData() {
         resultado: sel.value,
         nivel_riesgo: HOMONIMIA_RIESGO[sel.value].nivel,
         nombre_distintivo: nombreDistintivo(document.getElementById('nombre_sas').value),
+        consulta_realizada: _distintivoConsultado !== null
+                            && _distintivoConsultado === _distintivoDeclarado,
         riesgo_aceptado: !!document.getElementById('homonimia_ack')?.checked,
     };
 }
@@ -887,27 +1003,80 @@ const TIPO_DOC_OPTIONS = `
     <option value="NIT">NIT</option>`;
 
 function _juntaPersonaCard(prefix, idx, titulo, removable) {
+    const id = prefix + idx;
     return `
         <div class="accionista-card" data-junta-row>
             <div class="card-header">
                 <h4>${titulo}</h4>
                 ${removable ? `<button type="button" class="btn btn-danger" onclick="this.closest('[data-junta-row]').remove()">Eliminar</button>` : ''}
             </div>
+            <div class="upload-doc-section">
+                <div class="upload-doc-info">
+                    <strong>📷 Autocompletar desde cédula o pasaporte</strong>
+                    <span class="upload-hint">Suba el documento del miembro y Sí S.A.S. completa nombre, tipo y número.</span>
+                </div>
+                <label class="upload-doc-btn">
+                    Cargar documento
+                    <input type="file" accept="image/*,application/pdf"
+                           onchange="extractFromCedula(this, '${id}', 0)">
+                </label>
+                <span class="upload-status" id="${id}_upload_status"></span>
+            </div>
+            <div class="form-group">
+                <label>Seleccionar de accionistas</label>
+                <select data-junta-select onchange="selectJuntaAccionista(this, '${id}')">
+                    <option value="">-- Escribir manualmente --</option>
+                </select>
+                <span class="hint">Si el miembro ya figura como accionista, escójalo y se llenan sus datos.</span>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Nombre completo</label>
-                    <input type="text" name="${prefix}${idx}_nombre" placeholder="Nombres y apellidos">
+                    <input type="text" name="${id}_nombre" placeholder="Nombres y apellidos">
                 </div>
                 <div class="form-group">
                     <label>Tipo de identificación</label>
-                    <select name="${prefix}${idx}_tipo_doc">${TIPO_DOC_OPTIONS}</select>
+                    <select name="${id}_tipo_doc">${TIPO_DOC_OPTIONS}</select>
                 </div>
                 <div class="form-group">
                     <label>Número de identificación</label>
-                    <input type="text" name="${prefix}${idx}_id_num" placeholder="No. de identificación">
+                    <input type="text" name="${id}_id_num" placeholder="No. de identificación">
                 </div>
             </div>
         </div>`;
+}
+
+/** Llena los selectores de accionistas de todas las tarjetas de junta. */
+function populateJuntaSelects() {
+    const accionistas = getAccionistasData();
+    document.querySelectorAll('[data-junta-select]').forEach(sel => {
+        const previo = sel.value;
+        sel.innerHTML = '<option value="">-- Escribir manualmente --</option>';
+        accionistas.forEach((acc, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            // Una persona jurídica no puede ser miembro de junta directiva.
+            opt.textContent = acc.tipo === 'juridica'
+                ? `${acc.rl_nombre || acc.nombre} (RL de ${acc.nombre})`
+                : acc.nombre;
+            sel.appendChild(opt);
+        });
+        sel.value = previo;
+    });
+}
+
+function selectJuntaAccionista(sel, id) {
+    const idx = parseInt(sel.value);
+    if (isNaN(idx)) return;
+    const acc = getAccionistasData()[idx];
+    if (!acc) return;
+    // De una persona jurídica se toma su representante legal, que es quien
+    // puede ocupar la silla en la junta.
+    const esPJ = acc.tipo === 'juridica';
+    _setByName(`${id}_nombre`, esPJ ? acc.rl_nombre : acc.nombre);
+    _setByName(`${id}_id_num`, esPJ ? acc.rl_cc : acc.id_num);
+    const tipoSel = document.querySelector(`[name="${id}_tipo_doc"]`);
+    if (tipoSel) tipoSel.value = esPJ ? 'CC' : (acc.tipo_doc || 'CC');
 }
 
 function renderJuntaPrincipales() {
@@ -926,6 +1095,7 @@ function renderJuntaPrincipales() {
         _setByName(`jd_pri_${idx}_tipo_doc`, p.tipo_doc);
         _setByName(`jd_pri_${idx}_id_num`, p.id_num);
     });
+    populateJuntaSelects();
 }
 
 let juntaSuplenteCount = 0;
@@ -936,6 +1106,7 @@ function addJuntaSuplente() {
     div.innerHTML = _juntaPersonaCard('jd_sup_', juntaSuplenteCount,
         `Miembro suplente ${container.children.length + 1}`, true);
     container.appendChild(div.firstElementChild);
+    populateJuntaSelects();
 }
 
 function _setByName(name, value) {

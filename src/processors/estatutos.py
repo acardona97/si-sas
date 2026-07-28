@@ -476,16 +476,20 @@ def _fmt_num_table(n):
     return f"{n:,}".replace(",", ".")
 
 
-def _set_cell_text(cell, text):
+def _set_cell_text(cell, text, bold=False):
     """Reemplaza el texto de una celda preservando el formato de los runs."""
     para = cell.paragraphs[0]
     if para.runs:
         para.runs[0].text = text
+        if bold:
+            para.runs[0].bold = True
         for run in para.runs[1:]:
             run.text = ""
     else:
         run = para.add_run(text)
         run.font.name = "Cambria"
+        if bold:
+            run.bold = True
 
 
 def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
@@ -557,7 +561,7 @@ def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
         else:
             id_label = f"{acc.get('id_tipo', 'C.C.')} {acc.get('id_num', '')}"
 
-        _set_cell_text(new_row.cells[0], nombre)
+        _set_cell_text(new_row.cells[0], nombre, bold=True)   # nombre propio
         _set_cell_text(new_row.cells[1], id_label)
         _set_cell_text(new_row.cells[2], f"{int(pct)}%")
         _set_cell_text(new_row.cells[3], _fmt_num_table(acciones))
@@ -812,10 +816,12 @@ def _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombr
         elif firmante.get("es_rl_suplente"):
             lineas.append("Acepto cargo como representante legal suplente.")
 
+        indice_nombre = 4          # las cuatro primeras son el espacio de firma
         for i, texto in enumerate(lineas):
             p = _make_paragraph(
-                texto, bold=False, left=True, font_name="Cambria",
-                keep_next=(i < len(lineas) - 1),   # el último no arrastra
+                texto, bold=(i == indice_nombre),   # el nombre propio, resaltado
+                left=True, font_name="Cambria",
+                keep_next=(i < len(lineas) - 1),    # el último no arrastra
             )
             insert_point.addprevious(p)
 
@@ -1180,7 +1186,11 @@ def _label_tipo_doc(tipo):
 
 
 def _persona_nombramiento(p):
-    """'JUAN PÉREZ, identificado con C.C. No. 71.234.567'."""
+    """Segmentos de 'JUAN PÉREZ, identificado con C.C. No. 71.234.567'.
+
+    Devuelve una lista de (texto, negrilla) en lugar de una cadena, porque el
+    nombre propio va resaltado y el resto de la frase no.
+    """
     nombre = (p.get("nombre") or "").strip().upper()
     tipo = _label_tipo_doc(p.get("tipo_doc"))
     num = (p.get("id_num") or "").strip()
@@ -1188,7 +1198,14 @@ def _persona_nombramiento(p):
     ident = _genero(genero, "identificado", "identificada")
     if tipo == "NIT":
         ident = "identificada"  # persona jurídica
-    return f"{nombre}, {ident} con {tipo} No. {num}"
+    return [(nombre, True), (f", {ident} con {tipo} No. {num}", False)]
+
+
+def _segmentos_a_texto(segmentos):
+    """Aplana una lista de (texto, negrilla) a texto plano."""
+    if isinstance(segmentos, str):
+        return segmentos
+    return "".join(t for t, _ in segmentos)
 
 
 def _make_run(text, bold=False, font_name="Cambria", size=None):
@@ -1219,6 +1236,9 @@ def _make_labeled_paragraph(ref_p_elem, label, content):
     (alineación, interlineado, sangría) de un párrafo de referencia de la
     plantilla, de modo que los nombramientos nuevos se vean idénticos a los
     del representante legal.
+
+    `content` puede ser una cadena o una lista de (texto, negrilla) para
+    resaltar los nombres propios dentro de la frase.
     """
     p = OxmlElement("w:p")
     if ref_p_elem is not None:
@@ -1233,8 +1253,125 @@ def _make_labeled_paragraph(ref_p_elem, label, content):
                         rPr.remove(el)
             p.append(new_pPr)
     p.append(_make_run(label, bold=True))
-    p.append(_make_run(content, bold=False))
+    if isinstance(content, str):
+        p.append(_make_run(content, bold=False))
+    else:
+        for texto, negrilla in content:
+            if texto:
+                p.append(_make_run(texto, bold=negrilla))
     return p
+
+
+def _bold_substring(p_elem, texto):
+    """
+    Pone en negrilla la primera aparición de `texto` dentro del párrafo,
+    partiendo el run que lo contiene en hasta tres runs y conservando el
+    formato original (fuente, tamaño, color) en los tres.
+
+    Se usa para resaltar nombres propios en párrafos que ya venían armados
+    por sustitución de tokens, donde no se puede elegir el formato al
+    construirlos.
+    """
+    if not texto:
+        return False
+    for run in p_elem.findall(qn("w:r")):
+        t_elems = run.findall(qn("w:t"))
+        if len(t_elems) != 1:
+            continue
+        contenido = t_elems[0].text or ""
+        pos = contenido.find(texto)
+        if pos < 0:
+            continue
+
+        antes, medio, despues = (contenido[:pos], texto,
+                                 contenido[pos + len(texto):])
+        rPr = run.find(qn("w:rPr"))
+        indice = list(p_elem).index(run)
+        p_elem.remove(run)
+
+        nuevos = []
+        for fragmento, negrilla in ((antes, False), (medio, True), (despues, False)):
+            if not fragmento:
+                continue
+            r = OxmlElement("w:r")
+            if rPr is not None:
+                nuevo_rPr = deepcopy(rPr)
+                for tag in ("w:b", "w:bCs"):
+                    for el in nuevo_rPr.findall(qn(tag)):
+                        nuevo_rPr.remove(el)
+                if negrilla:
+                    nuevo_rPr.append(OxmlElement("w:b"))
+                    nuevo_rPr.append(OxmlElement("w:bCs"))
+                r.append(nuevo_rPr)
+            elif negrilla:
+                nuevo_rPr = OxmlElement("w:rPr")
+                nuevo_rPr.append(OxmlElement("w:b"))
+                nuevo_rPr.append(OxmlElement("w:bCs"))
+                r.append(nuevo_rPr)
+            t = OxmlElement("w:t")
+            t.text = fragmento
+            t.set(qn("xml:space"), "preserve")
+            r.append(t)
+            nuevos.append(r)
+
+        for offset, r in enumerate(nuevos):
+            p_elem.insert(indice + offset, r)
+        return True
+    return False
+
+
+def _nombres_propios(accionistas, rl_principal, rl_suplente, junta, revisor,
+                     apoderado):
+    """Reúne todos los nombres propios que deben ir resaltados.
+
+    Se ordenan del más largo al más corto para que, cuando un nombre sea
+    prefijo de otro, se resalte primero el completo.
+    """
+    nombres = []
+
+    for acc in accionistas or []:
+        nombres.append((acc.get("nombre") or "").upper())
+        if acc.get("tipo") == "juridica":
+            nombres.append((acc.get("rl_nombre") or "").upper())
+
+    for rl in (rl_principal, rl_suplente):
+        if rl:
+            nombres.append((rl.get("nombre") or "").upper())
+
+    if junta:
+        for grupo in ("principales", "suplentes"):
+            for m in junta.get(grupo) or []:
+                nombres.append((m.get("nombre") or "").upper())
+
+    if revisor:
+        nombres.append((revisor.get("nombre") or "").upper())
+        nombres.append((revisor.get("contador_nombre") or "").upper())
+
+    if apoderado:
+        nombres.append((apoderado.get("nombre") or "").upper())
+
+    return sorted({n.strip() for n in nombres if n.strip()},
+                  key=len, reverse=True)
+
+
+def _resaltar_nombres(doc, nombres):
+    """Pone en negrilla los nombres propios donde aparezcan en el cuerpo.
+
+    Recorre una sola vez el documento y, por cada párrafo, resalta el primer
+    nombre de la lista que encuentre. Solo se aplica a párrafos del cuerpo:
+    las tablas y los bloques que se construyen a mano ya salen resaltados
+    desde su origen.
+    """
+    nombres = [n for n in dict.fromkeys(nombres) if n and len(n) > 2]
+    if not nombres:
+        return
+    for p_elem in doc._element.body.findall(qn("w:p")):
+        texto = _get_para_text(p_elem)
+        if not texto.strip():
+            continue
+        for nombre in nombres:
+            if nombre in texto:
+                _bold_substring(p_elem, nombre)
 
 
 # Rasgos tomados de la tabla de accionistas de la plantilla, para que el
@@ -1341,8 +1478,16 @@ def _make_table(rows, col_widths, header=True, font_name="Cambria", size=None):
             tc.append(tcPr)
 
             p = OxmlElement("w:p")
-            p.append(_make_run(cell_text, bold=is_header,
-                               font_name=font_name, size=size))
+            # Una celda puede venir como texto plano o como lista de
+            # (texto, negrilla), para resaltar el nombre propio.
+            if isinstance(cell_text, str):
+                p.append(_make_run(cell_text, bold=is_header,
+                                   font_name=font_name, size=size))
+            else:
+                for texto, negrilla in cell_text:
+                    if texto:
+                        p.append(_make_run(texto, bold=is_header or negrilla,
+                                           font_name=font_name, size=size))
             tc.append(p)
             tr.append(tc)
         tbl.append(tr)
@@ -1422,6 +1567,7 @@ def _insert_nombramientos_organos(doc, junta, revisor):
                     _persona_nombramiento(principales[i]) if i < n_pri else "",
                     _persona_nombramiento(suplentes[i]) if i < len(suplentes) else "",
                 ])
+
             col_widths = [TBL_ANCHO_TOTAL // 2] * 2
         else:
             rows = [["Miembros principales"]]
@@ -1440,7 +1586,11 @@ def _insert_nombramientos_organos(doc, junta, revisor):
 
 
 def _texto_revisor(revisor):
-    """Redacta el nombramiento del revisor fiscal (persona natural o jurídica)."""
+    """Segmentos del nombramiento del revisor fiscal (persona natural o jurídica).
+
+    Devuelve una lista de (texto, negrilla): los nombres propios —la firma y
+    el contador designado— van resaltados.
+    """
     tipo = (revisor.get("tipo") or "natural").lower()
     tarjeta = (revisor.get("tarjeta_profesional") or "").strip()
 
@@ -1455,14 +1605,15 @@ def _texto_revisor(revisor):
         c_ident = _genero(c_genero, "identificado", "identificada")
         c_port = _genero(c_genero, "portador", "portadora")
 
-        texto = (
-            f"{razon}, sociedad identificada con NIT {nit}, "
-            f"quien de conformidad con el artículo 215 del Código de Comercio "
-            f"designa para el ejercicio personal del cargo a {c_nombre}, "
-            f"{c_ident} con {c_tipo} No. {c_num}, contador público "
-            f"{c_port} de la tarjeta profesional No. {c_tarjeta}."
-        )
-        return texto
+        return [
+            (razon, True),
+            (f", sociedad identificada con NIT {nit}, quien de conformidad con "
+             f"el artículo 215 del Código de Comercio designa para el ejercicio "
+             f"personal del cargo a ", False),
+            (c_nombre, True),
+            (f", {c_ident} con {c_tipo} No. {c_num}, contador público "
+             f"{c_port} de la tarjeta profesional No. {c_tarjeta}.", False),
+        ]
 
     nombre = (revisor.get("nombre") or "").strip().upper()
     tipo_doc = _label_tipo_doc(revisor.get("tipo_doc"))
@@ -1470,10 +1621,11 @@ def _texto_revisor(revisor):
     genero = _resolve_gender(revisor.get("nombre", ""), revisor.get("genero", "M"))
     ident = _genero(genero, "identificado", "identificada")
     port = _genero(genero, "portador", "portadora")
-    return (
-        f"{nombre}, {ident} con {tipo_doc} No. {num}, contador público "
-        f"{port} de la tarjeta profesional No. {tarjeta}."
-    )
+    return [
+        (nombre, True),
+        (f", {ident} con {tipo_doc} No. {num}, contador público "
+         f"{port} de la tarjeta profesional No. {tarjeta}.", False),
+    ]
 
 
 def _make_paragraph(text, bold=False, left=True, font_name="Cambria", size=None,
@@ -1658,6 +1810,16 @@ def generar_estatutos(data, template_path, output_path):
     _insert_nombramientos_organos(
         doc, data.get("junta_directiva"), data.get("revisor_fiscal")
     )
+
+    # ── Nombres propios en negrilla ──
+    # La comparecencia, las líneas de representante legal y el poder se arman
+    # por sustitución de tokens, así que el resaltado se aplica después sobre
+    # el texto ya montado. Se hace antes de las firmas porque esos bloques ya
+    # salen resaltados desde su construcción.
+    _resaltar_nombres(doc, _nombres_propios(
+        accionistas, rl_principal, rl_suplente,
+        data.get("junta_directiva"), data.get("revisor_fiscal"), apoderado,
+    ))
 
     # Insertar firmas como párrafos individuales con espacio para firma
     _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombre_sas)

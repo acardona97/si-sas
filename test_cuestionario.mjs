@@ -340,58 +340,148 @@ console.log('\n─── Homonimia: nombre distintivo, enlace al RUES y niveles 
     assert.match(w.document.getElementById('homonimia-termino').textContent, /CAFE MONTANA/);
     console.log('  OK  enlace profundo al RUES');
 
-    // Sin declarar, el paso 1 no deja avanzar
+    // ── Sin abrir el RUES no se puede avanzar, aunque se marque un resultado ──
     llenarPaso1(w);
     set(w, 'nombre_sas', 'FAMILIA ANDINA S.A.S.');
     w.onRazonSocialInput();
     w.resetHomonimia();
     w.__alerts = [];
-    assert.equal(w.validateStep(1), false, 'debía exigir la declaración');
-    assert.match(w.__alerts[0], /declare qué encontró/);
+    assert.equal(w.validateStep(1), false, 'sin consultar el RUES no debía pasar');
+    assert.match(w.__alerts[0], /debe consultar la razón social en el RUES/);
 
-    // Riesgo mínimo deja pasar
+    // El bloque de declaración ni siquiera está visible antes de consultar
+    assert.ok(w.document.getElementById('homonimia-declaracion').classList.contains('hidden'));
+    console.log('  OK  no deja avanzar si no se abrió la consulta en el RUES');
+
+    // ── Tras consultar, falta declarar ──
     w.marcarConsultaRues();
-    marcarRadio(w, 'homonimia', 'min');
+    assert.ok(w.document.getElementById('homonimia-link').classList.contains('consultado'),
+        'el botón debía quedar marcado como consultado');
+    assert.ok(w.document.getElementById('homo-paso-1').classList.contains('done'));
     w.__alerts = [];
+    assert.equal(w.validateStep(1), false, 'consultó pero no declaró');
+    assert.match(w.__alerts[0], /marque cuál de los cuatro resultados/);
+
+    // ── Veredictos ──
+    marcarRadio(w, 'homonimia', 'min');
+    const veredicto = w.document.getElementById('homonimia-resultado');
+    assert.ok(veredicto.classList.contains('ok'), 'clase del veredicto: ' + veredicto.className);
+    assert.match(veredicto.textContent, /NOMBRE DISPONIBLE/);
     assert.ok(w.validateStep(1), 'riesgo mínimo debía pasar: ' + w.__alerts);
-    assert.match(w.document.getElementById('homonimia-resultado').textContent, /Riesgo de homonimia mínimo/);
+    assert.equal(w.getHomonimiaData().consulta_realizada, true);
 
-    // Riesgo medio también deja pasar (solo advierte)
     marcarRadio(w, 'homonimia', 'similar');
+    assert.ok(veredicto.classList.contains('aviso'));
+    assert.match(veredicto.textContent, /ATENCIÓN/);
     assert.ok(w.validateStep(1), 'riesgo medio debía pasar');
-    marcarRadio(w, 'homonimia', 'identica_cancelada');
-    assert.ok(w.validateStep(1), 'idéntica cancelada debía pasar (riesgo medio)');
-    assert.match(w.document.getElementById('homonimia-resultado').textContent, /medio/);
 
-    // Riesgo máximo exige reconocer el riesgo, pero no bloquea
+    marcarRadio(w, 'homonimia', 'identica_cancelada');
+    assert.ok(veredicto.classList.contains('aviso'));
+    assert.match(veredicto.textContent, /Cancelada o Liquidada/);
+    assert.ok(w.validateStep(1), 'idéntica cancelada debía pasar (riesgo medio)');
+
     marcarRadio(w, 'homonimia', 'identica_activa');
+    assert.ok(veredicto.classList.contains('alto'), 'clase: ' + veredicto.className);
+    assert.match(veredicto.textContent, /NOMBRE NO DISPONIBLE/);
+    assert.match(veredicto.textContent, /devolver el trámite por homonimia/);
     assert.ok(!w.document.getElementById('homonimia-ack-wrap').classList.contains('hidden'),
         'debía pedir el reconocimiento expreso');
     w.__alerts = [];
     assert.equal(w.validateStep(1), false, 'sin reconocer el riesgo no debía pasar');
-    assert.match(w.__alerts[0], /riesgo de devolución por homonimia/);
+    assert.match(w.__alerts[0], /NO está disponible/);
     w.document.getElementById('homonimia_ack').checked = true;
     w.onHomonimiaChange();
     assert.ok(w.validateStep(1), 'con el riesgo aceptado debía pasar (solo advertencia)');
     assert.equal(w.getHomonimiaData().nivel_riesgo, 'máximo');
     assert.equal(w.getHomonimiaData().riesgo_aceptado, true);
-    console.log('  OK  niveles de riesgo: mínimo y medio pasan, máximo advierte sin bloquear');
+    console.log('  OK  veredictos: disponible / atención / no disponible');
 
-    // Cambiar la razón social invalida la declaración anterior
+    // ── Cambiar la razón social obliga a consultar de nuevo ──
     set(w, 'nombre_sas', 'OTRA COSA S.A.S.');
     w.onRazonSocialInput();
     assert.equal(w.getHomonimiaData(), null,
-        'al cambiar el nombre, la declaración anterior debe reiniciarse');
+        'al cambiar el nombre debe caducar la declaración');
     assert.ok(w.document.getElementById('homonimia-declaracion').classList.contains('hidden'));
-    console.log('  OK  la declaración se reinicia al cambiar la razón social');
+    assert.ok(!w.document.getElementById('homonimia-link').classList.contains('consultado'),
+        'el botón debía volver a su estado sin consultar');
+    w.__alerts = [];
+    assert.equal(w.validateStep(1), false, 'con nombre nuevo hay que consultar otra vez');
+    assert.match(w.__alerts[0], /debe consultar la razón social en el RUES/);
+    console.log('  OK  cambiar la razón social obliga a consultar de nuevo');
 
-    // Cambio que no altera el nombre distintivo NO reinicia
+    // Cambio que no altera el nombre distintivo NO obliga a repetir
     w.marcarConsultaRues();
     marcarRadio(w, 'homonimia', 'min');
     set(w, 'nombre_sas', 'Otra Cosa Ltda');   // mismo distintivo: OTRA COSA
     w.onRazonSocialInput();
-    assert.ok(w.getHomonimiaData(), 'mismo nombre distintivo: no debía reiniciarse');
-    console.log('  OK  no se reinicia si el nombre distintivo no cambió');
+    assert.ok(w.getHomonimiaData(), 'mismo nombre distintivo: no debía caducar');
+    assert.ok(w.validateStep(1), 'mismo distintivo: debía seguir pasando');
+    console.log('  OK  no caduca si el nombre distintivo no cambió');
+}
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Junta directiva: selector de accionistas en cada miembro');
+{
+    const w = nuevaApp();
+    llenarPaso1(w);
+    llenarAccionista(w, 1, { nombre: 'Juan Pablo García', id: '71111111', pct: 60 });
+    w.addAccionista();
+    llenarAccionista(w, 2, { nombre: 'María Camila Torres', id: '43222222', pct: 40 });
+
+    w.showStep(6);
+    marcarRadio(w, 'junta', 'si');
+    set(w, 'junta_num_principales', '3');
+    w.renderJuntaPrincipales();
+
+    // Cada tarjeta trae su selector poblado con los accionistas
+    const selects = w.document.querySelectorAll('[data-junta-select]');
+    assert.equal(selects.length, 3, 'debía haber un selector por miembro');
+    const opciones = [...selects[0].options].map(o => o.textContent);
+    assert.deepEqual(opciones,
+        ['-- Escribir manualmente --', 'Juan Pablo García', 'María Camila Torres'], opciones);
+
+    // Y cada tarjeta trae su carga de documento
+    assert.equal(w.document.querySelectorAll('#junta-principales-container input[type="file"]').length, 3);
+    assert.ok(w.document.getElementById('jd_pri_1_upload_status'), 'falta el estado de carga');
+
+    // Escoger un accionista autocompleta el miembro
+    selects[0].value = '1';
+    w.selectJuntaAccionista(selects[0], 'jd_pri_1');
+    assert.equal(w.document.querySelector('[name="jd_pri_1_nombre"]').value, 'María Camila Torres');
+    assert.equal(w.document.querySelector('[name="jd_pri_1_id_num"]').value, '43222222');
+
+    // Los suplentes también
+    w.addJuntaSuplente();
+    const selSup = w.document.querySelector('#junta-suplentes-container [data-junta-select]');
+    assert.ok(selSup, 'el suplente debía traer selector');
+    assert.equal([...selSup.options].length, 3);
+    assert.ok(w.document.querySelector('#junta-suplentes-container input[type="file"]'),
+        'el suplente debía traer carga de documento');
+    console.log('  OK  selector y carga de cédula en principales y suplentes');
+}
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Revisor fiscal: cargas de cédula y tarjeta profesional');
+{
+    const w = nuevaApp();
+    w.showStep(6);
+    marcarRadio(w, 'revisor', 'si');
+
+    // Persona natural: cédula + tarjeta profesional
+    for (const id of ['revisor_upload_status', 'revisor_tarjeta_upload_status']) {
+        assert.ok(w.document.getElementById(id), `falta ${id}`);
+    }
+    // Persona jurídica: cédula y tarjeta del contador designado
+    marcarRadio(w, 'revisor_tipo', 'juridica');
+    for (const id of ['revisor_contador_upload_status', 'revisor_contador_tarjeta_upload_status']) {
+        assert.ok(w.document.getElementById(id), `falta ${id}`);
+    }
+    // Las cargas apuntan a los endpoints correctos
+    const cargas = [...w.document.querySelectorAll('#revisor-fields input[type="file"]')]
+        .map(i => i.getAttribute('onchange'));
+    assert.equal(cargas.filter(c => c.includes('extractFromCedula')).length, 2, cargas.join(' | '));
+    assert.equal(cargas.filter(c => c.includes('extractFromTarjeta')).length, 2, cargas.join(' | '));
+    console.log('  OK  cuatro cargas: cédula y tarjeta, para natural y para el contador designado');
 }
 
 console.log('\nCuestionario verificado.\n');

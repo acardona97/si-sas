@@ -2333,3 +2333,104 @@ fieldset legend {
     display: flex; gap: 0.75rem; justify-content: flex-end;
     margin-top: 0.5rem;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   VERIFICACIÓN DE HOMONIMIA (RUES)
+   El veredicto tiene que leerse de un vistazo: el abogado decide
+   con esto si sigue o si cambia la razón social.
+   ══════════════════════════════════════════════════════════════ */
+
+.homo-paso {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.homo-paso-num {
+    flex: 0 0 auto;
+    width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    background: var(--navy, #1B2A41); color: #fff;
+    font-size: 0.8rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+}
+.homo-paso.done .homo-paso-num { background: var(--success); }
+.homo-paso-txt { flex: 1; font-size: 0.9rem; line-height: 1.5; }
+
+.homo-termino {
+    display: inline-block;
+    background: #fff; border: 1px dashed var(--gold-border, #E8D48A);
+    border-radius: var(--radius);
+    padding: 0.35rem 0.7rem; margin-top: 0.4rem;
+    font-family: var(--font-body); font-weight: 600; letter-spacing: 0.02em;
+}
+
+.homo-btn-consultar { position: relative; }
+.homo-btn-consultar.consultado {
+    border-color: var(--success); color: var(--success);
+}
+.homo-btn-consultar.consultado::before { content: "\2713\00a0"; font-weight: 700; }
+
+/* ─── Veredicto ─── */
+.homo-veredicto {
+    display: flex; gap: 1rem; align-items: flex-start;
+    border-radius: var(--radius-lg);
+    padding: 1.15rem 1.35rem;
+    margin-top: 1rem;
+    border: 2px solid;
+}
+.homo-veredicto-icono {
+    flex: 0 0 auto;
+    width: 2.75rem; height: 2.75rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1;
+}
+.homo-veredicto-cuerpo { flex: 1; }
+.homo-veredicto-titulo {
+    font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em;
+    margin-bottom: 0.3rem;
+}
+.homo-veredicto-texto {
+    font-size: 0.9rem; line-height: 1.55; color: var(--text);
+}
+.homo-veredicto-texto strong { font-weight: 650; }
+
+.homo-veredicto.ok {
+    background: rgba(30,122,74,0.07); border-color: rgba(30,122,74,0.45);
+}
+.homo-veredicto.ok .homo-veredicto-icono { background: var(--success); }
+.homo-veredicto.ok .homo-veredicto-titulo { color: var(--success); }
+
+.homo-veredicto.aviso {
+    background: rgba(184,134,11,0.09); border-color: rgba(184,134,11,0.5);
+}
+.homo-veredicto.aviso .homo-veredicto-icono { background: #B8860B; }
+.homo-veredicto.aviso .homo-veredicto-titulo { color: #8A6508; }
+
+.homo-veredicto.alto {
+    background: rgba(192,57,43,0.08); border-color: rgba(192,57,43,0.55);
+}
+.homo-veredicto.alto .homo-veredicto-icono { background: var(--danger); }
+.homo-veredicto.alto .homo-veredicto-titulo { color: var(--danger); }
+
+/* ─── Reconocimiento del riesgo máximo ─── */
+.homo-ack {
+    display: flex; align-items: flex-start; gap: 0.65rem;
+    margin-top: 0.9rem; padding: 0.85rem 1rem;
+    background: rgba(192,57,43,0.06);
+    border: 1px solid rgba(192,57,43,0.35);
+    border-radius: var(--radius);
+    cursor: pointer; font-size: 0.875rem; line-height: 1.5;
+}
+.homo-ack input { margin-top: 0.2rem; flex: 0 0 auto; }
+
+/* ─── Ejemplo visual de lo que muestra el RUES ─── */
+.homo-ejemplo {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    background: #F4F7FA; border: 1px solid #D6E2EC;
+    border-radius: var(--radius);
+    padding: 0.5rem 0.7rem; margin-top: 0.45rem;
+    color: #2B4A63;
+}
+
+@media (max-width: 640px) {
+    .homo-veredicto { flex-direction: column; gap: 0.7rem; }
+}

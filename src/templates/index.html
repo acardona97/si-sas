@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260528c">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260728a">
 </head>
 <body>
 
@@ -84,56 +84,87 @@
 
                 <!-- ═══ Verificación de homonimia en el RUES ═══ -->
                 <div class="form-group" id="homonimia-block">
-                    <label>Verificación de homonimia en el RUES *</label>
+                    <label>Verificación de homonimia en el RUES <span style="color:var(--danger)">— obligatoria</span></label>
                     <div class="info-box">
-                        La Cámara de Comercio devuelve el trámite si ya existe una sociedad
-                        registrada con nombre idéntico. La comparación se hace sobre el
-                        <strong>nombre distintivo</strong>: sin el tipo societario (S.A.S., LTDA,
-                        S.A.), sin tildes y sin puntuación.
-                        <div id="homonimia-termino" style="margin-top:.6rem"></div>
+                        <strong>La Cámara devuelve el trámite si el nombre ya existe.</strong>
+                        Hay que consultarlo en el RUES antes de seguir. La comparación es sobre el
+                        <strong>nombre distintivo</strong>: sin el tipo societario (S.A.S., LTDA, S.A.),
+                        sin tildes y sin puntuación.
+
+                        <div class="homo-paso" id="homo-paso-1" style="margin-top:.9rem">
+                            <span class="homo-paso-num">1</span>
+                            <span class="homo-paso-txt">
+                                Abra el RUES con el botón de abajo. Se busca exactamente esto:
+                                <div id="homonimia-termino"></div>
+                            </span>
+                        </div>
+                        <div class="homo-paso" id="homo-paso-2">
+                            <span class="homo-paso-num">2</span>
+                            <span class="homo-paso-txt">
+                                Mire qué dice el RUES en pantalla y vuelva a esta ventana.
+                            </span>
+                        </div>
+                        <div class="homo-paso" id="homo-paso-3">
+                            <span class="homo-paso-num">3</span>
+                            <span class="homo-paso-txt">
+                                Marque abajo el resultado que vio. De eso depende si puede seguir.
+                            </span>
+                        </div>
                     </div>
 
-                    <a id="homonimia-link" class="btn btn-outline" target="_blank" rel="noopener noreferrer"
-                       href="https://www.rues.org.co/" onclick="marcarConsultaRues()">
+                    <a id="homonimia-link" class="btn btn-outline homo-btn-consultar" target="_blank"
+                       rel="noopener noreferrer" href="https://www.rues.org.co/"
+                       onclick="marcarConsultaRues()">
                         Consultar en el RUES &#8599;
                     </a>
-                    <span class="hint" style="display:block;margin-top:.5rem">
-                        Abre el RUES en una pestaña nueva con la búsqueda ya cargada. Revise los
-                        resultados y vuelva aquí a declarar qué encontró.
+                    <span class="hint" id="homonimia-estado-consulta" style="display:block;margin-top:.5rem">
+                        Se abre en una pestaña nueva con la búsqueda ya escrita. No tiene que digitar nada.
                     </span>
 
-                    <div id="homonimia-declaracion" class="hidden" style="margin-top:1.25rem">
-                        <label>¿Qué arrojó la consulta?</label>
+                    <div id="homonimia-declaracion" class="hidden" style="margin-top:1.5rem">
+                        <label>¿Qué le mostró el RUES?</label>
                         <div class="radio-cards">
                             <label class="radio-card">
                                 <input type="radio" name="homonimia" value="min" onchange="onHomonimiaChange()">
-                                <span class="radio-title">No se encontraron resultados</span>
-                                <span class="radio-desc">El nombre está disponible. Riesgo mínimo.</span>
+                                <span class="radio-title">Ningún resultado</span>
+                                <span class="radio-desc">
+                                    El RUES dice textualmente:
+                                    <span class="homo-ejemplo">No se encontraron resultados</span>
+                                </span>
                             </label>
                             <label class="radio-card">
                                 <input type="radio" name="homonimia" value="similar" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Nombres parecidos, ninguno idéntico</span>
-                                <span class="radio-desc">Coinciden palabras o artículos, pero no el nombre completo. Riesgo medio.</span>
+                                <span class="radio-title">Salieron sociedades, pero ninguna se llama igual</span>
+                                <span class="radio-desc">
+                                    Aparecen nombres que comparten alguna palabra, sin coincidir por completo.
+                                    Ej.: busqué <em>ANDINA</em> y salió <em>ANDINA DEL CARIBE</em>.
+                                </span>
                             </label>
                             <label class="radio-card">
                                 <input type="radio" name="homonimia" value="identica_cancelada" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Idéntica, pero cancelada o liquidada</span>
-                                <span class="radio-desc">Existe el nombre exacto pero la sociedad no está activa. Riesgo medio.</span>
+                                <span class="radio-title">Salió una con el nombre exacto, pero está cancelada o liquidada</span>
+                                <span class="radio-desc">
+                                    El nombre coincide, y en la ficha el <strong>Estado</strong> dice
+                                    Cancelada o Liquidada — no Activa.
+                                </span>
                             </label>
                             <label class="radio-card">
                                 <input type="radio" name="homonimia" value="identica_activa" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Idéntica y activa</span>
-                                <span class="radio-desc">Existe una sociedad activa con el mismo nombre distintivo. Riesgo máximo.</span>
+                                <span class="radio-title">Salió una con el nombre exacto y está ACTIVA</span>
+                                <span class="radio-desc">
+                                    El RUES muestra la coincidencia y el <strong>Estado</strong> dice Activa.
+                                    Ej.: <span class="homo-ejemplo">Cerca de 1 resultados Exacto</span>
+                                </span>
                             </label>
                         </div>
 
                         <div id="homonimia-resultado" class="hidden"></div>
 
-                        <label id="homonimia-ack-wrap" class="hidden"
-                               style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;margin-top:.75rem">
-                            <input type="checkbox" id="homonimia_ack" onchange="onHomonimiaChange()" style="margin-top:.25rem">
-                            <span>Entiendo que la Cámara de Comercio puede devolver el trámite por
-                                  homonimia y aun así deseo continuar con esta razón social.</span>
+                        <label id="homonimia-ack-wrap" class="homo-ack hidden">
+                            <input type="checkbox" id="homonimia_ack" onchange="onHomonimiaChange()">
+                            <span><strong>Entiendo que la Cámara de Comercio muy probablemente
+                                  devolverá el trámite</strong> por homonimia, y aun así quiero
+                                  continuar con esta razón social bajo mi responsabilidad.</span>
                         </label>
                     </div>
                 </div>
@@ -586,6 +617,30 @@
 
                     <!-- Revisor persona natural -->
                     <div id="revisor_natural_fields">
+                        <div class="upload-doc-section">
+                            <div class="upload-doc-info">
+                                <strong>📷 Autocompletar desde cédula o pasaporte</strong>
+                                <span class="upload-hint">Suba el documento del revisor fiscal y se completan nombre, tipo y número.</span>
+                            </div>
+                            <label class="upload-doc-btn">
+                                Cargar documento
+                                <input type="file" accept="image/*,application/pdf"
+                                       onchange="extractFromCedula(this, 'revisor', 0)">
+                            </label>
+                            <span class="upload-status" id="revisor_upload_status"></span>
+                        </div>
+                        <div class="upload-doc-section">
+                            <div class="upload-doc-info">
+                                <strong>🎓 Autocompletar desde la tarjeta profesional</strong>
+                                <span class="upload-hint">Suba la tarjeta profesional de contador y se extrae su número.</span>
+                            </div>
+                            <label class="upload-doc-btn">
+                                Cargar tarjeta profesional
+                                <input type="file" accept="image/*,application/pdf"
+                                       onchange="extractFromTarjeta(this, 'revisor')">
+                            </label>
+                            <span class="upload-status" id="revisor_tarjeta_upload_status"></span>
+                        </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="revisor_nombre">Nombre completo *</label>
@@ -628,6 +683,30 @@
                             Una persona jurídica designada como revisor fiscal debe, a su vez, designar
                             a la persona natural con tarjeta profesional de contador que ejercerá el cargo
                             (artículo 215 del Código de Comercio).
+                        </div>
+                        <div class="upload-doc-section">
+                            <div class="upload-doc-info">
+                                <strong>📷 Autocompletar desde la cédula del contador</strong>
+                                <span class="upload-hint">Suba el documento de identidad del contador designado.</span>
+                            </div>
+                            <label class="upload-doc-btn">
+                                Cargar documento
+                                <input type="file" accept="image/*,application/pdf"
+                                       onchange="extractFromCedula(this, 'revisor_contador', 0)">
+                            </label>
+                            <span class="upload-status" id="revisor_contador_upload_status"></span>
+                        </div>
+                        <div class="upload-doc-section">
+                            <div class="upload-doc-info">
+                                <strong>🎓 Autocompletar desde la tarjeta profesional</strong>
+                                <span class="upload-hint">Suba la tarjeta profesional del contador designado y se extrae su número.</span>
+                            </div>
+                            <label class="upload-doc-btn">
+                                Cargar tarjeta profesional
+                                <input type="file" accept="image/*,application/pdf"
+                                       onchange="extractFromTarjeta(this, 'revisor_contador')">
+                            </label>
+                            <span class="upload-status" id="revisor_contador_tarjeta_upload_status"></span>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -863,6 +942,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260728b"></script>
+<script src="/static/js/app.js?v=20260728c"></script>
 </body>
 </html>

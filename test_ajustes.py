@@ -20,6 +20,7 @@ from pypdf import PdfReader
 
 from processors.estatutos import (
     generar_estatutos, _valor_nominal_frase, _texto_revisor,
+    _segmentos_a_texto,
 )
 from processors.pdf_filler import generar_empresa_familiar, generar_carta_no_control
 
@@ -36,6 +37,28 @@ def texto_doc(path):
         for row in t.rows:
             partes.extend(c.text for c in row.cells)
     return "\n".join(partes)
+
+
+def runs_en_negrilla(path):
+    """Todos los fragmentos que quedaron en negrilla en el documento."""
+    from docx.oxml.ns import qn
+    doc = Document(path)
+    negritas = set()
+
+    def _recorrer(parrafos):
+        for p in parrafos:
+            for r in p.runs:
+                rPr = r._element.find(qn("w:rPr"))
+                if rPr is not None and rPr.find(qn("w:b")) is not None:
+                    if r.text.strip():
+                        negritas.add(r.text.strip())
+
+    _recorrer(doc.paragraphs)
+    for t in doc.tables:
+        for row in t.rows:
+            for c in row.cells:
+                _recorrer(c.paragraphs)
+    return negritas
 
 
 # ════════════════════════════════════════════════════════════════
@@ -56,27 +79,35 @@ def test_valor_nominal_frase():
 # 2. Revisor fiscal — persona natural y jurídica
 # ════════════════════════════════════════════════════════════════
 def test_texto_revisor():
-    pn = _texto_revisor({
+    segs_pn = _texto_revisor({
         "tipo": "natural", "nombre": "Ana Restrepo Gómez",
         "tipo_doc": "CC", "id_num": "43.123.456",
         "tarjeta_profesional": "98765-T",
     })
+    pn = _segmentos_a_texto(segs_pn)
     assert "ANA RESTREPO GÓMEZ" in pn
     assert "identificada con C.C. No. 43.123.456" in pn
     assert "portadora de la tarjeta profesional No. 98765-T" in pn
+    # Solo el nombre propio va en negrilla
+    negritas_pn = [t for t, b in segs_pn if b]
+    assert negritas_pn == ["ANA RESTREPO GÓMEZ"], negritas_pn
 
-    pj = _texto_revisor({
+    segs_pj = _texto_revisor({
         "tipo": "juridica", "nombre": "Auditores Asociados S.A.S.",
         "id_num": "900.111.222-3",
         "contador_nombre": "Carlos Mesa Uribe", "contador_tipo_doc": "CC",
         "contador_id_num": "71.999.888",
         "contador_tarjeta_profesional": "12345-T",
     })
+    pj = _segmentos_a_texto(segs_pj)
     assert "NIT 900.111.222-3" in pj
     assert "CARLOS MESA URIBE" in pj.upper()
     assert "identificado con C.C. No. 71.999.888" in pj
     assert "portador de la tarjeta profesional No. 12345-T" in pj
     assert "artículo 215 del Código de Comercio" in pj
+    # La firma y el contador designado van resaltados; el resto no
+    negritas_pj = [t for t, b in segs_pj if b]
+    assert negritas_pj == ["AUDITORES ASOCIADOS S.A.S.", "CARLOS MESA URIBE"], negritas_pj
     print("OK  revisor fiscal: persona natural y jurídica")
 
 
@@ -163,7 +194,27 @@ def test_estatutos():
     assert total.cells[0].text.strip() == "TOTAL"
     assert total.cells[3].text.strip() == "20.000", total.cells[3].text
     assert total.cells[4].text.strip() == "$2.000.000"
+
+    # ── Todos los nombres propios en negrilla ──
+    negritas = runs_en_negrilla(out)
+    esperados = [
+        "JUAN PABLO GARCÍA",        # accionista, RL, miembro de junta y firmante
+        "MARÍA CAMILA TORRES",      # accionista y miembro de junta
+        "PETER SCHMIDT",            # miembro de junta
+        "LAURA GIL PEÑA",           # suplente de junta
+        "AUDITORES ASOCIADOS S.A.S.",   # revisor fiscal persona jurídica
+        "CARLOS MESA URIBE",        # contador designado
+    ]
+    for nombre in esperados:
+        assert nombre in negritas, (
+            f"{nombre!r} debía quedar en negrilla. En negrilla hay: "
+            f"{sorted(negritas)[:25]}"
+        )
+    # El texto corriente que rodea al nombre NO debe heredar la negrilla
+    assert not any(n.startswith("identificado con") or n.startswith(", identificad")
+                   for n in negritas), sorted(negritas)
     print(f"OK  estatutos con nominal $100 + junta + revisor PJ -> {out}")
+    print(f"OK  nombres propios en negrilla ({len(esperados)} verificados)")
 
 
 def test_estatutos_defaults():

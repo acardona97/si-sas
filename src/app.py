@@ -832,6 +832,26 @@ Reglas estrictas:
 4. Responde SOLO con el JSON, sin marcadores de código, sin texto adicional."""
 
 
+EXTRACT_TARJETA_SYSTEM = """Eres un extractor especializado de Tarjetas Profesionales de Contador Público expedidas por la Junta Central de Contadores de Colombia.
+
+Tu tarea es leer la imagen/PDF del documento y extraer los datos del contador.
+
+Devuelve EXCLUSIVAMENTE un objeto JSON válido con estos campos (usa cadena vacía "" si no puedes leer alguno con certeza):
+
+{
+  "nombre_completo": "string (Nombres + Apellidos en orden natural: 'CARLOS MESA URIBE')",
+  "numero_tarjeta": "string (número de la tarjeta profesional tal como aparece, incluyendo el sufijo con guion si lo tiene, ej: '12345-T')",
+  "numero_documento": "string (cédula del contador, solo dígitos, sin puntos)"
+}
+
+Reglas estrictas:
+1. NO inventes datos. Si un campo no se puede leer con certeza, usa "".
+2. El número de tarjeta profesional colombiano suele terminar en '-T'. Consérvalo si aparece.
+3. El número de documento debe ser solo dígitos (quita puntos, espacios, guiones).
+4. Para el nombre, usa el orden natural y mantén tildes.
+5. Responde SOLO con el JSON, sin marcadores de código, sin texto adicional."""
+
+
 def _extract_with_claude(file_data, mime_type, system_prompt, user_msg):
     """Envía el documento a Claude Vision y parsea el JSON de respuesta.
 
@@ -915,6 +935,36 @@ def extract_cedula():
         return jsonify({"error": f"Respuesta no es JSON válido: {e}"}), 500
     except Exception as e:
         app.logger.error(f"Error en extract_cedula: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/extract/tarjeta", methods=["POST"])
+@login_required
+def extract_tarjeta():
+    """Extrae los datos de una tarjeta profesional de contador público."""
+    if "file" not in request.files:
+        return jsonify({"error": "No se recibió archivo"}), 400
+
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "Archivo vacío"}), 400
+
+    file_data = file.read()
+    if len(file_data) > 10 * 1024 * 1024:
+        return jsonify({"error": "Archivo muy grande (máx 10MB)"}), 400
+
+    mime_type = file.mimetype or "image/jpeg"
+
+    try:
+        result = _extract_with_claude(
+            file_data, mime_type, EXTRACT_TARJETA_SYSTEM,
+            "Extrae los datos de esta tarjeta profesional de contador. Responde solo con el JSON.",
+        )
+        return jsonify(result)
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Respuesta no es JSON válido: {e}"}), 500
+    except Exception as e:
+        app.logger.error(f"Error en extract_tarjeta: {e}")
         return jsonify({"error": str(e)}), 500
 
 
