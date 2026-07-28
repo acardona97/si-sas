@@ -36,6 +36,8 @@ function showStep(n) {
 
     currentStep = n;
     if (n === 3) populateRLSelects();
+    if (n === 5) syncCapital();
+    if (n === 6) { refreshControlBlock(); renderNucleoFamiliar(); }
     if (n === 7) buildSummary();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -87,6 +89,58 @@ function validateStep(step) {
         if (Math.abs(totalPct - 100) > 0.01) {
             alert('Los porcentajes deben sumar 100%. Actual: ' + totalPct.toFixed(2) + '%');
             return false;
+        }
+    }
+    if (step === 5) {
+        const autorizado = _parseCop(document.getElementById('capital_autorizado').value);
+        const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
+        const nominal = _parseCop(document.getElementById('valor_nominal').value);
+        if (nominal < 1) { alert('El valor nominal por acción debe ser al menos $1'); return false; }
+        if (suscrito < nominal) { alert('El capital suscrito no puede ser inferior al valor nominal de una acción'); return false; }
+        if (autorizado < suscrito) {
+            alert('El capital autorizado no puede ser inferior al capital suscrito.');
+            return false;
+        }
+        if (autorizado % nominal !== 0 || suscrito % nominal !== 0) {
+            alert('El capital autorizado y el suscrito deben ser múltiplos exactos del valor nominal por acción ($'
+                  + nominal.toLocaleString('es-CO') + ').');
+            return false;
+        }
+    }
+    if (step === 6) {
+        if (document.querySelector('input[name="junta"]:checked')?.value === 'si') {
+            const n = parseInt(document.getElementById('junta_num_principales').value);
+            const principales = getJuntaPersonas('junta-principales-container');
+            if (principales.length < n) {
+                alert(`Complete el nombre y la identificación de los ${n} miembros principales de la junta directiva.`);
+                return false;
+            }
+        }
+        if (document.querySelector('input[name="revisor"]:checked')?.value === 'si') {
+            if (!getRevisorData()) {
+                alert('Complete todos los datos del revisor fiscal (incluida la tarjeta profesional del contador).');
+                return false;
+            }
+        }
+        if (document.querySelector('input[name="empresa_familiar"]:checked')?.value === 'si') {
+            const nucleo = getNucleoFamiliarData();
+            if (nucleo.length === 0) {
+                alert('Marque al menos un accionista que integre el núcleo familiar.');
+                return false;
+            }
+            if (nucleo.length > 5) {
+                alert('El formato oficial admite máximo 5 integrantes del núcleo familiar.');
+                return false;
+            }
+            if (nucleo.some(m => !m.parentesco)) {
+                alert('Indique el parentesco de cada integrante del núcleo familiar.');
+                return false;
+            }
+            if (_pctNucleoFamiliar() <= 50) {
+                alert('Los integrantes del núcleo familiar deben representar más de la mitad del capital. Actual: '
+                      + _pctNucleoFamiliar().toFixed(2) + '%');
+                return false;
+            }
         }
     }
     return true;
@@ -550,6 +604,32 @@ function _parseCop(str) {
 function syncCapital() {
     // Al cambiar capital suscrito solo recalcula el total; el pagado lo maneja el usuario.
     recalcCapitalPagadoTotal();
+    updateAccionesResumen();
+}
+
+function updateAccionesResumen() {
+    const box = document.getElementById('acciones_resumen');
+    if (!box) return;
+    const autorizado = _parseCop(document.getElementById('capital_autorizado').value);
+    const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
+    const nominal = _parseCop(document.getElementById('valor_nominal').value);
+
+    if (nominal < 1) {
+        box.innerHTML = '<strong>El valor nominal por acción debe ser al menos $1.</strong>';
+        return;
+    }
+    if (autorizado < suscrito) {
+        box.innerHTML = '<strong>El capital autorizado no puede ser inferior al capital suscrito.</strong>';
+        return;
+    }
+    if (autorizado % nominal !== 0 || suscrito % nominal !== 0) {
+        box.innerHTML = '<strong>El capital autorizado y el suscrito deben ser múltiplos exactos de $'
+            + nominal.toLocaleString('es-CO') + '.</strong>';
+        return;
+    }
+    box.innerHTML = (autorizado / nominal).toLocaleString('es-CO') + ' acciones autorizadas &middot; '
+        + (suscrito / nominal).toLocaleString('es-CO') + ' acciones suscritas &middot; valor nominal $'
+        + nominal.toLocaleString('es-CO') + ' c/u';
 }
 
 function syncPorcentaje(input, n) {
@@ -617,6 +697,282 @@ function toggleJunta(val) {
     document.querySelectorAll('input[name="junta"]').forEach(r => {
         r.closest('.radio-card').classList.toggle('selected', r.checked);
     });
+    const fields = document.getElementById('junta-fields');
+    fields.classList.toggle('hidden', !val);
+    if (val && document.getElementById('junta-principales-container').children.length === 0) {
+        renderJuntaPrincipales();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// JUNTA DIRECTIVA
+// ═══════════════════════════════════════════════════════════
+
+const TIPO_DOC_OPTIONS = `
+    <option value="CC">Cédula de ciudadanía</option>
+    <option value="CE">Cédula de extranjería</option>
+    <option value="Pasaporte">Pasaporte</option>
+    <option value="NIT">NIT</option>`;
+
+function _juntaPersonaCard(prefix, idx, titulo, removable) {
+    return `
+        <div class="accionista-card" data-junta-row>
+            <div class="card-header">
+                <h4>${titulo}</h4>
+                ${removable ? `<button type="button" class="btn btn-danger" onclick="this.closest('[data-junta-row]').remove()">Eliminar</button>` : ''}
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    <input type="text" name="${prefix}${idx}_nombre" placeholder="Nombres y apellidos">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de identificación</label>
+                    <select name="${prefix}${idx}_tipo_doc">${TIPO_DOC_OPTIONS}</select>
+                </div>
+                <div class="form-group">
+                    <label>Número de identificación</label>
+                    <input type="text" name="${prefix}${idx}_id_num" placeholder="No. de identificación">
+                </div>
+            </div>
+        </div>`;
+}
+
+function renderJuntaPrincipales() {
+    const n = parseInt(document.getElementById('junta_num_principales').value) || 1;
+    const container = document.getElementById('junta-principales-container');
+    // Se conservan los valores ya digitados al cambiar el número de miembros.
+    const previos = getJuntaPersonas('junta-principales-container', true);
+    let html = '';
+    for (let i = 1; i <= n; i++) {
+        html += _juntaPersonaCard('jd_pri_', i, `Miembro principal ${i}`, false);
+    }
+    container.innerHTML = html;
+    previos.slice(0, n).forEach((p, i) => {
+        const idx = i + 1;
+        _setByName(`jd_pri_${idx}_nombre`, p.nombre);
+        _setByName(`jd_pri_${idx}_tipo_doc`, p.tipo_doc);
+        _setByName(`jd_pri_${idx}_id_num`, p.id_num);
+    });
+}
+
+let juntaSuplenteCount = 0;
+function addJuntaSuplente() {
+    juntaSuplenteCount++;
+    const container = document.getElementById('junta-suplentes-container');
+    const div = document.createElement('div');
+    div.innerHTML = _juntaPersonaCard('jd_sup_', juntaSuplenteCount,
+        `Miembro suplente ${container.children.length + 1}`, true);
+    container.appendChild(div.firstElementChild);
+}
+
+function _setByName(name, value) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (el && value) el.value = value;
+}
+
+function getJuntaPersonas(containerId, incluirVacios) {
+    const personas = [];
+    document.querySelectorAll(`#${containerId} [data-junta-row]`).forEach(row => {
+        const nombre = (row.querySelector('[name$="_nombre"]')?.value || '').trim();
+        const idNum = (row.querySelector('[name$="_id_num"]')?.value || '').trim();
+        const tipoDoc = row.querySelector('[name$="_tipo_doc"]')?.value || 'CC';
+        if (incluirVacios || (nombre && idNum)) {
+            personas.push({ nombre: nombre, tipo_doc: tipoDoc, id_num: idNum });
+        }
+    });
+    return personas;
+}
+
+function getJuntaData() {
+    if (document.querySelector('input[name="junta"]:checked')?.value !== 'si') return null;
+    const principales = getJuntaPersonas('junta-principales-container');
+    if (principales.length === 0) return null;
+    return {
+        principales: principales,
+        suplentes: getJuntaPersonas('junta-suplentes-container'),
+    };
+}
+
+// ═══════════════════════════════════════════════════════════
+// REVISOR FISCAL
+// ═══════════════════════════════════════════════════════════
+
+function toggleRevisor(val) {
+    document.querySelectorAll('input[name="revisor"]').forEach(r => {
+        r.closest('.radio-card').classList.toggle('selected', r.checked);
+    });
+    document.getElementById('revisor-fields').classList.toggle('hidden', !val);
+}
+
+function toggleRevisorTipo(tipo) {
+    document.getElementById('revisor_natural_fields').classList.toggle('hidden', tipo !== 'natural');
+    document.getElementById('revisor_juridica_fields').classList.toggle('hidden', tipo !== 'juridica');
+}
+
+function getRevisorData() {
+    if (document.querySelector('input[name="revisor"]:checked')?.value !== 'si') return null;
+    const tipo = document.querySelector('input[name="revisor_tipo"]:checked')?.value || 'natural';
+    const v = id => (document.getElementById(id)?.value || '').trim();
+
+    if (tipo === 'juridica') {
+        const d = {
+            tipo: 'juridica',
+            nombre: v('revisor_pj_nombre'),
+            id_num: v('revisor_pj_nit'),
+            contador_nombre: v('revisor_contador_nombre'),
+            contador_tipo_doc: document.getElementById('revisor_contador_tipo_doc')?.value || 'CC',
+            contador_id_num: v('revisor_contador_id_num'),
+            contador_tarjeta_profesional: v('revisor_contador_tarjeta'),
+        };
+        // Una persona jurídica sin contador designado no puede ejercer el cargo.
+        if (!d.nombre || !d.id_num || !d.contador_nombre || !d.contador_id_num
+            || !d.contador_tarjeta_profesional) return null;
+        return d;
+    }
+
+    const d = {
+        tipo: 'natural',
+        nombre: v('revisor_nombre'),
+        tipo_doc: document.getElementById('revisor_tipo_doc')?.value || 'CC',
+        id_num: v('revisor_id_num'),
+        tarjeta_profesional: v('revisor_tarjeta'),
+    };
+    if (!d.nombre || !d.id_num || !d.tarjeta_profesional) return null;
+    return d;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SITUACIÓN DE CONTROL
+// ═══════════════════════════════════════════════════════════
+
+function getControlante() {
+    const accionistas = getAccionistasData();
+    if (accionistas.length === 0) return null;
+    if (accionistas.length === 1) return accionistas[0];
+    return accionistas.find(a => a.porcentaje > 50) || null;
+}
+
+function refreshControlBlock() {
+    const block = document.getElementById('control-block');
+    const ctx = document.getElementById('control-context');
+    const controlante = getControlante();
+    if (!controlante) {
+        block.classList.add('hidden');
+        return;
+    }
+    const accionistas = getAccionistasData();
+    ctx.innerHTML = accionistas.length === 1
+        ? `La sociedad se constituye con un único accionista (<strong>${controlante.nombre}</strong>),
+           lo que configura una situación de control.`
+        : `<strong>${controlante.nombre}</strong> es titular del ${controlante.porcentaje}% del capital,
+           lo que configura una situación de control.`;
+    block.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EMPRESA FAMILIAR (Ley 2495 de 2025)
+// ═══════════════════════════════════════════════════════════
+
+function toggleEmpresaFamiliar(val) {
+    document.querySelectorAll('input[name="empresa_familiar"]').forEach(r => {
+        r.closest('.radio-card').classList.toggle('selected', r.checked);
+    });
+    document.getElementById('familiar-fields').classList.toggle('hidden', !val);
+    if (val) renderNucleoFamiliar();
+}
+
+function _accionesDeAccionista(acc) {
+    const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
+    const nominal = Math.max(1, _parseCop(document.getElementById('valor_nominal').value));
+    return Math.floor(Math.round(suscrito * (acc.porcentaje || 0) / 100) / nominal);
+}
+
+function renderNucleoFamiliar() {
+    const container = document.getElementById('familiar-container');
+    if (!container) return;
+    const accionistas = getAccionistasData();
+    // Se conservan las marcas y parentescos ya digitados al re-renderizar.
+    const previos = {};
+    container.querySelectorAll('[data-fam-row]').forEach(row => {
+        previos[row.dataset.famRow] = {
+            checked: row.querySelector('[data-fam-check]').checked,
+            parentesco: row.querySelector('[data-fam-parentesco]').value,
+        };
+    });
+
+    if (accionistas.length === 0) {
+        container.innerHTML = '<p class="hint">Agregue accionistas en el Paso 2 para poder conformar el núcleo familiar.</p>';
+        return;
+    }
+
+    container.innerHTML = accionistas.map((acc, i) => {
+        const prev = previos[i] || {};
+        const id = acc.tipo === 'juridica' ? `NIT ${acc.id_num}` : `${acc.id_tipo} ${acc.id_num}`;
+        return `
+        <div class="accionista-card" data-fam-row="${i}">
+            <div class="form-row" style="align-items:center">
+                <div class="form-group" style="flex:0 0 auto">
+                    <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+                        <input type="checkbox" data-fam-check ${prev.checked ? 'checked' : ''}
+                               onchange="updateFamiliarBar()">
+                        <span>Integra el núcleo familiar</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Accionista</label>
+                    <input type="text" value="${acc.nombre} — ${id} (${acc.porcentaje}%)" disabled class="input-disabled">
+                </div>
+                <div class="form-group">
+                    <label>Parentesco</label>
+                    <input type="text" data-fam-parentesco value="${prev.parentesco || ''}"
+                           placeholder="Ej: Padre, Hija, Cónyuge, Hermano">
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+    updateFamiliarBar();
+}
+
+function _pctNucleoFamiliar() {
+    const accionistas = getAccionistasData();
+    let pct = 0;
+    document.querySelectorAll('#familiar-container [data-fam-row]').forEach(row => {
+        if (row.querySelector('[data-fam-check]').checked) {
+            const acc = accionistas[parseInt(row.dataset.famRow)];
+            if (acc) pct += acc.porcentaje || 0;
+        }
+    });
+    return pct;
+}
+
+function updateFamiliarBar() {
+    const pct = _pctNucleoFamiliar();
+    const fill = document.getElementById('familiar-bar-fill');
+    const label = document.getElementById('familiar-bar-label');
+    if (!fill || !label) return;
+    fill.style.width = Math.min(100, pct) + '%';
+    // Debe superar la mitad del capital para acceder a los beneficios de la ley.
+    fill.style.background = pct > 50 ? 'var(--success, #2e7d32)' : 'var(--danger, #c62828)';
+    label.textContent = pct.toFixed(2).replace(/\.00$/, '') + '% del capital';
+}
+
+function getNucleoFamiliarData() {
+    const accionistas = getAccionistasData();
+    const miembros = [];
+    document.querySelectorAll('#familiar-container [data-fam-row]').forEach(row => {
+        if (!row.querySelector('[data-fam-check]').checked) return;
+        const acc = accionistas[parseInt(row.dataset.famRow)];
+        if (!acc) return;
+        miembros.push({
+            tipo_doc: acc.tipo === 'juridica' ? 'NIT' : (acc.id_tipo || 'C.C.'),
+            id_num: acc.id_num,
+            nombre: acc.nombre,
+            acciones: _accionesDeAccionista(acc).toLocaleString('es-CO'),
+            parentesco: (row.querySelector('[data-fam-parentesco]').value || '').trim(),
+        });
+    });
+    return miembros;
 }
 
 // Radio-card click handler — update selected styling for all radio groups
@@ -691,6 +1047,9 @@ function collectAllData() {
         nombre_sas: document.getElementById('nombre_sas').value.trim().toUpperCase(),
         municipio: document.getElementById('municipio').value.trim(),
         departamento: document.getElementById('departamento').value.trim(),
+        // Una cámara cubre varios municipios (ej. Aburrá Sur), por eso no se
+        // deriva del municipio: el usuario la elige.
+        camara_ciudad: document.getElementById('camara_ciudad').value.trim(),
         direccion: document.getElementById('direccion').value.trim(),
         barrio: document.getElementById('barrio').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -720,6 +1079,8 @@ function collectAllData() {
         ciiu_code_sec: document.getElementById('ciiu_code_sec').value,
         ciiu_description_sec: document.getElementById('ciiu_description_sec').value,
         objeto_social: document.getElementById('objeto_social').value.trim(),
+        capital_autorizado: document.getElementById('capital_autorizado').value,
+        valor_nominal: document.getElementById('valor_nominal').value,
         capital_suscrito: document.getElementById('capital_suscrito').value,
         // capital_pagado total se calcula en el backend a partir de los
         // pagados individuales de cada accionista. Se envía para display/fallback.
@@ -728,8 +1089,15 @@ function collectAllData() {
         ingresos_mensuales: document.getElementById('ingresos_mensuales').value,
         tiene_junta: document.querySelector('input[name="junta"]:checked')?.value === 'si',
         tiene_revisor: document.querySelector('input[name="revisor"]:checked')?.value === 'si',
+        junta_directiva: getJuntaData(),
+        revisor_fiscal: getRevisorData(),
         es_emprendimiento_social: document.querySelector('input[name="emprendimiento"]:checked')?.value === 'si',
         grupo_etnico: document.getElementById('grupo_etnico')?.value || '',
+        // Solo se pregunta cuando existe controlante; si no, se deja en true
+        // para no alterar el comportamiento histórico.
+        declara_control: document.querySelector('input[name="declara_control"]:checked')?.value !== 'no',
+        es_empresa_familiar: document.querySelector('input[name="empresa_familiar"]:checked')?.value === 'si',
+        nucleo_familiar: getNucleoFamiliarData(),
         apoderado: apoderado,
     };
 }
@@ -745,6 +1113,7 @@ function buildSummary() {
     h += f('Razón Social', d.nombre_sas);
     h += f('Dirección', d.direccion);
     h += f('Municipio', `${d.municipio}, ${d.departamento}`);
+    h += f('Cámara de Comercio', d.camara_ciudad ? `Cámara de Comercio de ${d.camara_ciudad}` : '—');
     h += f('Barrio', d.barrio);
     h += f('Correo', d.email);
     h += f('Teléfono(s)', [d.telefono1, d.telefono2, d.telefono3].filter(Boolean).join(', '));
@@ -769,10 +1138,37 @@ function buildSummary() {
     h += f('Objeto Social', d.objeto_social ? d.objeto_social.substring(0, 150) + '...' : '—');
 
     h += '<h3>Capital y Régimen</h3>';
-    h += f('Capital Autorizado', '$1.000.000.000 (fijo)');
-    h += f('Capital Suscrito', '$' + d.capital_suscrito);
+    const _nominal = Math.max(1, _parseCop(d.valor_nominal));
+    h += f('Capital Autorizado', '$' + d.capital_autorizado
+           + ' (' + (_parseCop(d.capital_autorizado) / _nominal).toLocaleString('es-CO') + ' acciones)');
+    h += f('Capital Suscrito', '$' + d.capital_suscrito
+           + ' (' + (_parseCop(d.capital_suscrito) / _nominal).toLocaleString('es-CO') + ' acciones)');
     h += f('Capital Pagado', '$' + d.capital_pagado);
+    h += f('Valor nominal por acción', '$' + _nominal.toLocaleString('es-CO'));
     h += f('Régimen', d.regimen === 'simple' ? 'Simple (SIMPLE)' : 'Ordinario');
+
+    if (d.junta_directiva) {
+        h += '<h3>Junta Directiva</h3>';
+        d.junta_directiva.principales.forEach((m, i) => {
+            h += f(`Principal ${i + 1}`, `${m.nombre} (${m.tipo_doc} ${m.id_num})`);
+        });
+        d.junta_directiva.suplentes.forEach((m, i) => {
+            h += f(`Suplente ${i + 1}`, `${m.nombre} (${m.tipo_doc} ${m.id_num})`);
+        });
+    }
+
+    if (d.revisor_fiscal) {
+        h += '<h3>Revisor Fiscal</h3>';
+        if (d.revisor_fiscal.tipo === 'juridica') {
+            h += f('Firma', `${d.revisor_fiscal.nombre} (NIT ${d.revisor_fiscal.id_num})`);
+            h += f('Contador designado',
+                   `${d.revisor_fiscal.contador_nombre} (${d.revisor_fiscal.contador_tipo_doc} `
+                   + `${d.revisor_fiscal.contador_id_num}) — T.P. ${d.revisor_fiscal.contador_tarjeta_profesional}`);
+        } else {
+            h += f('Nombre', `${d.revisor_fiscal.nombre} (${d.revisor_fiscal.tipo_doc} ${d.revisor_fiscal.id_num})`);
+            h += f('Tarjeta profesional', d.revisor_fiscal.tarjeta_profesional);
+        }
+    }
 
     h += '<h3>Documentos a Generar</h3><div class="docs-list">';
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Estatutos</div>';
@@ -782,11 +1178,17 @@ function buildSummary() {
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Manifestación Emprendimientos Sociales</div>';
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Formato Grupo Étnico</div>';
 
-    // Situación de control: >50% estricto
-    const hasControl = d.accionistas.some(a => a.porcentaje > 50);
-    h += hasControl
-        ? '<div class="doc-item"><span class="doc-check">&#10003;</span> Formato Situación de Control</div>'
-        : '<div class="doc-item doc-conditional">— Situación de Control (no aplica)</div>';
+    // Situación de control: accionista único o titular de más del 50%.
+    // Si existe controlante pero el usuario decide no declararla, en su lugar
+    // se emite la carta explicativa a la Cámara de Comercio.
+    const hasControl = !!getControlante();
+    if (!hasControl) {
+        h += '<div class="doc-item doc-conditional">— Situación de Control (no aplica)</div>';
+    } else if (d.declara_control) {
+        h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Formato Situación de Control</div>';
+    } else {
+        h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Carta de no declaración de situación de control</div>';
+    }
 
     // Ley 1780: naturales ≤35 con >50% del CAPITAL
     const today = new Date();
@@ -803,7 +1205,19 @@ function buildSummary() {
         ? '<div class="doc-item"><span class="doc-check">&#10003;</span> Formato Ley 1780</div>'
         : '<div class="doc-item doc-conditional">— Ley 1780 (no aplica)</div>';
 
+    // Empresa familiar (Ley 2495 de 2025)
+    h += (d.es_empresa_familiar && d.nucleo_familiar.length)
+        ? '<div class="doc-item"><span class="doc-check">&#10003;</span> Formato Empresa Familiar (Ley 2495 de 2025)</div>'
+        : '<div class="doc-item doc-conditional">— Empresa Familiar (no aplica)</div>';
+
     h += '</div>';
+
+    if (d.es_empresa_familiar && d.nucleo_familiar.length) {
+        h += '<h3>Núcleo Familiar</h3>';
+        d.nucleo_familiar.forEach(m => {
+            h += f(m.parentesco || '—', `${m.nombre} (${m.tipo_doc} ${m.id_num}) — ${m.acciones} acciones`);
+        });
+    }
 
     // Apoderado
     if (d.apoderado) {

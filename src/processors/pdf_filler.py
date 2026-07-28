@@ -13,6 +13,7 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import NameObject, BooleanObject, TextStringObject
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
 # ════════════════════════════════════════════════════════════════
@@ -156,6 +157,21 @@ def _fill_acroform(template_path, output_path, field_values, checkbox_fields=Non
         writer.write(f)
 
 
+_TIPO_DOC_LABEL = {
+    "CC": "C.C.", "C.C.": "C.C.",
+    "CE": "C.E.", "C.E.": "C.E.",
+    "TI": "T.I.", "T.I.": "T.I.",
+    "PASAPORTE": "Pasaporte", "NIT": "NIT",
+}
+
+
+def _label_tipo_doc(tipo):
+    """Normaliza el tipo de documento que envía el formulario ('CC' -> 'C.C.')."""
+    if not tipo:
+        return "C.C."
+    return _TIPO_DOC_LABEL.get(str(tipo).strip().upper(), str(tipo).strip())
+
+
 def _fmt_money(n):
     """Formatea número como moneda colombiana: 1000000 -> '1.000.000'."""
     if not n:
@@ -168,7 +184,9 @@ def _overlay_text(template_path, output_path, text_items, strip_fields=False):
     Coloca texto en coordenadas específicas sobre un PDF existente.
 
     Args:
-        text_items: lista de dicts con keys: page, x, y, text, size (opcional), font (opcional)
+        text_items: lista de dicts con keys: page, x, y, text, size (opcional),
+                    font (opcional), max_width (opcional — reduce el tamaño de
+                    fuente hasta que el texto quepa en ese ancho en puntos)
         strip_fields: si True, elimina las anotaciones AcroForm de las páginas
                       que reciben overlay. Necesario cuando los campos tienen
                       fondos blancos que cubren el texto superpuesto.
@@ -196,8 +214,14 @@ def _overlay_text(template_path, output_path, text_items, strip_fields=False):
             for item in by_page[i]:
                 font = item.get("font", "Helvetica")
                 size = item.get("size", 9)
+                text = str(item["text"])
+                # Encoger la fuente hasta que el texto quepa en la casilla
+                max_width = item.get("max_width")
+                if max_width:
+                    while size > 5 and stringWidth(text, font, size) > max_width:
+                        size -= 0.5
                 c.setFont(font, size)
-                c.drawString(item["x"], item["y"], str(item["text"]))
+                c.drawString(item["x"], item["y"], text)
             c.save()
             buf.seek(0)
             overlay_reader = PdfReader(buf)
@@ -680,8 +704,11 @@ def generar_rues(data, template_path, output_path):
     checkboxes["Casilla 1_34"] = True
     # Proceso de innovación: NO
     checkboxes["Casilla 1_36"] = True
-    # Empresa familiar: NO
-    checkboxes["Casilla 1_38"] = True
+    # Empresa familiar (Ley 2495 de 2025): SÍ = 1_37, NO = 1_38
+    if data.get("es_empresa_familiar"):
+        checkboxes["Casilla 1_37"] = True
+    else:
+        checkboxes["Casilla 1_38"] = True
     # Porcentaje empleados temporales: 0
     fields[f"{_cn} 3"] = "0"
 
@@ -765,3 +792,300 @@ def generar_otras_entidades(data, template_path, output_path):
         overlay_items.append({"page": 0, "x": 321, "y": 197, "text": f"{tipo_doc_rl} {cc_rl}", "size": 8})
 
     _overlay_text(template_path, output_path, overlay_items, strip_fields=True)
+
+
+# ════════════════════════════════════════════════════════════════
+# 8. EMPRESA FAMILIAR — Ley 2495 de 2025 (overlay por coordenadas)
+# ════════════════════════════════════════════════════════════════
+
+MESES_ES = [
+    "", "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+]
+
+# El formato de la Cámara no trae AcroForm: se estampa el texto sobre las
+# líneas del original. Coordenadas tomadas de los rectángulos y de la matriz
+# de texto del PDF (mediabox 612 x 792, origen abajo-izquierda).
+_EF_BASE_X = 90.0          # margen izquierdo del cuerpo del texto
+_EF_HEADER_Y = 709.6       # línea "Municipio: ___ Día: ___ Mes: ___ Año: ___"
+_EF_HEADER_TEXT = ("Municipio: ______________________    Día: ______"
+                   "    Mes: ______    Año: ______")
+_EF_HEADER_FONT_SIZE = 11
+
+# Filas de la tabla del núcleo familiar: (y_base, alto) de cada celda
+_EF_ROW_Y = [397.51, 384.31, 371.21, 358.01, 344.93]
+_EF_ROW_BASELINE_OFFSET = 2.3
+
+# Columnas: (x del borde izquierdo, ancho de la celda)
+_EF_COLS = [
+    (90.50, 82.20),    # Tipo de identificación
+    (173.18, 82.10),   # Número de identificación
+    (255.89, 95.90),   # Nombre socio/accionista
+    (352.27, 95.88),   # Número de acciones/cuotas o participaciones
+    (448.63, 72.98),   # Parentesco
+]
+_EF_CELL_PADDING = 5.2
+
+
+def _ef_header_x(prefijo):
+    """x donde arranca un blanco de la línea de encabezado del formato.
+
+    Arial y Helvetica son métricamente equivalentes en el rango latino, así
+    que el ancho calculado con Helvetica coincide con el del PDF original.
+    """
+    return _EF_BASE_X + stringWidth(prefijo, "Helvetica", _EF_HEADER_FONT_SIZE)
+
+
+def generar_empresa_familiar(data, template_path, output_path):
+    """
+    Llena el formato de cumplimiento de la Ley 2495 de 2025 (empresa familiar).
+
+    data:
+      nombre_sas, ciudad, fecha, camara_ciudad
+      nombre_rl, tipo_doc_rl, cc_rl
+      nucleo_familiar: lista de dicts con tipo_doc, id_num, nombre,
+                       acciones y parentesco (máximo 5 filas en el formato)
+    """
+    fecha = data["fecha"]
+    if isinstance(fecha, str):
+        from datetime import datetime
+        fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
+
+    municipio = _strip_tildes(data.get("ciudad", "Medellin"))
+    camara = _strip_tildes(data.get("camara_ciudad") or data.get("ciudad", "Medellin"))
+    nombre_sas = _strip_tildes(data["nombre_sas"])
+    nombre_rl = _strip_tildes(data.get("nombre_rl", ""))
+    tipo_doc_rl = _label_tipo_doc(data.get("tipo_doc_rl"))
+    cc_rl = data.get("cc_rl", "")
+
+    items = []
+
+    # ─── Encabezado: Municipio / Día / Mes / Año ───
+    pre_mun = "Municipio: "
+    pre_dia = "Municipio: ______________________    Día: "
+    pre_mes = pre_dia + "______    Mes: "
+    pre_anio = pre_mes + "______    Año: "
+
+    items.append({"page": 0, "x": _ef_header_x(pre_mun) + 2, "y": _EF_HEADER_Y,
+                  "text": municipio, "size": 10, "max_width": 118})
+    items.append({"page": 0, "x": _ef_header_x(pre_dia) + 2, "y": _EF_HEADER_Y,
+                  "text": str(fecha.day).zfill(2), "size": 10})
+    items.append({"page": 0, "x": _ef_header_x(pre_mes) + 2, "y": _EF_HEADER_Y,
+                  "text": str(fecha.month).zfill(2), "size": 10})
+    items.append({"page": 0, "x": _ef_header_x(pre_anio) + 2, "y": _EF_HEADER_Y,
+                  "text": str(fecha.year), "size": 10})
+
+    # ─── "CAMARA DE COMERCIO DE ______." (blanco arranca en x=242.4) ───
+    # El blanco son 25 guiones bajos (~153 pt) antes del punto final.
+    items.append({"page": 0, "x": 245, "y": 626.7, "text": camara.upper(),
+                  "size": 10, "max_width": 148})
+
+    # ─── "Yo ______, en mi calidad de representante legal" ───
+    items.append({"page": 0, "x": _ef_header_x("Yo ") + 2, "y": 602.4,
+                  "text": nombre_rl.upper(), "size": 10, "max_width": 245})
+
+    # ─── "______, declaro que la sociedad que se constituye..." ───
+    items.append({"page": 0, "x": _EF_BASE_X + 2, "y": 573.2,
+                  "text": nombre_sas, "size": 10, "max_width": 245})
+
+    # ─── Tabla del núcleo familiar (máximo 5 filas en el formato) ───
+    for row_idx, miembro in enumerate(data.get("nucleo_familiar", [])[:5]):
+        y = _EF_ROW_Y[row_idx] + _EF_ROW_BASELINE_OFFSET
+        valores = [
+            miembro.get("tipo_doc", "C.C."),
+            miembro.get("id_num", ""),
+            miembro.get("nombre", ""),
+            miembro.get("acciones", ""),
+            miembro.get("parentesco", ""),
+        ]
+        for col_idx, valor in enumerate(valores):
+            if valor in (None, ""):
+                continue
+            col_x, col_w = _EF_COLS[col_idx]
+            items.append({
+                "page": 0,
+                "x": col_x + _EF_CELL_PADDING,
+                "y": y,
+                "text": _strip_tildes(str(valor)),
+                "size": 8,
+                "max_width": col_w - (2 * _EF_CELL_PADDING),
+            })
+
+    # ─── Cuadro de firma (columna derecha arranca en x=260.45) ───
+    items.append({"page": 0, "x": 264, "y": 308.2, "text": nombre_rl.upper(),
+                  "size": 9, "max_width": 253})
+    # La fila "Firma" queda en blanco para la rúbrica manuscrita.
+    items.append({"page": 0, "x": 264, "y": 281.9,
+                  "text": f"{tipo_doc_rl} {cc_rl}".strip(),
+                  "size": 9, "max_width": 253})
+
+    _overlay_text(template_path, output_path, items)
+
+
+# ════════════════════════════════════════════════════════════════
+# 9. CARTA DE NO DECLARACIÓN DE SITUACIÓN DE CONTROL (generada)
+# ════════════════════════════════════════════════════════════════
+
+def _wrap_text(texto, font, size, max_width):
+    """Parte un párrafo en líneas que quepan en `max_width` puntos."""
+    palabras = texto.split()
+    lineas, actual = [], ""
+    for palabra in palabras:
+        tentativa = f"{actual} {palabra}".strip()
+        if stringWidth(tentativa, font, size) <= max_width:
+            actual = tentativa
+        else:
+            if actual:
+                lineas.append(actual)
+            actual = palabra
+    if actual:
+        lineas.append(actual)
+    return lineas
+
+
+def generar_carta_no_control(data, output_path):
+    """
+    Genera la carta dirigida a la Cámara de Comercio explicando por qué no se
+    declara situación de control pese a existir un accionista mayoritario.
+
+    No parte de una plantilla: la Cámara no publica un formato para este
+    escrito, así que se compone desde cero.
+
+    data: nombre_sas, fecha, ciudad, camara_ciudad, nombre_rl, tipo_doc_rl,
+          cc_rl, controlante_nombre, controlante_porcentaje, es_unico_accionista
+    """
+    fecha = data["fecha"]
+    if isinstance(fecha, str):
+        from datetime import datetime
+        fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
+
+    nombre_sas = data["nombre_sas"]
+    ciudad = data.get("ciudad", "Medellín")
+    camara = (data.get("camara_ciudad") or ciudad).upper()
+    nombre_rl = data.get("nombre_rl", "").upper()
+    tipo_doc_rl = _label_tipo_doc(data.get("tipo_doc_rl"))
+    cc_rl = data.get("cc_rl", "")
+    controlante = data.get("controlante_nombre", "").upper()
+    pct = data.get("controlante_porcentaje")
+    unico = data.get("es_unico_accionista", False)
+
+    SERIF, SERIF_B = "Times-Roman", "Times-Bold"
+    PW, PH = letter
+    LEFT, RIGHT = 72, 72
+    WIDTH = PW - LEFT - RIGHT
+    SIZE, LEADING = 11, 16
+
+    c = canvas.Canvas(output_path, pagesize=letter)
+    y = PH - 90
+
+    def parrafo(texto, font=SERIF, size=SIZE, space_after=12, leading=LEADING):
+        nonlocal y
+        for linea in _wrap_text(texto, font, size, WIDTH):
+            c.setFont(font, size)
+            c.drawString(LEFT, y, linea)
+            y -= leading
+        y -= space_after
+
+    # ── Encabezado ──
+    c.setFont(SERIF, SIZE)
+    c.drawString(LEFT, y, f"{ciudad}, {fecha.day} de {MESES_ES[fecha.month]} de {fecha.year}")
+    y -= LEADING * 2
+
+    c.setFont(SERIF, SIZE)
+    c.drawString(LEFT, y, "Señores")
+    y -= LEADING
+    c.setFont(SERIF_B, SIZE)
+    c.drawString(LEFT, y, f"CÁMARA DE COMERCIO DE {camara}")
+    y -= LEADING
+    c.setFont(SERIF, SIZE)
+    c.drawString(LEFT, y, "E.  S.  D.")
+    y -= LEADING * 2
+
+    c.setFont(SERIF_B, SIZE)
+    c.drawString(LEFT, y, "Asunto: Constitución de "
+                          f"{nombre_sas} — no configuración de situación de control")
+    y -= LEADING * 2
+
+    # ── Cuerpo ──
+    parrafo("Respetados señores:")
+
+    if unico:
+        antecedente = (
+            f"En mi calidad de representante legal principal de {nombre_sas}, "
+            f"sociedad que por medio del presente trámite se constituye, me permito "
+            f"manifestar que dicha sociedad se constituye con un (1) único accionista, "
+            f"{controlante}."
+        )
+    else:
+        pct_txt = f", titular del {pct}% de las acciones suscritas" if pct else ""
+        antecedente = (
+            f"En mi calidad de representante legal principal de {nombre_sas}, "
+            f"sociedad que por medio del presente trámite se constituye, me permito "
+            f"manifestar que en el acto constitutivo figura un accionista mayoritario, "
+            f"{controlante}{pct_txt}."
+        )
+    parrafo(antecedente)
+
+    parrafo(
+        "No obstante lo anterior, y de manera respetuosa, manifiesto que NO se declara "
+        "situación de control ni grupo empresarial respecto de la sociedad que se "
+        "constituye, por las razones que expongo a continuación."
+    )
+
+    parrafo(
+        "La composición accionaria que consta en el documento de constitución obedece "
+        "exclusivamente a una necesidad operativa de simplificación del trámite de "
+        "registro, y no refleja la estructura de propiedad que la sociedad tendrá de "
+        "manera estable. Los constituyentes tienen prevista la vinculación de nuevos "
+        "accionistas y la consiguiente redistribución del capital suscrito de forma "
+        "inmediatamente posterior a la inscripción del acto constitutivo en el registro "
+        "mercantil, de suerte que la participación mayoritaria aquí registrada tiene "
+        "carácter transitorio."
+    )
+
+    parrafo(
+        "En consecuencia, a la fecha no se configuran los presupuestos de subordinación "
+        "previstos en el artículo 261 del Código de Comercio, toda vez que no existe la "
+        "vocación de permanencia en el control que la norma supone para efectos de la "
+        "inscripción de que trata el artículo 30 de la Ley 222 de 1995."
+    )
+
+    parrafo(
+        "Manifiesto expresamente que conozco el deber legal de inscribir la situación de "
+        "control dentro de los treinta (30) días hábiles siguientes a su configuración, y "
+        "asumo el compromiso de presentar oportunamente el documento privado "
+        "correspondiente ante esta Cámara de Comercio si, una vez surtida la "
+        "reorganización de la composición accionaria, dicha situación llegare a "
+        "configurarse."
+    )
+
+    parrafo(
+        "La presente declaración se rinde bajo la gravedad del juramento. Cualquier "
+        "falsedad en que se incurra podrá ser sancionada de acuerdo con la ley "
+        "(artículo 38 del Código de Comercio y normas concordantes y complementarias)."
+    )
+
+    parrafo("Cordialmente,", space_after=0)
+
+    # ── Firma ──
+    y -= LEADING * 4
+    c.line(LEFT, y, LEFT + 220, y)
+    y -= LEADING
+    c.setFont(SERIF_B, SIZE)
+    c.drawString(LEFT, y, nombre_rl)
+    y -= LEADING
+    c.setFont(SERIF, SIZE)
+    c.drawString(LEFT, y, f"{tipo_doc_rl} No. {cc_rl}")
+    y -= LEADING
+    c.drawString(LEFT, y, f"Representante legal principal de {nombre_sas}")
+
+    # ── Pie ──
+    c.setFont(SERIF, 8)
+    c.setFillGray(0.45)
+    c.drawCentredString(
+        PW / 2, 48,
+        "Documento generado con Sí S.A.S. — Quarta Acompañamiento Legal S.A.S.",
+    )
+
+    c.showPage()
+    c.save()

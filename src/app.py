@@ -36,6 +36,8 @@ from processors.pdf_filler import (
     generar_grupo_etnico,
     generar_rues,
     generar_otras_entidades,
+    generar_empresa_familiar,
+    generar_carta_no_control,
 )
 
 app = Flask(__name__)
@@ -135,6 +137,14 @@ def determinar_ley_1780(accionistas):
 
 
 def determinar_situacion_control(accionistas):
+    """Devuelve el accionista controlante, o None si no hay ninguno.
+
+    Es controlante quien supere el 50% del capital y, en todo caso, el
+    accionista único (que controla por definición aunque el porcentaje
+    venga mal diligenciado).
+    """
+    if len(accionistas) == 1:
+        return accionistas[0]
     for acc in accionistas:
         if float(acc.get("porcentaje", 0)) > 50:
             return acc
@@ -401,6 +411,27 @@ def generate():
         regimen = data.get("regimen", "ordinario")
         capital_suscrito = parse_money(data.get("capital_suscrito", 1_000_000))
 
+        # ─── Capital autorizado y valor nominal por acción ───
+        # Ambos son editables desde el cuestionario; si vienen vacíos o
+        # inválidos se cae a los valores por defecto históricos.
+        capital_autorizado = parse_money(
+            data.get("capital_autorizado") or CAPITAL_AUTORIZADO
+        ) or CAPITAL_AUTORIZADO
+        valor_nominal = parse_money(
+            data.get("valor_nominal") or VALOR_NOMINAL_ACCION
+        ) or VALOR_NOMINAL_ACCION
+        if capital_autorizado < capital_suscrito:
+            return jsonify({
+                "error": "El capital autorizado no puede ser inferior al capital suscrito."
+            }), 400
+        if capital_autorizado % valor_nominal or capital_suscrito % valor_nominal:
+            return jsonify({
+                "error": (
+                    f"El capital autorizado y el suscrito deben ser múltiplos exactos "
+                    f"del valor nominal por acción (${valor_nominal:,}).".replace(",", ".")
+                )
+            }), 400
+
         # ─── Capital pagado: dos modos posibles ───
         # MODO A: el usuario llenó el campo individual de al menos un accionista.
         #         → suma los individuales (vacío = 100% del suscrito de ese acc).
@@ -446,6 +477,24 @@ def generate():
         es_emprendimiento = data.get("es_emprendimiento_social", False)
         tiene_junta = data.get("tiene_junta", False)
         tiene_revisor = data.get("tiene_revisor", False)
+
+        # ─── Junta directiva y revisor fiscal (nombramientos) ───
+        junta_directiva = data.get("junta_directiva") if tiene_junta else None
+        if junta_directiva and not junta_directiva.get("principales"):
+            junta_directiva = None
+        revisor_fiscal = data.get("revisor_fiscal") if tiene_revisor else None
+        if revisor_fiscal and not revisor_fiscal.get("nombre"):
+            revisor_fiscal = None
+
+        # ─── Empresa familiar (Ley 2495 de 2025) ───
+        es_empresa_familiar = data.get("es_empresa_familiar", False)
+        nucleo_familiar = data.get("nucleo_familiar", []) if es_empresa_familiar else []
+        camara_ciudad = data.get("camara_ciudad") or municipio
+
+        # ─── Declaración de situación de control ───
+        # Por defecto se declara (comportamiento histórico); el cuestionario
+        # solo ofrece la opción cuando existe un accionista controlante.
+        declara_control = data.get("declara_control", True)
 
         # Apoderado (opcional)
         apoderado_raw = data.get("apoderado", None)
@@ -496,13 +545,16 @@ def generate():
                 "departamento": departamento,
                 "accionistas": accionistas,
                 "objeto_social": objeto_social_final,
-                "capital_autorizado": CAPITAL_AUTORIZADO,
+                "capital_autorizado": capital_autorizado,
                 "capital_suscrito": capital_suscrito,
                 "capital_pagado": capital_pagado,
+                "valor_nominal": valor_nominal,
                 "rl_principal": rl_principal,
                 "rl_suplente": rl_suplente,
                 "tiene_junta": tiene_junta,
                 "tiene_revisor": tiene_revisor,
+                "junta_directiva": junta_directiva,
+                "revisor_fiscal": revisor_fiscal,
                 "apoderado": apoderado,
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Estatutos.docx")
@@ -527,6 +579,7 @@ def generate():
                 "accionistas": accionistas,
                 "zona": zona, "tipo_local": tipo_local,
                 "tenencia": tenencia, "aplica_1780": aplica_1780,
+                "es_empresa_familiar": es_empresa_familiar,
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Formulario_RUES.pdf")
             generar_rues(rues_data, os.path.join(PLANTILLAS_DIR, "rues_form.pdf"), out)
@@ -587,7 +640,10 @@ def generate():
             errors.append(f"Grupo Étnico: {e}")
 
         # ─── 7. SITUACIÓN DE CONTROL (condicional) ───
-        if controlante:
+        # Si hay controlante, el usuario decide en el cuestionario si la
+        # declara. Cuando opta por no declararla se emite en su lugar la carta
+        # explicativa dirigida a la Cámara de Comercio.
+        if controlante and declara_control:
             try:
                 ctrl_data = {
                     "nombre_sas": nombre_sas,
@@ -605,6 +661,25 @@ def generate():
                 generated.append(out)
             except Exception as e:
                 errors.append(f"Situación Control: {e}")
+        elif controlante and not declara_control:
+            try:
+                carta_data = {
+                    "nombre_sas": nombre_sas,
+                    "fecha": fecha,
+                    "ciudad": municipio,
+                    "camara_ciudad": camara_ciudad,
+                    "nombre_rl": rl_principal.get("nombre", ""),
+                    "tipo_doc_rl": rl_principal.get("tipo_doc", "C.C."),
+                    "cc_rl": rl_principal.get("cc", ""),
+                    "controlante_nombre": controlante.get("nombre", ""),
+                    "controlante_porcentaje": controlante.get("porcentaje"),
+                    "es_unico_accionista": len(accionistas) == 1,
+                }
+                out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Carta_No_Situacion_Control.pdf")
+                generar_carta_no_control(carta_data, out)
+                generated.append(out)
+            except Exception as e:
+                errors.append(f"Carta No Situación Control: {e}")
 
         # ─── 8. LEY 1780 (condicional) ───
         if aplica_1780:
@@ -633,6 +708,25 @@ def generate():
                 generated.append(out)
             except Exception as e:
                 errors.append(f"Ley 1780: {e}")
+
+        # ─── 9. EMPRESA FAMILIAR — Ley 2495 de 2025 (condicional) ───
+        if es_empresa_familiar and nucleo_familiar:
+            try:
+                fam_data = {
+                    "nombre_sas": nombre_sas,
+                    "fecha": fecha,
+                    "ciudad": municipio,
+                    "camara_ciudad": camara_ciudad,
+                    "nombre_rl": rl_principal.get("nombre", ""),
+                    "tipo_doc_rl": rl_principal.get("tipo_doc", "C.C."),
+                    "cc_rl": rl_principal.get("cc", ""),
+                    "nucleo_familiar": nucleo_familiar,
+                }
+                out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Formato_Empresa_Familiar.pdf")
+                generar_empresa_familiar(fam_data, os.path.join(PLANTILLAS_DIR, "empresa_familiar_form.pdf"), out)
+                generated.append(out)
+            except Exception as e:
+                errors.append(f"Empresa Familiar: {e}")
 
         # ─── ZIP ───
         zip_name = f"{fecha_pfx}_{nombre_limpio}.zip"

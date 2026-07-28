@@ -103,6 +103,43 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label for="camara_ciudad">Cámara de Comercio donde se radica *</label>
+                    <input type="text" id="camara_ciudad" value="Medellín para Antioquia"
+                           list="camaras_comercio" autocomplete="off">
+                    <datalist id="camaras_comercio">
+                        <option value="Medellín para Antioquia"></option>
+                        <option value="Aburrá Sur"></option>
+                        <option value="Oriente Antioqueño"></option>
+                        <option value="Urabá"></option>
+                        <option value="Magdalena Medio y Nordeste Antioqueño"></option>
+                        <option value="Bogotá"></option>
+                        <option value="Cali"></option>
+                        <option value="Barranquilla"></option>
+                        <option value="Cartagena"></option>
+                        <option value="Bucaramanga"></option>
+                        <option value="Pereira"></option>
+                        <option value="Manizales"></option>
+                        <option value="Armenia y del Quindío"></option>
+                        <option value="Santa Marta"></option>
+                        <option value="Cúcuta"></option>
+                        <option value="Ibagué"></option>
+                        <option value="Villavicencio"></option>
+                        <option value="Neiva"></option>
+                        <option value="Pasto"></option>
+                        <option value="Popayán"></option>
+                        <option value="Montería"></option>
+                        <option value="Sincelejo"></option>
+                        <option value="Valledupar"></option>
+                        <option value="Tunja"></option>
+                    </datalist>
+                    <span class="hint">
+                        Se escribe después de "Cámara de Comercio de". Una misma cámara cubre varios
+                        municipios: Envigado, Itagüí, Sabaneta, La Estrella y Caldas se radican en
+                        <strong>Aburrá Sur</strong>, no en Medellín. Puede escribir una distinta a las sugeridas.
+                    </span>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="telefono1">Teléfono principal *</label>
@@ -350,17 +387,28 @@
             <section class="step hidden" id="step5">
                 <h2>Capital y Régimen Tributario</h2>
 
-                <div class="form-group">
-                    <label>Capital Autorizado</label>
-                    <input type="text" value="$1.000.000.000" disabled class="input-disabled">
-                    <span class="hint">Fijo por ley. Mil millones de pesos, dividido en 1.000.000.000 acciones de $1 c/u.</span>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capital_autorizado">Capital Autorizado *</label>
+                        <input type="text" id="capital_autorizado" value="1.000.000.000" oninput="formatMoney(this); syncCapital()">
+                        <span class="hint">Por defecto mil millones de pesos. Puede modificarlo; nunca puede ser inferior al capital suscrito.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor_nominal">Valor nominal por acción *</label>
+                        <input type="text" id="valor_nominal" value="1" oninput="formatMoney(this); syncCapital()">
+                        <span class="hint">Por defecto $1. El número de acciones resulta de dividir cada capital entre este valor.</span>
+                    </div>
+                </div>
+
+                <div class="info-box" id="acciones_resumen">
+                    1.000.000.000 acciones autorizadas · 1.000.000 acciones suscritas
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="capital_suscrito">Capital Suscrito *</label>
                         <input type="text" id="capital_suscrito" value="1.000.000" oninput="formatMoney(this); syncCapital()">
-                        <span class="hint">Mínimo $1. Cada acción vale $1.</span>
+                        <span class="hint">Debe ser múltiplo exacto del valor nominal por acción.</span>
                     </div>
                     <div class="form-group">
                         <label for="capital_pagado">Capital Pagado (total)</label>
@@ -418,21 +466,187 @@
                     </div>
                 </div>
 
+                <fieldset id="junta-fields" class="hidden">
+                    <legend>Miembros de la Junta Directiva</legend>
+                    <div class="info-box">
+                        Los nombramientos quedarán en el Artículo Primero Transitorio de los estatutos,
+                        en un cuadro de principales y suplentes.
+                    </div>
+
+                    <div class="form-group">
+                        <label for="junta_num_principales">Número de miembros principales</label>
+                        <select id="junta_num_principales" onchange="renderJuntaPrincipales()">
+                            <option value="1">1 miembro</option>
+                            <option value="3" selected>3 miembros</option>
+                            <option value="5">5 miembros</option>
+                            <option value="7">7 miembros</option>
+                            <option value="9">9 miembros</option>
+                        </select>
+                        <span class="hint">Debe ser un número impar para evitar empates en las decisiones.</span>
+                    </div>
+
+                    <div id="junta-principales-container"></div>
+
+                    <p class="hint" style="margin-top:1rem"><strong>Miembros suplentes nominales (opcional):</strong></p>
+                    <div id="junta-suplentes-container"></div>
+                    <button type="button" class="btn btn-outline" onclick="addJuntaSuplente()">+ Agregar suplente</button>
+                </fieldset>
+
                 <div class="form-group">
                     <label>¿Revisor Fiscal?</label>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="revisor" value="no" checked>
+                            <input type="radio" name="revisor" value="no" checked onchange="toggleRevisor(false)">
                             <span class="radio-title">No</span>
                             <span class="radio-desc">Sin revisor fiscal (lo más común)</span>
                         </label>
                         <label class="radio-card">
-                            <input type="radio" name="revisor" value="si">
+                            <input type="radio" name="revisor" value="si" onchange="toggleRevisor(true)">
                             <span class="radio-title">Sí</span>
                             <span class="radio-desc">Con revisor fiscal</span>
                         </label>
                     </div>
                 </div>
+
+                <fieldset id="revisor-fields" class="hidden">
+                    <legend>Datos del Revisor Fiscal</legend>
+
+                    <div class="form-group">
+                        <label>Tipo de revisor fiscal</label>
+                        <div class="radio-cards">
+                            <label class="radio-card selected">
+                                <input type="radio" name="revisor_tipo" value="natural" checked onchange="toggleRevisorTipo('natural')">
+                                <span class="radio-title">Persona natural</span>
+                                <span class="radio-desc">Contador público con tarjeta profesional</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="revisor_tipo" value="juridica" onchange="toggleRevisorTipo('juridica')">
+                                <span class="radio-title">Persona jurídica</span>
+                                <span class="radio-desc">Firma de revisoría fiscal con NIT</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Revisor persona natural -->
+                    <div id="revisor_natural_fields">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_nombre">Nombre completo *</label>
+                                <input type="text" id="revisor_nombre" placeholder="Ej: Ana Restrepo Gómez">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_tipo_doc">Tipo de identificación</label>
+                                <select id="revisor_tipo_doc">
+                                    <option value="CC">C.C.</option>
+                                    <option value="CE">C.E.</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_id_num">Número de identificación *</label>
+                                <input type="text" id="revisor_id_num" placeholder="No. de identificación">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_tarjeta">Tarjeta profesional de contador *</label>
+                                <input type="text" id="revisor_tarjeta" placeholder="Ej: 98765-T">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Revisor persona jurídica -->
+                    <div id="revisor_juridica_fields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_pj_nombre">Razón social *</label>
+                                <input type="text" id="revisor_pj_nombre" placeholder="Ej: AUDITORES ASOCIADOS S.A.S.">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_pj_nit">NIT *</label>
+                                <input type="text" id="revisor_pj_nit" placeholder="Ej: 900.111.222-3">
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            Una persona jurídica designada como revisor fiscal debe, a su vez, designar
+                            a la persona natural con tarjeta profesional de contador que ejercerá el cargo
+                            (artículo 215 del Código de Comercio).
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_contador_nombre">Contador público designado *</label>
+                                <input type="text" id="revisor_contador_nombre" placeholder="Nombre completo del contador">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_contador_tipo_doc">Tipo de identificación</label>
+                                <select id="revisor_contador_tipo_doc">
+                                    <option value="CC">C.C.</option>
+                                    <option value="CE">C.E.</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_contador_id_num">Número de identificación *</label>
+                                <input type="text" id="revisor_contador_id_num" placeholder="No. de identificación">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_contador_tarjeta">Tarjeta profesional de contador *</label>
+                                <input type="text" id="revisor_contador_tarjeta" placeholder="Ej: 12345-T">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- ═══ Situación de control (solo si hay accionista controlante) ═══ -->
+                <div class="form-group hidden" id="control-block">
+                    <label>¿Desea declarar la situación de control?</label>
+                    <div class="info-box" id="control-context"></div>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="declara_control" value="si" checked>
+                            <span class="radio-title">Sí, declararla</span>
+                            <span class="radio-desc">Se genera el Formato de Situación de Control (Decreto 667 de 2018)</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="declara_control" value="no">
+                            <span class="radio-title">No declararla</span>
+                            <span class="radio-desc">Se genera en su lugar una carta a la Cámara de Comercio explicando que la composición accionaria cambiará inmediatamente después del trámite</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ═══ Empresa familiar (Ley 2495 de 2025) ═══ -->
+                <div class="form-group">
+                    <label>¿Es una empresa familiar? (Ley 2495 de 2025)</label>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="empresa_familiar" value="no" checked onchange="toggleEmpresaFamiliar(false)">
+                            <span class="radio-title">No</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="empresa_familiar" value="si" onchange="toggleEmpresaFamiliar(true)">
+                            <span class="radio-title">Sí</span>
+                            <span class="radio-desc">Se genera el formato de cumplimiento de la Ley 2495 de 2025</span>
+                        </label>
+                    </div>
+                </div>
+
+                <fieldset id="familiar-fields" class="hidden">
+                    <legend>Núcleo familiar</legend>
+                    <div class="info-box">
+                        Marque los accionistas que hacen parte de un mismo núcleo familiar e indique
+                        el parentesco de cada uno. En conjunto deben representar más de la mitad del
+                        capital social.
+                    </div>
+                    <div id="familiar-container"></div>
+                    <div class="pct-bar">
+                        <div class="pct-bar-fill" id="familiar-bar-fill"></div>
+                        <span class="pct-bar-label" id="familiar-bar-label">0%</span>
+                    </div>
+                    <span class="hint">El formato oficial admite hasta cinco (5) integrantes.</span>
+                </fieldset>
 
                 <div class="form-group">
                     <label>¿Es emprendimiento social? (Ley 2234 de 2022)</label>
@@ -592,6 +806,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260528a"></script>
+<script src="/static/js/app.js?v=20260728a"></script>
 </body>
 </html>

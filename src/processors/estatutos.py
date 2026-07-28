@@ -140,6 +140,27 @@ def _acciones_letras_cifras(n):
     return f"{letras} ({cifras})"
 
 
+def _valor_nominal_frase(valor, sufijo="moneda legal colombiana"):
+    """Frase del valor nominal por acción, concordada en número.
+
+    Ej: 1    -> 'un peso moneda legal colombiana (COP $1)'
+        100  -> 'cien pesos moneda legal colombiana (COP $100)'
+
+    El sufijo varía entre artículos de la plantilla ('moneda legal
+    colombiana' en los artículos 4 y 5, 'colombiano/s' en el 6), por lo que
+    se recibe como parámetro.
+    """
+    letras = _numero_a_letras(valor)
+    cifras = f"{valor:,}".replace(",", ".")
+    if valor == 1:
+        sustantivo = "peso"
+        suf = sufijo.replace("colombianos", "colombiano")
+    else:
+        sustantivo = "pesos"
+        suf = sufijo.replace("colombiano", "colombianos")
+    return f"{letras} {sustantivo} {suf} (COP ${cifras})"
+
+
 def _fecha_literal(f):
     """Ej: date(2026,5,20) -> 'veinte (20) días del mes de mayo de 2026'."""
     dia_letras = _numero_a_letras(f.day)
@@ -467,7 +488,8 @@ def _set_cell_text(cell, text):
         run.font.name = "Cambria"
 
 
-def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado):
+def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
+                            valor_nominal=1):
     """
     Llena la tabla de accionistas/acciones/capital en los estatutos.
 
@@ -478,10 +500,17 @@ def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado):
 
     Se clonan las filas existentes para preservar bordes, fuentes y alineación.
     """
-    if not doc.tables:
+    # Se localiza por el encabezado y no por índice: el Artículo Primero
+    # Transitorio puede insertar antes la tabla de la junta directiva, con lo
+    # que la de accionistas deja de ser doc.tables[0].
+    table = None
+    for t in doc.tables:
+        if t.rows and "accionista" in t.rows[0].cells[0].text.strip().lower():
+            table = t
+            break
+    if table is None:
         return
 
-    table = doc.tables[0]
     tbl = table._tbl
 
     # Guardar templates (deep copy del XML) antes de eliminar
@@ -497,10 +526,12 @@ def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado):
     total_suscrito = 0
     total_pagado = 0
 
+    vn = max(1, int(valor_nominal or 1))
+
     for acc in accionistas:
         pct = float(acc.get("porcentaje", 0))
-        acciones = int(capital_suscrito * pct / 100)
-        suscrito_acc = acciones  # valor nominal = $1 por acción
+        suscrito_acc = int(capital_suscrito * pct / 100)
+        acciones = suscrito_acc // vn
         # Capital pagado individual: puede ser distinto por accionista
         # (algunos pagan todo, otros parte). Si no se especificó, se
         # calcula proporcional al global.
@@ -1140,6 +1171,278 @@ def _fill_apoderado_section(all_paras, apoderado, rl_principal, nombre_sas, gene
             _replace_para_full_text(p_elem, cierre_text, strip_emphasis=True)
 
 
+# ════════════════════════════════════════════════════════════════
+# NOMBRAMIENTOS DE ÓRGANOS (Artículo Primero Transitorio)
+# ════════════════════════════════════════════════════════════════
+
+TIPO_DOC_LABEL = {
+    "CC": "C.C.", "C.C.": "C.C.",
+    "CE": "C.E.", "C.E.": "C.E.",
+    "TI": "T.I.", "T.I.": "T.I.",
+    "PASAPORTE": "Pasaporte", "PASSPORT": "Pasaporte",
+    "NIT": "NIT",
+}
+
+
+def _label_tipo_doc(tipo):
+    """Normaliza el tipo de documento a su etiqueta de estatutos."""
+    if not tipo:
+        return "C.C."
+    return TIPO_DOC_LABEL.get(str(tipo).strip().upper(), str(tipo).strip())
+
+
+def _persona_nombramiento(p):
+    """'JUAN PÉREZ, identificado con C.C. No. 71.234.567'."""
+    nombre = (p.get("nombre") or "").strip().upper()
+    tipo = _label_tipo_doc(p.get("tipo_doc"))
+    num = (p.get("id_num") or "").strip()
+    genero = _resolve_gender(p.get("nombre", ""), p.get("genero", "M"))
+    ident = _genero(genero, "identificado", "identificada")
+    if tipo == "NIT":
+        ident = "identificada"  # persona jurídica
+    return f"{nombre}, {ident} con {tipo} No. {num}"
+
+
+def _make_run(text, bold=False, font_name="Cambria", size=None):
+    """Crea un <w:r> con texto y formato básico."""
+    r = OxmlElement("w:r")
+    rPr = OxmlElement("w:rPr")
+    rFonts = OxmlElement("w:rFonts")
+    rFonts.set(qn("w:ascii"), font_name)
+    rFonts.set(qn("w:hAnsi"), font_name)
+    rPr.append(rFonts)
+    if bold:
+        rPr.append(OxmlElement("w:b"))
+    if size:
+        sz = OxmlElement("w:sz")
+        sz.set(qn("w:val"), str(size * 2))
+        rPr.append(sz)
+    r.append(rPr)
+    t = OxmlElement("w:t")
+    t.text = text
+    t.set(qn("xml:space"), "preserve")
+    r.append(t)
+    return r
+
+
+def _make_labeled_paragraph(ref_p_elem, label, content):
+    """
+    Crea un párrafo 'Etiqueta: contenido' clonando las propiedades de párrafo
+    (alineación, interlineado, sangría) de un párrafo de referencia de la
+    plantilla, de modo que los nombramientos nuevos se vean idénticos a los
+    del representante legal.
+    """
+    p = OxmlElement("w:p")
+    if ref_p_elem is not None:
+        ref_pPr = ref_p_elem.find(qn("w:pPr"))
+        if ref_pPr is not None:
+            new_pPr = deepcopy(ref_pPr)
+            # El rPr por defecto del párrafo puede traer negrilla del template
+            rPr = new_pPr.find(qn("w:rPr"))
+            if rPr is not None:
+                for tag in ("w:b", "w:bCs", "w:i", "w:iCs", "w:u", "w:highlight"):
+                    for el in rPr.findall(qn(tag)):
+                        rPr.remove(el)
+            p.append(new_pPr)
+    p.append(_make_run(label, bold=True))
+    p.append(_make_run(content, bold=False))
+    return p
+
+
+def _tbl_borders():
+    """<w:tblBorders> con línea sencilla en todos los bordes."""
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        el = OxmlElement(f"w:{edge}")
+        el.set(qn("w:val"), "single")
+        el.set(qn("w:sz"), "4")
+        el.set(qn("w:space"), "0")
+        el.set(qn("w:color"), "000000")
+        borders.append(el)
+    return borders
+
+
+def _make_table(rows, col_widths, header=True, font_name="Cambria", size=None):
+    """
+    Construye un <w:tbl> con bordes a partir de una lista de filas
+    (cada fila es una lista de strings). `col_widths` en twips.
+
+    La primera fila se marca como encabezado (negrilla + repetición en
+    salto de página) cuando `header=True`.
+
+    No se fija tamaño de fuente ni espaciado en las celdas: se hereda el del
+    documento, que es lo que hace la tabla de accionistas de la plantilla.
+    Fijarlos aquí produciría una tabla con métrica distinta a la otra.
+    """
+    tbl = OxmlElement("w:tbl")
+
+    tblPr = OxmlElement("w:tblPr")
+    tblW = OxmlElement("w:tblW")
+    tblW.set(qn("w:w"), str(sum(col_widths)))
+    tblW.set(qn("w:type"), "dxa")
+    tblPr.append(tblW)
+    tblPr.append(_tbl_borders())
+    tbl.append(tblPr)
+
+    grid = OxmlElement("w:tblGrid")
+    for w in col_widths:
+        gc = OxmlElement("w:gridCol")
+        gc.set(qn("w:w"), str(w))
+        grid.append(gc)
+    tbl.append(grid)
+
+    for ri, row in enumerate(rows):
+        tr = OxmlElement("w:tr")
+        is_header = header and ri == 0
+        if is_header:
+            trPr = OxmlElement("w:trPr")
+            trPr.append(OxmlElement("w:tblHeader"))
+            tr.append(trPr)
+        for ci, cell_text in enumerate(row):
+            tc = OxmlElement("w:tc")
+            tcPr = OxmlElement("w:tcPr")
+            tcW = OxmlElement("w:tcW")
+            tcW.set(qn("w:w"), str(col_widths[ci]))
+            tcW.set(qn("w:type"), "dxa")
+            tcPr.append(tcW)
+            tc.append(tcPr)
+
+            p = OxmlElement("w:p")
+            p.append(_make_run(cell_text, bold=is_header,
+                               font_name=font_name, size=size))
+            tc.append(p)
+            tr.append(tc)
+        tbl.append(tr)
+
+    return tbl
+
+
+def _insert_nombramientos_organos(doc, junta, revisor):
+    """
+    Inserta en el Artículo Primero Transitorio (bloque de nombramientos)
+    los miembros de junta directiva y el revisor fiscal, justo después de
+    la línea del representante legal suplente.
+
+    `junta`   → {"principales": [...], "suplentes": [...]} o None
+    `revisor` → dict con datos del revisor fiscal o None
+
+    Cada persona es un dict con nombre, tipo_doc, id_num.
+    """
+    if not junta and not revisor:
+        return
+
+    body = doc._element.body
+    anchor = None
+    for p_elem in body.findall(qn("w:p")):
+        if _get_para_text(p_elem).strip().startswith("Representante legal suplente:"):
+            anchor = p_elem
+            break
+    if anchor is None:
+        return
+
+    # El bloque de nombramientos alterna párrafo y línea en blanco. Se clona la
+    # línea en blanco que ya existe tras el representante legal suplente para
+    # que los separadores nuevos tengan exactamente su mismo formato
+    # (justificación, interlineado y sangría) y el ritmo vertical no se rompa.
+    blank_ref = anchor.getnext()
+    if blank_ref is None or blank_ref.tag != qn("w:p") \
+            or _get_para_text(blank_ref).strip():
+        blank_ref = None
+
+    insert_after = anchor
+
+    def _insert(el):
+        """Inserta `el` precedido de una línea en blanco de separación."""
+        nonlocal insert_after
+        blank = deepcopy(blank_ref) if blank_ref is not None \
+            else _make_paragraph("", font_name="Cambria")
+        insert_after.addnext(blank)
+        blank.addnext(el)
+        insert_after = el
+
+    # ── Junta directiva ──
+    if junta:
+        principales = junta.get("principales") or []
+        suplentes = junta.get("suplentes") or []
+        n_pri = len(principales)
+
+        intro = (
+            f"la sociedad tendrá una junta directiva integrada por "
+            f"{_numero_a_letras(n_pri)} ({n_pri}) "
+            f"{'miembro principal' if n_pri == 1 else 'miembros principales'}"
+        )
+        if suplentes:
+            n_sup = len(suplentes)
+            intro += (
+                f" y {_numero_a_letras(n_sup)} ({n_sup}) "
+                f"{'miembro suplente' if n_sup == 1 else 'miembros suplentes'} "
+                f"de carácter nominal"
+            )
+        intro += ", designados así:"
+
+        _insert(_make_labeled_paragraph(anchor, "Junta directiva: ", intro))
+
+        if suplentes:
+            rows = [["Miembros principales", "Miembros suplentes"]]
+            for i in range(max(n_pri, len(suplentes))):
+                rows.append([
+                    _persona_nombramiento(principales[i]) if i < n_pri else "",
+                    _persona_nombramiento(suplentes[i]) if i < len(suplentes) else "",
+                ])
+            col_widths = [4400, 4400]
+        else:
+            rows = [["Miembros principales"]]
+            rows.extend([[_persona_nombramiento(m)] for m in principales])
+            col_widths = [8800]
+
+        _insert(_make_table(rows, col_widths))
+
+    # ── Revisor fiscal ──
+    # Va siempre precedido de su línea en blanco, que además separa la tabla
+    # anterior del texto siguiente.
+    if revisor:
+        _insert(_make_labeled_paragraph(
+            anchor, "Revisor fiscal: ", _texto_revisor(revisor)
+        ))
+
+
+def _texto_revisor(revisor):
+    """Redacta el nombramiento del revisor fiscal (persona natural o jurídica)."""
+    tipo = (revisor.get("tipo") or "natural").lower()
+    tarjeta = (revisor.get("tarjeta_profesional") or "").strip()
+
+    if tipo == "juridica":
+        razon = (revisor.get("nombre") or "").strip().upper()
+        nit = (revisor.get("id_num") or "").strip()
+        c_nombre = (revisor.get("contador_nombre") or "").strip().upper()
+        c_tipo = _label_tipo_doc(revisor.get("contador_tipo_doc"))
+        c_num = (revisor.get("contador_id_num") or "").strip()
+        c_tarjeta = (revisor.get("contador_tarjeta_profesional") or "").strip()
+        c_genero = _resolve_gender(revisor.get("contador_nombre", ""), "M")
+        c_ident = _genero(c_genero, "identificado", "identificada")
+        c_port = _genero(c_genero, "portador", "portadora")
+
+        texto = (
+            f"{razon}, sociedad identificada con NIT {nit}, "
+            f"quien de conformidad con el artículo 215 del Código de Comercio "
+            f"designa para el ejercicio personal del cargo a {c_nombre}, "
+            f"{c_ident} con {c_tipo} No. {c_num}, contador público "
+            f"{c_port} de la tarjeta profesional No. {c_tarjeta}."
+        )
+        return texto
+
+    nombre = (revisor.get("nombre") or "").strip().upper()
+    tipo_doc = _label_tipo_doc(revisor.get("tipo_doc"))
+    num = (revisor.get("id_num") or "").strip()
+    genero = _resolve_gender(revisor.get("nombre", ""), revisor.get("genero", "M"))
+    ident = _genero(genero, "identificado", "identificada")
+    port = _genero(genero, "portador", "portadora")
+    return (
+        f"{nombre}, {ident} con {tipo_doc} No. {num}, contador público "
+        f"{port} de la tarjeta profesional No. {tarjeta}."
+    )
+
+
 def _make_paragraph(text, bold=False, left=True, font_name="Cambria", size=None):
     """Crea un elemento <w:p> con formato básico."""
     p = OxmlElement("w:p")
@@ -1211,6 +1514,9 @@ def generar_estatutos(data, template_path, output_path):
     capital_autorizado = data.get("capital_autorizado", 1_000_000_000)
     capital_suscrito = data.get("capital_suscrito", 1_000_000)
     capital_pagado = data.get("capital_pagado", capital_suscrito)
+    # Valor nominal por acción. El número de acciones de cada tramo de capital
+    # se deriva dividiendo el monto entre este valor.
+    valor_nominal = max(1, int(data.get("valor_nominal", 1) or 1))
 
     # ── Normalización automática de género ──
     # La detección por nombre prevalece sobre el dropdown del formulario,
@@ -1243,7 +1549,7 @@ def generar_estatutos(data, template_path, output_path):
 
     # Construir RL suplente línea
     if rl_suplente and rl_suplente.get("nombre"):
-        tipo_doc_s = rl_suplente.get("tipo_doc", "C.C.")
+        tipo_doc_s = _label_tipo_doc(rl_suplente.get("tipo_doc"))
         genero_rls = rl_suplente.get("genero", "M")
         rl_suplente_linea = (
             f"{rl_suplente['nombre'].upper()}, "
@@ -1262,14 +1568,24 @@ def generar_estatutos(data, template_path, output_path):
         "{{BLOQUE_COMPARECENCIA_ACCIONISTAS}}": _bloque_comparecencia(accionistas),
         "{{OBJETO_SOCIAL_DESARROLLADO}}": data.get("objeto_social", ""),
         "{{CAPITAL_AUTORIZADO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_autorizado),
-        "{{CAPITAL_AUTORIZADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_autorizado),
+        "{{CAPITAL_AUTORIZADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_autorizado // valor_nominal),
         "{{CAPITAL_SUSCRITO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_suscrito),
-        "{{CAPITAL_SUSCRITO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_suscrito),
+        "{{CAPITAL_SUSCRITO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_suscrito // valor_nominal),
         "{{CAPITAL_PAGADO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_pagado),
-        "{{CAPITAL_PAGADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_pagado),
+        "{{CAPITAL_PAGADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_pagado // valor_nominal),
+        # Valor nominal por acción: la plantilla lo trae escrito en duro como
+        # "un peso ... (COP $1)" en los artículos 4, 5 y 6. Se sustituye la
+        # frase literal para que refleje el valor elegido por el usuario.
+        "un peso moneda legal colombiana (COP $1)":
+            _valor_nominal_frase(valor_nominal, "moneda legal colombiana"),
+        "un peso colombiano (COP $1)":
+            _valor_nominal_frase(valor_nominal, "colombiano"),
         "{{RL_PRINCIPAL_NOMBRE}}": rl_principal.get("nombre", "").upper(),
         "{{RL_PRINCIPAL_IDENTIFICADO}}": _genero(genero_rl, "identificado", "identificada"),
-        "{{RL_PRINCIPAL_TIPO_DOC}}": rl_principal.get("tipo_doc", "C.C."),
+        # El formulario envía "CC"/"CE"; se normaliza a la etiqueta de
+        # estatutos para que la línea del representante legal no quede escrita
+        # distinto a los nombramientos de junta y revisoría que van debajo.
+        "{{RL_PRINCIPAL_TIPO_DOC}}": _label_tipo_doc(rl_principal.get("tipo_doc")),
         "{{RL_PRINCIPAL_NUM_DOC}}": rl_principal.get("cc", ""),
         "{{RL_PRINCIPAL_CIUDAD_EXPEDICION}}": rl_principal.get("expedicion", ""),
         "{{RL_SUPLENTE_LINEA}}": rl_suplente_linea,
@@ -1295,11 +1611,18 @@ def generar_estatutos(data, template_path, output_path):
     # - Eliminar párrafos vacíos consecutivos (espaciado armónico)
     _post_process_doc(doc, nombre_sas)
 
+    # Nombramientos de junta directiva y revisor fiscal en el Artículo
+    # Primero Transitorio (van después del representante legal suplente)
+    _insert_nombramientos_organos(
+        doc, data.get("junta_directiva"), data.get("revisor_fiscal")
+    )
+
     # Insertar firmas como párrafos individuales con espacio para firma
     _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombre_sas)
 
     # Llenar tabla de accionistas / acciones / capital
-    _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado)
+    _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
+                            valor_nominal)
 
     doc.save(output_path)
 

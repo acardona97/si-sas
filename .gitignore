@@ -1,5 +1,9 @@
 # Secretos — NUNCA subir al repositorio
 .env
+# Base de usuarios: contiene los hashes de contraseña
+data/users.db
+*.db
+notebooklm-cookies.json
 
 # Python
 __pycache__/
