@@ -6,6 +6,7 @@ let accionistaCount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     addAccionista();
+    onRazonSocialInput();
 
     // Sidebar step navigation
     document.querySelectorAll('.step-item[data-step]').forEach(item => {
@@ -62,6 +63,19 @@ function validateStep(step) {
             if (email.length > 60) { alert('El correo no puede exceder 60 caracteres (regla DIAN)'); return false; }
             const atIdx = email.indexOf('@');
             if (atIdx > 0 && email[atIdx - 1] === '-') { alert('El correo no puede tener guión antes del @ (regla DIAN)'); return false; }
+        }
+        // Homonimia: se exige la declaración, nunca se bloquea por el resultado.
+        const homonimia = getHomonimiaData();
+        if (!homonimia) {
+            alert('Consulte la razón social en el RUES y declare qué encontró antes de continuar.');
+            document.getElementById('homonimia-block')
+                ?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+        if (homonimia.resultado === 'identica_activa' && !homonimia.riesgo_aceptado) {
+            alert('Existe una sociedad activa con el mismo nombre distintivo. Marque que entiende '
+                  + 'el riesgo de devolución por homonimia, o cambie la razón social.');
+            return false;
         }
     }
     if (step === 2) {
@@ -590,6 +604,164 @@ function _normTipoDoc(tipo) {
     return tipo;
 }
 
+// ═══════════════════════════════════════════════════════════
+// HOMONIMIA — verificación contra el RUES
+// ═══════════════════════════════════════════════════════════
+// La Cámara devuelve el trámite si ya existe una sociedad con nombre
+// idéntico. La comparación legal recae sobre el nombre distintivo, no sobre
+// el tipo societario, así que se despoja el sufijo antes de buscar.
+//
+// El RUES no expone su API a terceros (responde 401 fuera del navegador), de
+// modo que la consulta la hace el abogado en el sitio oficial mediante enlace
+// profundo y aquí declara el resultado.
+
+// Ordenados de más largo a más corto: "S EN C A" debe consumirse antes que
+// "S EN C", y "S A S" antes que "S A".
+const SUFIJOS_SOCIETARIOS = [
+    'SOCIEDAD DE BENEFICIO E INTERES COLECTIVO',
+    'SOCIEDAD POR ACCIONES SIMPLIFICADA',
+    'EMPRESA DE SERVICIOS PUBLICOS',
+    'SOCIEDAD EN COMANDITA POR ACCIONES',
+    'SOCIEDAD EN COMANDITA SIMPLE',
+    'EMPRESA UNIPERSONAL',
+    'SOCIEDAD ANONIMA',
+    'SOCIEDAD LIMITADA',
+    'EN LIQUIDACION',
+    'S EN C A', 'S EN C', 'SENC',
+    'S C A', 'S C S', 'SCA', 'SCS',
+    'S A S', 'SAS',
+    'LTDA', 'LIMITADA',
+    'S A', 'SA',
+    'E U', 'EU',
+    'E S P', 'ESP',
+    'B I C', 'BIC',
+    'Y CIA', 'CIA',
+];
+
+function _normalizarNombre(s) {
+    return (s || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // tildes
+        .toUpperCase()
+        .replace(/[^A-Z0-9\s]/g, ' ')                       // puntuación, &, guiones
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/** "Café Montaña S.A.S. B.I.C." -> "CAFE MONTANA" */
+function nombreDistintivo(razonSocial) {
+    let n = _normalizarNombre(razonSocial);
+    let cambio = true;
+    while (cambio && n) {
+        cambio = false;
+        for (const suf of SUFIJOS_SOCIETARIOS) {
+            if (n === suf) { n = ''; cambio = true; break; }
+            if (n.endsWith(' ' + suf)) {
+                n = n.slice(0, n.length - suf.length - 1).trim();
+                cambio = true;
+                break;
+            }
+        }
+    }
+    return n;
+}
+
+// Nombre distintivo sobre el que se declaró el último resultado. Si el usuario
+// cambia la razón social, la declaración anterior deja de ser válida.
+let _distintivoDeclarado = null;
+
+function onRazonSocialInput() {
+    const razon = document.getElementById('nombre_sas').value.trim();
+    const distintivo = nombreDistintivo(razon);
+    const termino = document.getElementById('homonimia-termino');
+    const link = document.getElementById('homonimia-link');
+    if (!termino || !link) return;
+
+    if (!distintivo) {
+        termino.innerHTML = '<em>Escriba la razón social para habilitar la consulta.</em>';
+        link.href = 'https://www.rues.org.co/';
+        link.classList.add('hidden');
+    } else {
+        termino.innerHTML = 'Se buscará en el RUES: <strong>' + distintivo + '</strong>';
+        link.href = 'https://www.rues.org.co/buscar/RM/' + encodeURIComponent(distintivo);
+        link.classList.remove('hidden');
+    }
+
+    // La declaración corresponde a un nombre concreto: si cambia, se reinicia.
+    if (_distintivoDeclarado !== null && distintivo !== _distintivoDeclarado) {
+        resetHomonimia();
+    }
+}
+
+function resetHomonimia() {
+    _distintivoDeclarado = null;
+    document.querySelectorAll('input[name="homonimia"]').forEach(r => {
+        r.checked = false;
+        r.closest('.radio-card').classList.remove('selected');
+    });
+    const ack = document.getElementById('homonimia_ack');
+    if (ack) ack.checked = false;
+    document.getElementById('homonimia-declaracion').classList.add('hidden');
+    document.getElementById('homonimia-resultado').classList.add('hidden');
+    document.getElementById('homonimia-ack-wrap').classList.add('hidden');
+}
+
+function marcarConsultaRues() {
+    // El enlace abre el RUES en otra pestaña; al volver, el usuario declara.
+    document.getElementById('homonimia-declaracion').classList.remove('hidden');
+}
+
+const HOMONIMIA_RIESGO = {
+    min: {
+        nivel: 'mínimo', color: 'var(--success)',
+        texto: 'El nombre está disponible. Puede continuar con la constitución.',
+    },
+    similar: {
+        nivel: 'medio', color: '#B8860B',
+        texto: 'Existen nombres parecidos. La Cámara podría objetar el registro; '
+             + 'considere ajustar la razón social para diferenciarla mejor.',
+    },
+    identica_cancelada: {
+        nivel: 'medio', color: '#B8860B',
+        texto: 'El nombre exacto existe pero la sociedad no está activa. Suele admitirse, '
+             + 'aunque la Cámara puede pedir aclaración. Verifique el estado del registro.',
+    },
+    identica_activa: {
+        nivel: 'máximo', color: 'var(--danger)',
+        texto: 'Existe una sociedad activa con el mismo nombre distintivo. '
+             + 'La Cámara devolverá el trámite por homonimia. Se recomienda cambiar la razón social.',
+    },
+};
+
+function onHomonimiaChange() {
+    const sel = document.querySelector('input[name="homonimia"]:checked');
+    const caja = document.getElementById('homonimia-resultado');
+    const ackWrap = document.getElementById('homonimia-ack-wrap');
+    if (!sel) { caja.classList.add('hidden'); ackWrap.classList.add('hidden'); return; }
+
+    const r = HOMONIMIA_RIESGO[sel.value];
+    _distintivoDeclarado = nombreDistintivo(document.getElementById('nombre_sas').value);
+
+    caja.className = 'info-box';
+    caja.style.borderLeftColor = r.color;
+    caja.innerHTML = '<strong style="color:' + r.color + '">Riesgo de homonimia ' + r.nivel
+                   + '.</strong> ' + r.texto;
+    caja.classList.remove('hidden');
+
+    // Solo el riesgo máximo exige reconocimiento expreso; nunca bloquea.
+    ackWrap.classList.toggle('hidden', sel.value !== 'identica_activa');
+}
+
+function getHomonimiaData() {
+    const sel = document.querySelector('input[name="homonimia"]:checked');
+    if (!sel) return null;
+    return {
+        resultado: sel.value,
+        nivel_riesgo: HOMONIMIA_RIESGO[sel.value].nivel,
+        nombre_distintivo: nombreDistintivo(document.getElementById('nombre_sas').value),
+        riesgo_aceptado: !!document.getElementById('homonimia_ack')?.checked,
+    };
+}
+
 // ─── MONEY FORMAT ───
 function formatMoney(input) {
     let val = input.value.replace(/\D/g, '');
@@ -1050,6 +1222,7 @@ function collectAllData() {
         // Una cámara cubre varios municipios (ej. Aburrá Sur), por eso no se
         // deriva del municipio: el usuario la elige.
         camara_ciudad: document.getElementById('camara_ciudad').value.trim(),
+        homonimia: getHomonimiaData(),
         direccion: document.getElementById('direccion').value.trim(),
         barrio: document.getElementById('barrio').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -1111,6 +1284,13 @@ function buildSummary() {
 
     let h = '<h3>Sociedad</h3>';
     h += f('Razón Social', d.nombre_sas);
+    if (d.homonimia) {
+        const r = HOMONIMIA_RIESGO[d.homonimia.resultado];
+        h += f('Homonimia (RUES)',
+               `<span style="color:${r.color};font-weight:600">Riesgo ${d.homonimia.nivel_riesgo}</span>`
+               + ` — se consultó "${d.homonimia.nombre_distintivo}"`
+               + (d.homonimia.riesgo_aceptado ? ' · riesgo aceptado por el usuario' : ''));
+    }
     h += f('Dirección', d.direccion);
     h += f('Municipio', `${d.municipio}, ${d.departamento}`);
     h += f('Cámara de Comercio', d.camara_ciudad ? `Cámara de Comercio de ${d.camara_ciudad}` : '—');

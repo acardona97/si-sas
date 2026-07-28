@@ -77,8 +77,65 @@
 
                 <div class="form-group">
                     <label for="nombre_sas">Razón Social *</label>
-                    <input type="text" id="nombre_sas" placeholder="Ej: ACME INNOVACIONES S.A.S." required>
+                    <input type="text" id="nombre_sas" placeholder="Ej: ACME INNOVACIONES S.A.S."
+                           oninput="onRazonSocialInput()" required>
                     <span class="hint">Debe terminar en S.A.S.</span>
+                </div>
+
+                <!-- ═══ Verificación de homonimia en el RUES ═══ -->
+                <div class="form-group" id="homonimia-block">
+                    <label>Verificación de homonimia en el RUES *</label>
+                    <div class="info-box">
+                        La Cámara de Comercio devuelve el trámite si ya existe una sociedad
+                        registrada con nombre idéntico. La comparación se hace sobre el
+                        <strong>nombre distintivo</strong>: sin el tipo societario (S.A.S., LTDA,
+                        S.A.), sin tildes y sin puntuación.
+                        <div id="homonimia-termino" style="margin-top:.6rem"></div>
+                    </div>
+
+                    <a id="homonimia-link" class="btn btn-outline" target="_blank" rel="noopener noreferrer"
+                       href="https://www.rues.org.co/" onclick="marcarConsultaRues()">
+                        Consultar en el RUES &#8599;
+                    </a>
+                    <span class="hint" style="display:block;margin-top:.5rem">
+                        Abre el RUES en una pestaña nueva con la búsqueda ya cargada. Revise los
+                        resultados y vuelva aquí a declarar qué encontró.
+                    </span>
+
+                    <div id="homonimia-declaracion" class="hidden" style="margin-top:1.25rem">
+                        <label>¿Qué arrojó la consulta?</label>
+                        <div class="radio-cards">
+                            <label class="radio-card">
+                                <input type="radio" name="homonimia" value="min" onchange="onHomonimiaChange()">
+                                <span class="radio-title">No se encontraron resultados</span>
+                                <span class="radio-desc">El nombre está disponible. Riesgo mínimo.</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="homonimia" value="similar" onchange="onHomonimiaChange()">
+                                <span class="radio-title">Nombres parecidos, ninguno idéntico</span>
+                                <span class="radio-desc">Coinciden palabras o artículos, pero no el nombre completo. Riesgo medio.</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="homonimia" value="identica_cancelada" onchange="onHomonimiaChange()">
+                                <span class="radio-title">Idéntica, pero cancelada o liquidada</span>
+                                <span class="radio-desc">Existe el nombre exacto pero la sociedad no está activa. Riesgo medio.</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="homonimia" value="identica_activa" onchange="onHomonimiaChange()">
+                                <span class="radio-title">Idéntica y activa</span>
+                                <span class="radio-desc">Existe una sociedad activa con el mismo nombre distintivo. Riesgo máximo.</span>
+                            </label>
+                        </div>
+
+                        <div id="homonimia-resultado" class="hidden"></div>
+
+                        <label id="homonimia-ack-wrap" class="hidden"
+                               style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;margin-top:.75rem">
+                            <input type="checkbox" id="homonimia_ack" onchange="onHomonimiaChange()" style="margin-top:.25rem">
+                            <span>Entiendo que la Cámara de Comercio puede devolver el trámite por
+                                  homonimia y aun así deseo continuar con esta razón social.</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -806,6 +863,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260728a"></script>
+<script src="/static/js/app.js?v=20260728b"></script>
 </body>
 </html>

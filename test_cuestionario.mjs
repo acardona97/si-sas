@@ -59,12 +59,15 @@ function marcarRadio(w, name, value) {
     if (onchange) w.eval(onchange.replace(/\bthis\b/g, `document.querySelector('input[name="${name}"][value="${value}"]')`));
 }
 
-function llenarPaso1(w) {
+function llenarPaso1(w, homonimia = 'min') {
     set(w, 'nombre_sas', 'FAMILIA ANDINA S.A.S.');
     set(w, 'direccion', 'Carrera 43A #1-50, Oficina 805');
     set(w, 'barrio', 'El Poblado');
     set(w, 'email', 'contacto@familiaandina.co');
     set(w, 'telefono1', '3001234567');
+    w.onRazonSocialInput();
+    w.marcarConsultaRues();
+    marcarRadio(w, 'homonimia', homonimia);
 }
 
 // La cámara no se deriva del municipio: Envigado se radica en Aburrá Sur.
@@ -309,6 +312,86 @@ console.log('\n─── Validaciones que deben bloquear el avance');
     assert.match(w.__alerts[0], /parentesco/);
 
     console.log('  OK  todas las validaciones bloquean correctamente');
+}
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Homonimia: nombre distintivo, enlace al RUES y niveles de riesgo');
+{
+    const w = nuevaApp();
+
+    // El nombre distintivo ignora tipo societario, tildes y puntuación.
+    assert.equal(w.nombreDistintivo('DONATELO S.A.S.'), 'DONATELO');
+    assert.equal(w.nombreDistintivo('Donatelo s.a.s.'), 'DONATELO');
+    assert.equal(w.nombreDistintivo('Café Montaña S.A.S. B.I.C.'), 'CAFE MONTANA');
+    assert.equal(w.nombreDistintivo('ACME LTDA'), 'ACME');
+    assert.equal(w.nombreDistintivo('ACME Sociedad Anónima'), 'ACME');
+    assert.equal(w.nombreDistintivo('Inversiones J&M S. en C.'), 'INVERSIONES J M');
+    assert.equal(w.nombreDistintivo('AGUAS DEL SUR S.A.S. E.S.P.'), 'AGUAS DEL SUR');
+    // No debe comerse palabras que solo parecen sufijo en medio del nombre
+    assert.equal(w.nombreDistintivo('CASA SAS'), 'CASA');
+    assert.equal(w.nombreDistintivo('SA MARIA S.A.S.'), 'SA MARIA');
+    console.log('  OK  normalización del nombre distintivo');
+
+    // El enlace apunta al RUES con la búsqueda ya cargada
+    set(w, 'nombre_sas', 'Café Montaña S.A.S.');
+    w.onRazonSocialInput();
+    const href = w.document.getElementById('homonimia-link').href;
+    assert.equal(href, 'https://www.rues.org.co/buscar/RM/CAFE%20MONTANA', 'href: ' + href);
+    assert.match(w.document.getElementById('homonimia-termino').textContent, /CAFE MONTANA/);
+    console.log('  OK  enlace profundo al RUES');
+
+    // Sin declarar, el paso 1 no deja avanzar
+    llenarPaso1(w);
+    set(w, 'nombre_sas', 'FAMILIA ANDINA S.A.S.');
+    w.onRazonSocialInput();
+    w.resetHomonimia();
+    w.__alerts = [];
+    assert.equal(w.validateStep(1), false, 'debía exigir la declaración');
+    assert.match(w.__alerts[0], /declare qué encontró/);
+
+    // Riesgo mínimo deja pasar
+    w.marcarConsultaRues();
+    marcarRadio(w, 'homonimia', 'min');
+    w.__alerts = [];
+    assert.ok(w.validateStep(1), 'riesgo mínimo debía pasar: ' + w.__alerts);
+    assert.match(w.document.getElementById('homonimia-resultado').textContent, /Riesgo de homonimia mínimo/);
+
+    // Riesgo medio también deja pasar (solo advierte)
+    marcarRadio(w, 'homonimia', 'similar');
+    assert.ok(w.validateStep(1), 'riesgo medio debía pasar');
+    marcarRadio(w, 'homonimia', 'identica_cancelada');
+    assert.ok(w.validateStep(1), 'idéntica cancelada debía pasar (riesgo medio)');
+    assert.match(w.document.getElementById('homonimia-resultado').textContent, /medio/);
+
+    // Riesgo máximo exige reconocer el riesgo, pero no bloquea
+    marcarRadio(w, 'homonimia', 'identica_activa');
+    assert.ok(!w.document.getElementById('homonimia-ack-wrap').classList.contains('hidden'),
+        'debía pedir el reconocimiento expreso');
+    w.__alerts = [];
+    assert.equal(w.validateStep(1), false, 'sin reconocer el riesgo no debía pasar');
+    assert.match(w.__alerts[0], /riesgo de devolución por homonimia/);
+    w.document.getElementById('homonimia_ack').checked = true;
+    w.onHomonimiaChange();
+    assert.ok(w.validateStep(1), 'con el riesgo aceptado debía pasar (solo advertencia)');
+    assert.equal(w.getHomonimiaData().nivel_riesgo, 'máximo');
+    assert.equal(w.getHomonimiaData().riesgo_aceptado, true);
+    console.log('  OK  niveles de riesgo: mínimo y medio pasan, máximo advierte sin bloquear');
+
+    // Cambiar la razón social invalida la declaración anterior
+    set(w, 'nombre_sas', 'OTRA COSA S.A.S.');
+    w.onRazonSocialInput();
+    assert.equal(w.getHomonimiaData(), null,
+        'al cambiar el nombre, la declaración anterior debe reiniciarse');
+    assert.ok(w.document.getElementById('homonimia-declaracion').classList.contains('hidden'));
+    console.log('  OK  la declaración se reinicia al cambiar la razón social');
+
+    // Cambio que no altera el nombre distintivo NO reinicia
+    w.marcarConsultaRues();
+    marcarRadio(w, 'homonimia', 'min');
+    set(w, 'nombre_sas', 'Otra Cosa Ltda');   // mismo distintivo: OTRA COSA
+    w.onRazonSocialInput();
+    assert.ok(w.getHomonimiaData(), 'mismo nombre distintivo: no debía reiniciarse');
+    console.log('  OK  no se reinicia si el nombre distintivo no cambió');
 }
 
 console.log('\nCuestionario verificado.\n');
