@@ -218,8 +218,10 @@ def test_carta_no_control():
             "es_unico_accionista": unico,
         }, out)
         # El texto va justificado por líneas: se normalizan los espacios para
-        # que las aserciones no dependan de dónde cayó el salto de línea.
-        txt = " ".join(PdfReader(out).pages[0].extract_text().split())
+        # que las aserciones no dependan de dónde cayó el salto de línea ni de
+        # en qué página quedó el bloque de firma.
+        lector = PdfReader(out)
+        txt = " ".join(" ".join(p.extract_text() or "" for p in lector.pages).split())
         assert "CÁMARA DE COMERCIO DE MEDELLÍN" in txt
         assert "PRUEBA TEST S.A.S." in txt
         assert "artículo 261 del Código de Comercio" in txt
@@ -230,6 +232,31 @@ def test_carta_no_control():
         else:
             assert "accionista mayoritario" in txt
             assert "60%" in txt
+
+        # El pie no puede encimarse sobre el bloque de firma: se comprueba que
+        # ningún texto del cuerpo invada la banda inferior donde va el pie.
+        posiciones = []
+
+        def _visitor(text, cm, tm, font_dict, font_size):
+            if text and text.strip():
+                posiciones.append((round(tm[5], 1), round(font_size, 1), text.strip()))
+
+        for pagina in PdfReader(out).pages:
+            posiciones.clear()
+            pagina.extract_text(visitor_text=_visitor)
+            cuerpo = [p for p in posiciones if p[1] > 9]      # el pie va en 8 pt
+            pie = [p for p in posiciones if p[1] <= 9]
+            if cuerpo and pie:
+                y_pie = max(p[0] for p in pie)
+                y_min_cuerpo = min(p[0] for p in cuerpo)
+                assert y_min_cuerpo > y_pie + 8, (
+                    f"el cuerpo baja hasta y={y_min_cuerpo} y el pie está en "
+                    f"y={y_pie}: se encimarían"
+                )
+            # Nada debe quedar pegado al borde inferior de la página
+            if cuerpo:
+                assert min(p[0] for p in cuerpo) > 40, "hay texto al borde de la hoja"
+
         print(f"OK  carta no situación de control ({'único' if unico else 'mayoritario'}) -> {out}")
 
 
@@ -256,9 +283,9 @@ def test_empresa_familiar():
 
     txt = PdfReader(out).pages[0].extract_text()
     assert "LEY 2495 DE 2025" in txt, "se perdió el texto original del formato"
-    assert "MEDELLIN" in txt.upper()
+    assert "MEDELLÍN" in txt.upper()
     assert "PRUEBA TEST S.A.S." in txt
-    assert "JUAN PABLO GARCIA" in txt.upper()
+    assert "JUAN PABLO GARCÍA" in txt.upper()
     assert "71111111" in txt
     assert "Padre" in txt and "Hija" in txt
     assert "1.200.000" in txt and "800.000" in txt

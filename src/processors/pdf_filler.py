@@ -851,10 +851,13 @@ def generar_empresa_familiar(data, template_path, output_path):
         from datetime import datetime
         fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
 
-    municipio = _strip_tildes(data.get("ciudad", "Medellin"))
-    camara = _strip_tildes(data.get("camara_ciudad") or data.get("ciudad", "Medellin"))
-    nombre_sas = _strip_tildes(data["nombre_sas"])
-    nombre_rl = _strip_tildes(data.get("nombre_rl", ""))
+    # Este formato se estampa con reportlab sobre la página, no en campos
+    # AcroForm, así que Helvetica renderiza las tildes sin problema y los
+    # nombres propios conservan su ortografía.
+    municipio = data.get("ciudad", "Medellín")
+    camara = data.get("camara_ciudad") or data.get("ciudad", "Medellín")
+    nombre_sas = data["nombre_sas"]
+    nombre_rl = data.get("nombre_rl", "")
     tipo_doc_rl = _label_tipo_doc(data.get("tipo_doc_rl"))
     cc_rl = data.get("cc_rl", "")
 
@@ -906,7 +909,7 @@ def generar_empresa_familiar(data, template_path, output_path):
                 "page": 0,
                 "x": col_x + _EF_CELL_PADDING,
                 "y": y,
-                "text": _strip_tildes(str(valor)),
+                "text": str(valor),
                 "size": 8,
                 "max_width": col_w - (2 * _EF_CELL_PADDING),
             })
@@ -973,38 +976,56 @@ def generar_carta_no_control(data, output_path):
     PW, PH = letter
     LEFT, RIGHT = 72, 72
     WIDTH = PW - LEFT - RIGHT
-    SIZE, LEADING = 11, 16
+    SIZE, LEADING = 11, 15
+    TOPE = PH - 80      # primera línea de cada página
+    PISO = 72           # por debajo de esto se invade la zona del pie
+    PIE_Y = 48
+    PIE = "Documento generado con Sí S.A.S. — Quarta Acompañamiento Legal S.A.S."
 
     c = canvas.Canvas(output_path, pagesize=letter)
-    y = PH - 90
+    y = TOPE
 
-    def parrafo(texto, font=SERIF, size=SIZE, space_after=12, leading=LEADING):
+    def pie():
+        c.setFont(SERIF, 8)
+        c.setFillGray(0.45)
+        c.drawCentredString(PW / 2, PIE_Y, PIE)
+        c.setFillGray(0)
+
+    def salto_pagina():
         nonlocal y
-        for linea in _wrap_text(texto, font, size, WIDTH):
-            c.setFont(font, size)
-            c.drawString(LEFT, y, linea)
-            y -= leading
+        pie()
+        c.showPage()
+        y = TOPE
+
+    def linea(texto, font=SERIF, size=SIZE):
+        """Escribe una línea, pasando de página si ya no cabe sobre el pie."""
+        nonlocal y
+        if y < PISO:
+            salto_pagina()
+        c.setFont(font, size)
+        c.drawString(LEFT, y, texto)
+        y -= LEADING
+
+    def parrafo(texto, font=SERIF, size=SIZE, space_after=9):
+        nonlocal y
+        for l in _wrap_text(texto, font, size, WIDTH):
+            linea(l, font, size)
         y -= space_after
 
     # ── Encabezado ──
-    c.setFont(SERIF, SIZE)
-    c.drawString(LEFT, y, f"{ciudad}, {fecha.day} de {MESES_ES[fecha.month]} de {fecha.year}")
-    y -= LEADING * 2
-
-    c.setFont(SERIF, SIZE)
-    c.drawString(LEFT, y, "Señores")
+    linea(f"{ciudad}, {fecha.day} de {MESES_ES[fecha.month]} de {fecha.year}")
     y -= LEADING
-    c.setFont(SERIF_B, SIZE)
-    c.drawString(LEFT, y, f"CÁMARA DE COMERCIO DE {camara}")
-    y -= LEADING
-    c.setFont(SERIF, SIZE)
-    c.drawString(LEFT, y, "E.  S.  D.")
-    y -= LEADING * 2
 
-    c.setFont(SERIF_B, SIZE)
-    c.drawString(LEFT, y, "Asunto: Constitución de "
-                          f"{nombre_sas} — no configuración de situación de control")
-    y -= LEADING * 2
+    linea("Señores")
+    linea(f"CÁMARA DE COMERCIO DE {camara}", SERIF_B)
+    linea("E.  S.  D.")
+    y -= LEADING
+
+    for l in _wrap_text("Asunto: Constitución de " + nombre_sas
+                        + " — no configuración de situación de control",
+                        SERIF_B, SIZE, WIDTH):
+        linea(l, SERIF_B)
+    y -= LEADING
 
     # ── Cuerpo ──
     parrafo("Respetados señores:")
@@ -1065,27 +1086,24 @@ def generar_carta_no_control(data, output_path):
         "(artículo 38 del Código de Comercio y normas concordantes y complementarias)."
     )
 
-    parrafo("Cordialmente,", space_after=0)
-
     # ── Firma ──
-    y -= LEADING * 4
+    # El bloque es indivisible: despedida, espacio para la rúbrica, línea,
+    # nombre, documento y calidad. Si no cabe entero, pasa a la página
+    # siguiente en lugar de partirse o encimarse sobre el pie.
+    # Despedida + 3 líneas de espacio para la rúbrica + nombre, documento y
+    # calidad: siete interlineados exactos.
+    ALTO_FIRMA = LEADING * 7
+    if y - ALTO_FIRMA < PISO:
+        salto_pagina()
+
+    linea("Cordialmente,")
+    y -= LEADING * 3
     c.line(LEFT, y, LEFT + 220, y)
     y -= LEADING
-    c.setFont(SERIF_B, SIZE)
-    c.drawString(LEFT, y, nombre_rl)
-    y -= LEADING
-    c.setFont(SERIF, SIZE)
-    c.drawString(LEFT, y, f"{tipo_doc_rl} No. {cc_rl}")
-    y -= LEADING
-    c.drawString(LEFT, y, f"Representante legal principal de {nombre_sas}")
+    linea(nombre_rl, SERIF_B)
+    linea(f"{tipo_doc_rl} No. {cc_rl}")
+    linea(f"Representante legal principal de {nombre_sas}")
 
-    # ── Pie ──
-    c.setFont(SERIF, 8)
-    c.setFillGray(0.45)
-    c.drawCentredString(
-        PW / 2, 48,
-        "Documento generado con Sí S.A.S. — Quarta Acompañamiento Legal S.A.S.",
-    )
-
+    pie()
     c.showPage()
     c.save()

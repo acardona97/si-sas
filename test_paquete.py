@@ -226,9 +226,12 @@ def test_escenario_a(client):
     assert "FAMILIA ANDINA S.A.S." in fam
     assert "Padre" in fam and "Hija" in fam
     assert "12.000" in fam and "8.000" in fam
-    assert "ABURRA SUR" in fam, "el formato debe llevar la cámara elegida"
-    assert "Envigado" in fam or "ENVIGADO" in fam.upper()
+    assert "ABURRÁ SUR" in fam, "el formato debe llevar la cámara elegida"
+    assert "Envigado" in fam
     assert "C.C. 71111111" in fam, "el tipo de documento del RL debe ir normalizado"
+    # El formato se estampa con reportlab, no en AcroForm: conserva las tildes
+    assert "JUAN PABLO GARCÍA" in fam, "los nombres propios deben conservar tildes"
+    assert "María Camila Torres" in fam
 
     print("  OK  escenario A")
 

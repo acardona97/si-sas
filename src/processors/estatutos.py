@@ -800,36 +800,24 @@ def _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombr
     # Insertar párrafos de firma antes del target (o después del "proceden a firmarlo")
     insert_point = target_elem
     for firmante in firmantes:
-        # Espacio para firma (3 líneas vacías)
-        for _ in range(4):
-            blank = _make_paragraph("", bold=False, left=True, font_name="Cambria")
-            insert_point.addprevious(blank)
-
-        # Nombre (puede ser negrita como nombre propio)
-        p_nombre = _make_paragraph(firmante["nombre"], bold=False, left=True, font_name="Cambria")
-        insert_point.addprevious(p_nombre)
-
-        # Documento
-        p_doc = _make_paragraph(firmante["documento"], bold=False, left=True, font_name="Cambria")
-        insert_point.addprevious(p_doc)
-
-        # Calidad
-        p_cal = _make_paragraph(firmante["calidad"], bold=False, left=True, font_name="Cambria")
-        insert_point.addprevious(p_cal)
-
-        # Aceptación del cargo (representante legal principal o suplente)
+        # Un bloque de firma es indivisible: espacio para la rúbrica, nombre,
+        # documento, calidad y, si aplica, la aceptación del cargo. Se arma
+        # completo y se marca para que Word no lo parta entre dos páginas.
+        lineas = [""] * 4                       # espacio para firma manuscrita
+        lineas.append(firmante["nombre"])
+        lineas.append(firmante["documento"])
+        lineas.append(firmante["calidad"])
         if firmante.get("es_rl"):
-            p_acept = _make_paragraph(
-                "Acepto cargo como representante legal principal.",
-                bold=False, left=True, font_name="Cambria",
-            )
-            insert_point.addprevious(p_acept)
+            lineas.append("Acepto cargo como representante legal principal.")
         elif firmante.get("es_rl_suplente"):
-            p_acept = _make_paragraph(
-                "Acepto cargo como representante legal suplente.",
-                bold=False, left=True, font_name="Cambria",
+            lineas.append("Acepto cargo como representante legal suplente.")
+
+        for i, texto in enumerate(lineas):
+            p = _make_paragraph(
+                texto, bold=False, left=True, font_name="Cambria",
+                keep_next=(i < len(lineas) - 1),   # el último no arrastra
             )
-            insert_point.addprevious(p_acept)
+            insert_point.addprevious(p)
 
     # ── Eliminar el párrafo residual "En calidad de poderdante" ──
     # Este párrafo del template servía como marcador para insertar las firmas
@@ -1249,17 +1237,38 @@ def _make_labeled_paragraph(ref_p_elem, label, content):
     return p
 
 
-def _tbl_borders():
-    """<w:tblBorders> con línea sencilla en todos los bordes."""
-    borders = OxmlElement("w:tblBorders")
-    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+# Rasgos tomados de la tabla de accionistas de la plantilla, para que el
+# cuadro de la junta directiva se vea idéntico y no como una tabla ajena.
+TBL_ANCHO_TOTAL = 9360      # twips
+TBL_RELLENO_ENCABEZADO = "D5E8F0"
+
+
+def _tbl_borders(tag="w:tblBorders", sz="4", color="auto", inside=True):
+    """Bordes de línea sencilla, con los mismos grosores de la plantilla."""
+    borders = OxmlElement(tag)
+    edges = ["top", "left", "bottom", "right"]
+    if inside:
+        edges += ["insideH", "insideV"]
+    for edge in edges:
         el = OxmlElement(f"w:{edge}")
         el.set(qn("w:val"), "single")
-        el.set(qn("w:sz"), "4")
+        el.set(qn("w:sz"), sz)
         el.set(qn("w:space"), "0")
-        el.set(qn("w:color"), "000000")
+        el.set(qn("w:color"), color)
         borders.append(el)
     return borders
+
+
+def _tc_margenes():
+    """<w:tcMar> con el relleno interno de celda de la plantilla."""
+    mar = OxmlElement("w:tcMar")
+    for lado, ancho in (("top", "60"), ("left", "100"),
+                        ("bottom", "60"), ("right", "100")):
+        el = OxmlElement(f"w:{lado}")
+        el.set(qn("w:w"), ancho)
+        el.set(qn("w:type"), "dxa")
+        mar.append(el)
+    return mar
 
 
 def _make_table(rows, col_widths, header=True, font_name="Cambria", size=None):
@@ -1282,6 +1291,21 @@ def _make_table(rows, col_widths, header=True, font_name="Cambria", size=None):
     tblW.set(qn("w:type"), "dxa")
     tblPr.append(tblW)
     tblPr.append(_tbl_borders())
+
+    cellMar = OxmlElement("w:tblCellMar")
+    for lado in ("left", "right"):
+        el = OxmlElement(f"w:{lado}")
+        el.set(qn("w:w"), "10")
+        el.set(qn("w:type"), "dxa")
+        cellMar.append(el)
+    tblPr.append(cellMar)
+
+    look = OxmlElement("w:tblLook")
+    for k, v in (("w:val", "04A0"), ("w:firstRow", "1"), ("w:lastRow", "0"),
+                 ("w:firstColumn", "1"), ("w:lastColumn", "0"),
+                 ("w:noHBand", "0"), ("w:noVBand", "1")):
+        look.set(qn(k), v)
+    tblPr.append(look)
     tbl.append(tblPr)
 
     grid = OxmlElement("w:tblGrid")
@@ -1305,6 +1329,15 @@ def _make_table(rows, col_widths, header=True, font_name="Cambria", size=None):
             tcW.set(qn("w:w"), str(col_widths[ci]))
             tcW.set(qn("w:type"), "dxa")
             tcPr.append(tcW)
+            tcPr.append(_tbl_borders("w:tcBorders", sz="1",
+                                     color="000000", inside=False))
+            if is_header:
+                shd = OxmlElement("w:shd")
+                shd.set(qn("w:val"), "clear")
+                shd.set(qn("w:color"), "auto")
+                shd.set(qn("w:fill"), TBL_RELLENO_ENCABEZADO)
+                tcPr.append(shd)
+            tcPr.append(_tc_margenes())
             tc.append(tcPr)
 
             p = OxmlElement("w:p")
@@ -1389,11 +1422,11 @@ def _insert_nombramientos_organos(doc, junta, revisor):
                     _persona_nombramiento(principales[i]) if i < n_pri else "",
                     _persona_nombramiento(suplentes[i]) if i < len(suplentes) else "",
                 ])
-            col_widths = [4400, 4400]
+            col_widths = [TBL_ANCHO_TOTAL // 2] * 2
         else:
             rows = [["Miembros principales"]]
             rows.extend([[_persona_nombramiento(m)] for m in principales])
-            col_widths = [8800]
+            col_widths = [TBL_ANCHO_TOTAL]
 
         _insert(_make_table(rows, col_widths))
 
@@ -1443,12 +1476,21 @@ def _texto_revisor(revisor):
     )
 
 
-def _make_paragraph(text, bold=False, left=True, font_name="Cambria", size=None):
-    """Crea un elemento <w:p> con formato básico."""
+def _make_paragraph(text, bold=False, left=True, font_name="Cambria", size=None,
+                    keep_next=False):
+    """Crea un elemento <w:p> con formato básico.
+
+    `keep_next` mantiene el párrafo unido al siguiente al paginar. Se usa en
+    los bloques de firma para que el nombre no quede huérfano al final de una
+    página y el documento no lo separe de su cédula y su calidad.
+    """
     p = OxmlElement("w:p")
 
     # Propiedades del párrafo
     pPr = OxmlElement("w:pPr")
+    if keep_next:
+        pPr.append(OxmlElement("w:keepNext"))
+        pPr.append(OxmlElement("w:keepLines"))
     if left:
         jc = OxmlElement("w:jc")
         jc.set(qn("w:val"), "left")
