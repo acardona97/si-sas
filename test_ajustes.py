@@ -161,6 +161,15 @@ def test_estatutos():
             "así como obtener créditos y financiamientos de cualquier naturaleza "
             "con entidades financieras para fortalecer su operación y expansión "
             "empresarial.\n"
+            "\n"
+            # Cláusula que la plantilla ya trae: debe eliminarse para no dejar
+            # dos párrafos diciendo lo mismo.
+            "Asimismo, la sociedad podrá llevar a cabo, en general, todas las "
+            "actividades lícitas de comercio que guarden relación directa o "
+            "indirecta con el objeto social descrito, incluyendo aquellas "
+            "actividades accesorias, complementarias o conexas que sean "
+            "necesarias o convenientes para el cumplimiento de su objeto social "
+            "principal.\n"
         ),
         # 500.000.000 / 100 = 5.000.000 acciones
         "capital_autorizado": 500_000_000,
@@ -278,6 +287,53 @@ def test_estatutos():
         "se perdió el artículo de capital autorizado"
     print("OK  sin saltos internos ni espacios dobles (formato simétrico)")
     print("OK  la numeración de artículos no se altera al partir párrafos")
+
+    # ── El objeto social no repite la cláusula de cierre de la plantilla ──
+    cierres = [p for p in parrafos
+               if p.lower().startswith("asimismo")
+               and "llevar a cabo, en general" in p.lower()]
+    assert len(cierres) == 1, (
+        f"la cláusula general de cierre debe aparecer una sola vez (la de la "
+        f"plantilla); se encontraron {len(cierres)}"
+    )
+    assert "todas las operaciones" in cierres[0], \
+        "debe quedar la cláusula de la plantilla, no la del objeto social redactado"
+
+    # ── Los cuadros: encabezado gris y separados del texto siguiente ──
+    from docx.oxml.ns import qn as _q
+    doc_t = Document(out)
+
+    def _relleno(fila):
+        rellenos = set()
+        for tc in fila._tr.findall(_q("w:tc")):
+            tcPr = tc.find(_q("w:tcPr"))
+            shd = tcPr.find(_q("w:shd")) if tcPr is not None else None
+            rellenos.add(shd.get(_q("w:fill")) if shd is not None else None)
+        return rellenos
+
+    tablas = [t for t in doc_t.tables if t.rows and len(t.rows) > 1]
+    assert len(tablas) >= 2, "deben existir el cuadro de junta y el de accionistas"
+    for t in tablas:
+        assert _relleno(t.rows[0]) == {"D9D9D9"}, (
+            f"el encabezado debe ir en gris, no en azul: {_relleno(t.rows[0])}"
+        )
+    # La fila TOTAL del cuadro de accionistas también
+    tabla_acc2 = next(t for t in doc_t.tables
+                      if t.rows and "accionista" in t.rows[0].cells[0].text.lower())
+    assert _relleno(tabla_acc2.rows[-1]) == {"D9D9D9"}, "la fila TOTAL también va en gris"
+
+    # Después de cada tabla debe venir un párrafo vacío
+    cuerpo = list(doc_t._element.body)
+    for i, el in enumerate(cuerpo):
+        if el.tag != _q("w:tbl"):
+            continue
+        siguiente = cuerpo[i + 1] if i + 1 < len(cuerpo) else None
+        assert siguiente is not None and siguiente.tag == _q("w:p"), \
+            "toda tabla debe ir seguida de un párrafo"
+        texto_sig = "".join(t.text or "" for t in siguiente.findall(f".//{_q('w:t')}"))
+        assert not texto_sig.strip(), \
+            f"la tabla no puede quedar pegada al texto siguiente: {texto_sig[:60]!r}"
+    print("OK  cuadros con encabezado gris y separados del artículo siguiente")
 
 
 def test_estatutos_defaults():

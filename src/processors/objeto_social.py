@@ -51,7 +51,7 @@ Tu tarea es redactar el OBJETO SOCIAL para los estatutos de constitución de una
 2. **Incluir** actividades complementarias y conexas típicas del sector, redactadas en estilo jurídico societario colombiano.
 3. **Si hay un CIIU secundario**, integrarlo de forma natural en el texto.
 4. **Si el usuario proporcionó una descripción breve**, REESCRIBIRLA e integrarla profesionalmente (ver reglas abajo).
-5. **Cerrar siempre** con la cláusula catch-all: "Asimismo, la sociedad podrá llevar a cabo, en general, todas las actividades lícitas de comercio que guarden relación directa o indirecta con el objeto social descrito, incluyendo aquellas actividades accesorias, complementarias o conexas que sean necesarias o convenientes para el cumplimiento de su objeto social principal."
+5. **NO cerrar** con una cláusula general del tipo "Asimismo, la sociedad podrá llevar a cabo, en general, todas las actividades lícitas de comercio...". Los estatutos ya traen esa cláusula en el párrafo siguiente y repetirla deja el texto redundante. Termina con la última actividad concreta.
 6. **Incluir** las actividades universales: celebración de toda clase de actos y contratos civiles y comerciales; importación y exportación de bienes y servicios; participación como socia o accionista en otras sociedades; adquisición, enajenación, administración y gravamen de bienes muebles e inmuebles.
 
 ⚠️ INTEGRACIÓN DEL TEXTO DEL USUARIO (regla crítica):
@@ -878,8 +878,10 @@ def _generar_deterministico(ciiu_code, ciiu_desc, ciiu_code_sec="", ciiu_desc_se
     intro_univ += "; y " + ACTIVIDADES_UNIVERSALES[-1] + "."
     parrafos.append(intro_univ)
 
-    # Cláusula catch-all
-    parrafos.append(CLAUSULA_CATCHALL)
+    # La cláusula de cierre ("Asimismo, la sociedad podrá llevar a cabo...")
+    # NO se agrega aquí: la plantilla de estatutos ya trae su propia cláusula
+    # equivalente en el párrafo siguiente, y ponerla dos veces deja el objeto
+    # social redundante. Ver CLAUSULA_CATCHALL.
 
     return " ".join(parrafos)
 

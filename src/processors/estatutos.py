@@ -580,6 +580,11 @@ def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
     _set_cell_text(total_row.cells[4], _fmt_money_table(total_suscrito))
     _set_cell_text(total_row.cells[5], _fmt_money_table(total_pagado))
 
+    # La plantilla trae las filas de encabezado y total en azul claro; se
+    # repintan en gris para que ambos cuadros del documento coincidan.
+    _pintar_fila(table.rows[0], TBL_RELLENO_ENCABEZADO)
+    _pintar_fila(total_row, TBL_RELLENO_ENCABEZADO)
+
 
 # ════════════════════════════════════════════════════════════════
 # POST-PROCESAMIENTO ESTÉTICO
@@ -1238,6 +1243,41 @@ def _persona_nombramiento(p):
     return [(nombre, True), (f", {ident} con {tipo} No. {num}", False)]
 
 
+def _quitar_clausula_redundante(texto):
+    """Quita la cláusula general de cierre del objeto social.
+
+    La plantilla ya trae, justo después, su propia cláusula equivalente
+    ("Asimismo la sociedad podrá llevar a cabo, en general, todas las
+    operaciones..."). Si el objeto social redactado también la incluye, el
+    documento queda con dos párrafos que dicen lo mismo.
+
+    El generador ya no la produce, pero el redactor es un modelo y puede
+    emitirla de todas formas: esto lo cubre.
+    """
+    if not texto:
+        return texto
+    marca = "asimismo"
+    cierre = "llevar a cabo, en general"
+    partes = str(texto).split("\n")
+    limpias = []
+    for parte in partes:
+        p = parte.strip()
+        pl = _strip_acentos(p)
+        if pl.startswith(marca) and _strip_acentos(cierre) in pl:
+            continue
+        limpias.append(parte)
+    resultado = "\n".join(limpias)
+
+    # También puede venir pegada al final del mismo párrafo, sin salto previo.
+    for separador in (". Asimismo, la sociedad podrá llevar a cabo",
+                      ". Asimismo la sociedad podrá llevar a cabo"):
+        pos = resultado.find(separador)
+        if pos > 0:
+            resultado = resultado[:pos + 1]
+            break
+    return resultado.strip()
+
+
 def _normalizar_bloque(texto):
     """Limpia un bloque de texto de varias líneas antes de insertarlo.
 
@@ -1437,7 +1477,9 @@ def _resaltar_nombres(doc, nombres):
 # Rasgos tomados de la tabla de accionistas de la plantilla, para que el
 # cuadro de la junta directiva se vea idéntico y no como una tabla ajena.
 TBL_ANCHO_TOTAL = 9360      # twips
-TBL_RELLENO_ENCABEZADO = "D5E8F0"
+# Gris neutro para las filas de encabezado y de total. La plantilla traía un
+# azul claro; el gris se lee mejor impreso y no compite con el texto.
+TBL_RELLENO_ENCABEZADO = "D9D9D9"
 
 
 def _tbl_borders(tag="w:tblBorders", sz="4", color="auto", inside=True):
@@ -1454,6 +1496,41 @@ def _tbl_borders(tag="w:tblBorders", sz="4", color="auto", inside=True):
         el.set(qn("w:color"), color)
         borders.append(el)
     return borders
+
+
+def _pintar_fila(row, fill):
+    """Aplica un relleno de fondo a todas las celdas de una fila."""
+    for tc in row._tr.findall(qn("w:tc")):
+        tcPr = tc.find(qn("w:tcPr"))
+        if tcPr is None:
+            tcPr = OxmlElement("w:tcPr")
+            tc.insert(0, tcPr)
+        for viejo in tcPr.findall(qn("w:shd")):
+            tcPr.remove(viejo)
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:val"), "clear")
+        shd.set(qn("w:color"), "auto")
+        shd.set(qn("w:fill"), fill)
+        tcPr.append(shd)
+
+
+def _espaciar_despues_de_tablas(doc):
+    """
+    Garantiza un párrafo vacío después de cada tabla.
+
+    Sin él la tabla queda pegada al artículo siguiente, que además es lo que
+    Word necesita para no fusionar dos tablas contiguas.
+    """
+    body = doc._element.body
+    for tbl in list(body.findall(qn("w:tbl"))):
+        siguiente = tbl.getnext()
+        ya_hay_blanco = (
+            siguiente is not None
+            and siguiente.tag == qn("w:p")
+            and not _get_para_text(siguiente).strip()
+        )
+        if not ya_hay_blanco:
+            tbl.addnext(_make_paragraph("", font_name="Cambria"))
 
 
 def _tc_margenes():
@@ -1820,7 +1897,8 @@ def generar_estatutos(data, template_path, output_path):
         "{{DOMICILIO_DEPARTAMENTO}}": data.get("departamento", "Antioquia"),
         "{{FECHA_LITERAL}}": _fecha_literal(fecha),
         "{{BLOQUE_COMPARECENCIA_ACCIONISTAS}}": _bloque_comparecencia(accionistas),
-        "{{OBJETO_SOCIAL_DESARROLLADO}}": _normalizar_bloque(data.get("objeto_social", "")),
+        "{{OBJETO_SOCIAL_DESARROLLADO}}": _normalizar_bloque(
+            _quitar_clausula_redundante(data.get("objeto_social", ""))),
         "{{CAPITAL_AUTORIZADO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_autorizado),
         "{{CAPITAL_AUTORIZADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_autorizado // valor_nominal),
         "{{CAPITAL_SUSCRITO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_suscrito),
@@ -1888,6 +1966,9 @@ def generar_estatutos(data, template_path, output_path):
     # Llenar tabla de accionistas / acciones / capital
     _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
                             valor_nominal)
+
+    # Ninguna tabla queda pegada al artículo siguiente
+    _espaciar_despues_de_tablas(doc)
 
     # Último paso: un solo espacio entre palabras en todo el documento. Va al
     # final para que alcance también al texto insertado por los pasos previos.
