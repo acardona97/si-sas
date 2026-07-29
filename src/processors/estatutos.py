@@ -587,93 +587,130 @@ def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
 
 def _split_comparecencia_paragraph(doc):
     """
-    Divide el párrafo de comparecencia (con <w:br/> entre accionistas) en
-    múltiples párrafos separados, uno por accionista.
+    Convierte todo salto de línea (<w:br/>) en un párrafo independiente.
 
-    Esto produce el espaciado visual entre accionistas que tiene la lista
-    numerada de los estatutos (cada accionista en su propio párrafo, con
-    el espaciado "after" del template aplicado entre ellos).
+    Word justifica la línea que antecede a un <w:br/> como si fuera una línea
+    intermedia, estirando los espacios de punta a punta. En un texto
+    justificado eso deja huecos enormes entre las últimas palabras. La única
+    forma de evitarlo es que cada bloque sea un párrafo de verdad, no una
+    línea partida dentro del mismo párrafo.
 
-    Sin este post-procesado, los accionistas quedan en un solo párrafo
-    con saltos de línea normales y sin espacio entre ellos.
+    Aplica tanto a la comparecencia de accionistas como al objeto social, que
+    llega redactado en varios párrafos, y a cualquier otro token multilínea.
+    Cada párrafo nuevo se clona del original, así conserva alineación,
+    interlineado, sangría y fuente.
     """
     body = doc._element.body
 
     for p_elem in list(body.findall(qn("w:p"))):
-        text = _get_para_text(p_elem).strip()
-        # Patrón de comparecencia: empieza con "1. " y contiene "2. "
-        if not (text.startswith("1. ") and "2. " in text):
+        if p_elem.find(f".//{qn('w:br')}") is None:
             continue
 
-        # Encontrar el run que contiene los <w:br/> (donde están los
-        # separadores entre accionistas)
         main_run = None
         for r in p_elem.findall(qn("w:r")):
             if r.find(qn("w:br")) is not None:
                 main_run = r
                 break
-
         if main_run is None:
-            continue  # No hay <w:br/>: solo un accionista, nada que dividir
+            continue
 
-        # Extraer los textos de cada accionista del run principal
-        partes = []
-        current = ""
+        # Trocear el contenido del run por los saltos
+        partes, actual = [], ""
         for child in list(main_run):
             tag = child.tag.split("}")[-1]
             if tag == "t":
-                current += child.text or ""
+                actual += child.text or ""
             elif tag == "br":
-                if current.strip():
-                    partes.append(current)
-                current = ""
-        if current.strip():
-            partes.append(current)
+                partes.append(actual)
+                actual = ""
+        partes.append(actual)
 
-        if len(partes) <= 1:
+        # Un tramo vacío es la línea en blanco que separa dos párrafos y se
+        # emite como párrafo vacío, que es lo que da el espaciado del
+        # documento. Solo se descartan los de los extremos.
+        while partes and not partes[0].strip():
+            partes.pop(0)
+        while partes and not partes[-1].strip():
+            partes.pop()
+        if not partes:
             continue
 
-        # Dejar el primer run solo con el texto de partes[0]
+        # El run original se queda con el primer tramo, ya sin saltos
         for child in list(main_run):
-            tag = child.tag.split("}")[-1]
-            if tag in ("t", "br"):
+            if child.tag.split("}")[-1] in ("t", "br"):
                 main_run.remove(child)
         t = OxmlElement("w:t")
         t.text = partes[0]
         t.set(qn("xml:space"), "preserve")
         main_run.append(t)
 
-        # Para cada accionista adicional, clonar todo el párrafo
-        # (preservando spacing, alineación, fuente, indent, etc.) y
-        # establecer su texto.
+        # Plantilla de run para los tramos siguientes: se copia el formato del
+        # run que traía los saltos, no el del párrafo entero. Si el párrafo
+        # empieza con una etiqueta en negrilla ("Objeto social: "), esa
+        # etiqueta pertenece solo al primer tramo y no debe repetirse.
+        run_modelo = deepcopy(main_run)
+        for child in list(run_modelo):
+            if child.tag.split("}")[-1] in ("t", "br"):
+                run_modelo.remove(child)
+
         insert_after = p_elem
         for parte in partes[1:]:
             clon = deepcopy(p_elem)
-            # Encontrar el run del clon para escribir el nuevo texto
-            clon_run = None
+            # El clon se queda solo con las propiedades del párrafo
             for r in clon.findall(qn("w:r")):
-                if r.find(qn("w:t")) is not None or r.find(qn("w:br")) is not None:
-                    clon_run = r
-                    break
-            if clon_run is None:
-                clon_run = clon.find(qn("w:r"))
+                clon.remove(r)
 
-            if clon_run is not None:
-                # Limpiar texto y saltos del clon
-                for child in list(clon_run):
-                    tag = child.tag.split("}")[-1]
-                    if tag in ("t", "br"):
-                        clon_run.remove(child)
-                t_new = OxmlElement("w:t")
-                t_new.text = parte
-                t_new.set(qn("xml:space"), "preserve")
-                clon_run.append(t_new)
+            # Un tramo de continuación no es un elemento nuevo de la lista: si
+            # conservara la numeración automática se comería el número del
+            # artículo siguiente ("Artículo 4." aparecería a mitad del objeto
+            # social y el capital autorizado pasaría a ser el 5).
+            clon_pPr = clon.find(qn("w:pPr"))
+            if clon_pPr is not None:
+                for numPr in clon_pPr.findall(qn("w:numPr")):
+                    clon_pPr.remove(numPr)
 
-            # Insertar el clon como siguiente hermano
+            nuevo_run = deepcopy(run_modelo)
+            t_new = OxmlElement("w:t")
+            t_new.text = parte
+            t_new.set(qn("xml:space"), "preserve")
+            nuevo_run.append(t_new)
+            clon.append(nuevo_run)
+
             insert_after.addnext(clon)
             insert_after = clon
 
-        return  # Solo procesar el primer párrafo de comparecencia
+
+def _colapsar_espacios_dobles(doc):
+    """
+    Deja un solo espacio entre palabras en todo el documento.
+
+    Los espacios de más vienen de dos lados: de la plantilla, que en algunos
+    puntos tiene dos espacios seguidos alrededor de un token, y de los valores
+    sustituidos que terminan o empiezan con espacio. En texto justificado se
+    notan como huecos.
+
+    Recorre los <w:t> de cada párrafo en orden, de modo que también detecta el
+    espacio doble repartido entre dos runs distintos.
+    """
+    for p_elem in doc._element.body.iter(qn("w:p")):
+        anterior_es_espacio = False
+        for t in p_elem.findall(f".//{qn('w:t')}"):
+            texto = t.text or ""
+            if not texto:
+                continue
+            salida = []
+            for ch in texto:
+                if ch == " ":
+                    if anterior_es_espacio:
+                        continue
+                    anterior_es_espacio = True
+                else:
+                    anterior_es_espacio = False
+                salida.append(ch)
+            nuevo = "".join(salida)
+            if nuevo != texto:
+                t.text = nuevo
+                t.set(qn("xml:space"), "preserve")
 
 
 def _enable_auto_hyphenation(doc):
@@ -1199,6 +1236,29 @@ def _persona_nombramiento(p):
     if tipo == "NIT":
         ident = "identificada"  # persona jurídica
     return [(nombre, True), (f", {ident} con {tipo} No. {num}", False)]
+
+
+def _normalizar_bloque(texto):
+    """Limpia un bloque de texto de varias líneas antes de insertarlo.
+
+    El objeto social lo redacta un modelo y puede llegar con líneas en blanco
+    intercaladas, espacios al final de cada línea o un salto sobrante al
+    cierre. Cualquiera de esos deja huecos en el documento justificado.
+    """
+    if not texto:
+        return ""
+    lineas = [" ".join(l.split()) for l in str(texto).splitlines()]
+    # Se conserva una línea en blanco entre párrafos —es la que da el
+    # espaciado del documento— pero nunca dos seguidas, ni al principio ni al
+    # final del bloque.
+    limpias = []
+    for linea in lineas:
+        if not linea and (not limpias or not limpias[-1]):
+            continue
+        limpias.append(linea)
+    while limpias and not limpias[-1]:
+        limpias.pop()
+    return "\n".join(limpias)
 
 
 def _segmentos_a_texto(segmentos):
@@ -1760,7 +1820,7 @@ def generar_estatutos(data, template_path, output_path):
         "{{DOMICILIO_DEPARTAMENTO}}": data.get("departamento", "Antioquia"),
         "{{FECHA_LITERAL}}": _fecha_literal(fecha),
         "{{BLOQUE_COMPARECENCIA_ACCIONISTAS}}": _bloque_comparecencia(accionistas),
-        "{{OBJETO_SOCIAL_DESARROLLADO}}": data.get("objeto_social", ""),
+        "{{OBJETO_SOCIAL_DESARROLLADO}}": _normalizar_bloque(data.get("objeto_social", "")),
         "{{CAPITAL_AUTORIZADO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_autorizado),
         "{{CAPITAL_AUTORIZADO_NUM_ACCIONES_LETRAS_Y_CIFRAS}}": _acciones_letras_cifras(capital_autorizado // valor_nominal),
         "{{CAPITAL_SUSCRITO_MONTO_LETRAS_Y_CIFRAS}}": _monto_letras_cifras(capital_suscrito),
@@ -1795,8 +1855,9 @@ def generar_estatutos(data, template_path, output_path):
     # Manejar sección de apoderado (eliminar o llenar según el caso)
     _handle_apoderado_section(doc, tiene_apoderado, apoderado, rl_principal, nombre_sas, genero_rl)
 
-    # Dividir comparecencia en un párrafo por accionista (para el espaciado
-    # visible entre accionistas que define el formato de lista numerada)
+    # Cada salto de línea pasa a ser un párrafo propio. Esto da el espaciado
+    # entre accionistas y, sobre todo, evita que Word estire la última línea
+    # de cada bloque justificado.
     _split_comparecencia_paragraph(doc)
 
     # Post-procesamiento estético:
@@ -1827,6 +1888,10 @@ def generar_estatutos(data, template_path, output_path):
     # Llenar tabla de accionistas / acciones / capital
     _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
                             valor_nominal)
+
+    # Último paso: un solo espacio entre palabras en todo el documento. Va al
+    # final para que alcance también al texto insertado por los pasos previos.
+    _colapsar_espacios_dobles(doc)
 
     doc.save(output_path)
 

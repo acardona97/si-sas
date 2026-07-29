@@ -930,20 +930,52 @@ def generar_empresa_familiar(data, template_path, output_path):
 # ════════════════════════════════════════════════════════════════
 
 def _wrap_text(texto, font, size, max_width):
-    """Parte un párrafo en líneas que quepan en `max_width` puntos."""
-    palabras = texto.split()
-    lineas, actual = [], ""
-    for palabra in palabras:
-        tentativa = f"{actual} {palabra}".strip()
-        if stringWidth(tentativa, font, size) <= max_width:
+    """Parte un párrafo en líneas que quepan en `max_width` puntos.
+
+    Devuelve listas de palabras, no cadenas, para que quien dibuje pueda
+    justificar repartiendo el sobrante entre los espacios.
+    """
+    lineas, actual = [], []
+    for palabra in texto.split():
+        tentativa = actual + [palabra]
+        if stringWidth(" ".join(tentativa), font, size) <= max_width or not actual:
             actual = tentativa
         else:
-            if actual:
-                lineas.append(actual)
-            actual = palabra
+            lineas.append(actual)
+            actual = [palabra]
     if actual:
         lineas.append(actual)
     return lineas
+
+
+def _dibujar_linea_justificada(c, palabras, x, y, font, size, max_width,
+                               justificar):
+    """Dibuja una línea repartiendo el sobrante entre los espacios.
+
+    La última línea de cada párrafo va sin justificar, como corresponde: si se
+    estirara, quedarían huecos enormes entre las últimas palabras.
+    """
+    c.setFont(font, size)
+    texto = " ".join(palabras)
+    if not justificar or len(palabras) == 1:
+        c.drawString(x, y, texto)
+        return
+
+    ancho_palabras = sum(stringWidth(p, font, size) for p in palabras)
+    sobrante = max_width - ancho_palabras
+    hueco = sobrante / (len(palabras) - 1)
+    # Un hueco desmedido afea más que una línea corta: si la línea quedó muy
+    # vacía, se deja sin justificar.
+    if hueco > stringWidth(" ", font, size) * 4:
+        c.drawString(x, y, texto)
+        return
+
+    cursor = x
+    for i, palabra in enumerate(palabras):
+        c.drawString(cursor, y, palabra)
+        cursor += stringWidth(palabra, font, size)
+        if i < len(palabras) - 1:
+            cursor += hueco
 
 
 def generar_carta_no_control(data, output_path):
@@ -998,7 +1030,7 @@ def generar_carta_no_control(data, output_path):
         y = TOPE
 
     def linea(texto, font=SERIF, size=SIZE):
-        """Escribe una línea, pasando de página si ya no cabe sobre el pie."""
+        """Escribe una línea suelta, pasando de página si ya no cabe."""
         nonlocal y
         if y < PISO:
             salto_pagina()
@@ -1007,9 +1039,17 @@ def generar_carta_no_control(data, output_path):
         y -= LEADING
 
     def parrafo(texto, font=SERIF, size=SIZE, space_after=9):
+        """Escribe un párrafo justificado a ambos márgenes."""
         nonlocal y
-        for l in _wrap_text(texto, font, size, WIDTH):
-            linea(l, font, size)
+        lineas = _wrap_text(texto, font, size, WIDTH)
+        for i, palabras in enumerate(lineas):
+            if y < PISO:
+                salto_pagina()
+            _dibujar_linea_justificada(
+                c, palabras, LEFT, y, font, size, WIDTH,
+                justificar=(i < len(lineas) - 1),   # la última, no
+            )
+            y -= LEADING
         y -= space_after
 
     # ── Encabezado ──
@@ -1021,10 +1061,10 @@ def generar_carta_no_control(data, output_path):
     linea("E.  S.  D.")
     y -= LEADING
 
-    for l in _wrap_text("Asunto: Constitución de " + nombre_sas
-                        + " — no configuración de situación de control",
-                        SERIF_B, SIZE, WIDTH):
-        linea(l, SERIF_B)
+    for palabras in _wrap_text("Asunto: Constitución de " + nombre_sas
+                               + " — no configuración de situación de control",
+                               SERIF_B, SIZE, WIDTH):
+        linea(" ".join(palabras), SERIF_B)
     y -= LEADING
 
     # ── Cuerpo ──

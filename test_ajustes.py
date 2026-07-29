@@ -39,6 +39,27 @@ def texto_doc(path):
     return "\n".join(partes)
 
 
+def defectos_de_formato(path):
+    """Busca en el .docx los dos defectos que estiran el texto justificado.
+
+    1. Saltos de línea dentro de un párrafo: Word justifica la línea que
+       antecede al salto, dejando huecos enormes entre las últimas palabras.
+    2. Espacios dobles, que en justificado se ven como agujeros.
+    """
+    import re
+    from docx.oxml.ns import qn
+    doc = Document(path)
+    saltos, dobles = [], []
+    for i, p in enumerate(doc._element.body.findall(qn("w:p"))):
+        texto = "".join(t.text or "" for t in p.findall(f".//{qn('w:t')}"))
+        if p.find(f".//{qn('w:br')}") is not None:
+            saltos.append((i, texto[:70]))
+        m = re.search(r"\S(  +)\S", texto)
+        if m:
+            dobles.append((i, texto[max(0, m.start() - 30):m.end() + 30]))
+    return saltos, dobles
+
+
 def runs_en_negrilla(path):
     """Todos los fragmentos que quedaron en negrilla en el documento."""
     from docx.oxml.ns import qn
@@ -128,7 +149,19 @@ def test_estatutos():
              "id_num": "43222222", "expedicion": "Envigado", "domicilio": "Envigado",
              "porcentaje": 40, "genero": "F"},
         ],
-        "objeto_social": "Actividades de prueba.",
+        # Redactado en varios párrafos, con líneas en blanco, espacios al
+        # final y un salto sobrante: justo lo que devuelve el modelo.
+        "objeto_social": (
+            "La sociedad tendrá como objeto social principal las actividades de "
+            "desarrollo de sistemas informáticos.   \n"
+            "\n"
+            "Adicionalmente, la sociedad podrá celebrar toda clase de actos y "
+            "contratos civiles y comerciales; importar y exportar bienes y "
+            "servicios; participar como socia o accionista en otras sociedades; "
+            "así como obtener créditos y financiamientos de cualquier naturaleza "
+            "con entidades financieras para fortalecer su operación y expansión "
+            "empresarial.\n"
+        ),
         # 500.000.000 / 100 = 5.000.000 acciones
         "capital_autorizado": 500_000_000,
         "capital_suscrito": 2_000_000,
@@ -215,6 +248,36 @@ def test_estatutos():
                    for n in negritas), sorted(negritas)
     print(f"OK  estatutos con nominal $100 + junta + revisor PJ -> {out}")
     print(f"OK  nombres propios en negrilla ({len(esperados)} verificados)")
+
+    # ── Nada que estire el texto justificado ──
+    saltos, dobles = defectos_de_formato(out)
+    assert not saltos, (
+        "quedaron saltos de línea dentro de un párrafo; Word estira la línea "
+        f"anterior al salto: {saltos}"
+    )
+    assert not dobles, f"quedaron espacios dobles: {dobles}"
+
+    # El objeto social multipárrafo se partió en párrafos de verdad
+    parrafos = [p.text.strip() for p in Document(out).paragraphs if p.text.strip()]
+    assert any(p.startswith("Adicionalmente, la sociedad podrá celebrar") for p in parrafos), \
+        "el segundo párrafo del objeto social debía quedar como párrafo propio"
+    assert any(p.endswith("expansión empresarial.") for p in parrafos)
+
+    # Los tramos de continuación no pueden llevar numeración automática: si la
+    # llevaran, se comerían el número del artículo siguiente.
+    from docx.oxml.ns import qn as _qn
+    doc_v = Document(out)
+    for p in doc_v.paragraphs:
+        if p.text.strip().startswith("Adicionalmente, la sociedad podrá celebrar"):
+            pPr = p._element.find(_qn("w:pPr"))
+            assert pPr is None or pPr.find(_qn("w:numPr")) is None, \
+                "el párrafo de continuación no debe numerarse como artículo"
+            break
+    # Y el articulado sigue corrido: el capital autorizado conserva su artículo
+    assert any(p.startswith("Capital autorizado:") for p in parrafos), \
+        "se perdió el artículo de capital autorizado"
+    print("OK  sin saltos internos ni espacios dobles (formato simétrico)")
+    print("OK  la numeración de artículos no se altera al partir párrafos")
 
 
 def test_estatutos_defaults():
@@ -308,7 +371,47 @@ def test_carta_no_control():
             if cuerpo:
                 assert min(p[0] for p in cuerpo) > 40, "hay texto al borde de la hoja"
 
+        # ── El cuerpo va justificado a ambos márgenes ──
+        # Se agrupan los fragmentos por línea y se mide dónde termina cada una:
+        # en texto justificado casi todas deben llegar al margen derecho.
+        from reportlab.pdfbase.pdfmetrics import stringWidth
+        piezas = []
+
+        def _v(text, cm, tm, font_dict, font_size):
+            if text and text.strip():
+                piezas.append((round(tm[5], 1), tm[4], text, round(font_size, 1)))
+
+        PdfReader(out).pages[0].extract_text(visitor_text=_v)
+        MARGEN_DER = 612 - 72          # carta menos margen derecho
+        lineas = {}
+        for y, x, txt, sz in piezas:
+            if sz <= 9:                # el pie no cuenta
+                continue
+            # pypdf agrega un salto a cada fragmento: se descarta para medir.
+            lineas.setdefault(y, []).append(x + stringWidth(txt.strip(), "Times-Roman", sz))
+
+        # Una línea justificada se dibuja palabra por palabra, así que llega
+        # con varios fragmentos; las demás (últimas de párrafo, encabezado y
+        # firma) vienen en uno solo y van alineadas a la izquierda.
+        justificadas = [max(v) for v in lineas.values() if len(v) > 1]
+        sueltas = [max(v) for v in lineas.values() if len(v) == 1]
+
+        assert len(justificadas) >= 10, (
+            f"casi ninguna línea salió justificada ({len(justificadas)}): "
+            "el cuerpo de la carta debe ir justificado a ambos márgenes"
+        )
+        desalineadas = [f for f in justificadas if abs(f - MARGEN_DER) > 3]
+        assert not desalineadas, (
+            f"hay líneas justificadas que no llegan al margen derecho "
+            f"({MARGEN_DER}): {[round(f, 1) for f in desalineadas]}"
+        )
+        # Ninguna línea puede desbordarse del margen
+        assert max(justificadas + sueltas) < MARGEN_DER + 3, \
+            f"hay texto fuera del margen: {max(justificadas + sueltas):.1f}"
+
         print(f"OK  carta no situación de control ({'único' if unico else 'mayoritario'}) -> {out}")
+        print(f"    justificada: {len(justificadas)} líneas al margen exacto, "
+              f"{len(sueltas)} de cierre de párrafo")
 
 
 # ════════════════════════════════════════════════════════════════
