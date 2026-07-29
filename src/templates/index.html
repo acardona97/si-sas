@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260728a">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260728b">
 </head>
 <body>
 
@@ -86,10 +86,10 @@
                 <div class="form-group" id="homonimia-block">
                     <label>Verificación de homonimia en el RUES <span style="color:var(--danger)">— obligatoria</span></label>
                     <div class="info-box">
-                        <strong>La Cámara devuelve el trámite si el nombre ya existe.</strong>
-                        Hay que consultarlo en el RUES antes de seguir. La comparación es sobre el
-                        <strong>nombre distintivo</strong>: sin el tipo societario (S.A.S., LTDA, S.A.),
-                        sin tildes y sin puntuación.
+                        <strong>La Cámara devuelve el trámite si la razón social ya está registrada.</strong>
+                        Hay que consultarla en el RUES antes de seguir. La comparación se hace sobre la
+                        <strong>parte distintiva de la razón social</strong>: sin el tipo societario
+                        (S.A.S., LTDA, S.A.), sin tildes y sin puntuación.
 
                         <div class="homo-paso" id="homo-paso-1" style="margin-top:.9rem">
                             <span class="homo-paso-num">1</span>
@@ -122,38 +122,95 @@
                     </span>
 
                     <div id="homonimia-declaracion" class="hidden" style="margin-top:1.5rem">
-                        <label>¿Qué le mostró el RUES?</label>
-                        <div class="radio-cards">
-                            <label class="radio-card">
+                        <label>¿Cuál de estas cuatro pantallas le mostró el RUES?</label>
+                        <span class="hint" style="display:block;margin-bottom:.9rem">
+                            Compare con lo que tiene en la otra pestaña y marque la que coincida.
+                            El color de la izquierda le indica qué pasa con su trámite.
+                        </span>
+
+                        <div class="rues-opciones">
+                            <label class="rues-opcion" data-nivel="ok">
                                 <input type="radio" name="homonimia" value="min" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Ningún resultado</span>
-                                <span class="radio-desc">
-                                    El RUES dice textualmente:
-                                    <span class="homo-ejemplo">No se encontraron resultados</span>
+                                <span class="rues-marca"></span>
+                                <span class="rues-opcion-main">
+                                    <span class="rues-chip">Razón social disponible</span>
+                                    <span class="rues-opcion-titulo">El RUES no arrojó ningún resultado</span>
+                                    <span class="rues-opcion-desc">
+                                        La búsqueda quedó vacía: no hay ninguna sociedad registrada con
+                                        esa razón social. Puede constituir con ella.
+                                    </span>
+                                </span>
+                                <span class="rues-mock">
+                                    <span class="rues-mock-label">Así se ve en el RUES</span>
+                                    <span class="rues-mock-vacio">No se encontraron resultados</span>
                                 </span>
                             </label>
-                            <label class="radio-card">
+
+                            <label class="rues-opcion" data-nivel="aviso">
                                 <input type="radio" name="homonimia" value="similar" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Salieron sociedades, pero ninguna se llama igual</span>
-                                <span class="radio-desc">
-                                    Aparecen nombres que comparten alguna palabra, sin coincidir por completo.
-                                    Ej.: busqué <em>ANDINA</em> y salió <em>ANDINA DEL CARIBE</em>.
+                                <span class="rues-marca"></span>
+                                <span class="rues-opcion-main">
+                                    <span class="rues-chip">Puede haber objeción</span>
+                                    <span class="rues-opcion-titulo">Salieron sociedades parecidas, ninguna igual</span>
+                                    <span class="rues-opcion-desc">
+                                        Aparecen razones sociales que comparten alguna palabra con la suya,
+                                        pero ninguna coincide por completo. Ej.: buscó <em>ANDINA</em> y
+                                        salió <em>ANDINA DEL CARIBE S.A.S.</em>
+                                    </span>
+                                </span>
+                                <span class="rues-mock">
+                                    <span class="rues-mock-label">Así se ve en el RUES</span>
+                                    <span class="rues-mock-card">
+                                        <span class="rues-mock-rs">ANDINA DEL CARIBE S.A.S.</span>
+                                        <span class="rues-mock-campo">Estado</span>
+                                        <span class="rues-mock-valor">Activa</span>
+                                        <span class="rues-mock-conteo">Cerca de 3 resultados</span>
+                                    </span>
                                 </span>
                             </label>
-                            <label class="radio-card">
+
+                            <label class="rues-opcion" data-nivel="aviso">
                                 <input type="radio" name="homonimia" value="identica_cancelada" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Salió una con el nombre exacto, pero está cancelada o liquidada</span>
-                                <span class="radio-desc">
-                                    El nombre coincide, y en la ficha el <strong>Estado</strong> dice
-                                    Cancelada o Liquidada — no Activa.
+                                <span class="rues-marca"></span>
+                                <span class="rues-opcion-main">
+                                    <span class="rues-chip">Existió antes</span>
+                                    <span class="rues-opcion-titulo">Salió la razón social exacta, pero ya no opera</span>
+                                    <span class="rues-opcion-desc">
+                                        La razón social coincide por completo, y en la ficha el campo
+                                        <strong>Estado</strong> dice Cancelada o Liquidada.
+                                        Fíjese bien en ese campo: si dijera Activa, es la última opción.
+                                    </span>
+                                </span>
+                                <span class="rues-mock">
+                                    <span class="rues-mock-label">Así se ve en el RUES</span>
+                                    <span class="rues-mock-card">
+                                        <span class="rues-mock-rs">SU RAZÓN SOCIAL S.A.S.</span>
+                                        <span class="rues-mock-campo">Estado</span>
+                                        <span class="rues-mock-valor">Cancelada</span>
+                                        <span class="rues-mock-conteo">Cerca de 1 resultados Exacto</span>
+                                    </span>
                                 </span>
                             </label>
-                            <label class="radio-card">
+
+                            <label class="rues-opcion" data-nivel="alto">
                                 <input type="radio" name="homonimia" value="identica_activa" onchange="onHomonimiaChange()">
-                                <span class="radio-title">Salió una con el nombre exacto y está ACTIVA</span>
-                                <span class="radio-desc">
-                                    El RUES muestra la coincidencia y el <strong>Estado</strong> dice Activa.
-                                    Ej.: <span class="homo-ejemplo">Cerca de 1 resultados Exacto</span>
+                                <span class="rues-marca"></span>
+                                <span class="rues-opcion-main">
+                                    <span class="rues-chip">Razón social no disponible</span>
+                                    <span class="rues-opcion-titulo">Salió la razón social exacta y está ACTIVA</span>
+                                    <span class="rues-opcion-desc">
+                                        La razón social coincide por completo y el campo <strong>Estado</strong>
+                                        dice Activa. Es el caso que hace devolver el trámite.
+                                    </span>
+                                </span>
+                                <span class="rues-mock">
+                                    <span class="rues-mock-label">Así se ve en el RUES</span>
+                                    <span class="rues-mock-card">
+                                        <span class="rues-mock-rs">SU RAZÓN SOCIAL S.A.S.</span>
+                                        <span class="rues-mock-campo">Estado</span>
+                                        <span class="rues-mock-valor alerta">Activa</span>
+                                        <span class="rues-mock-conteo">Cerca de 1 resultados Exacto</span>
+                                    </span>
                                 </span>
                             </label>
                         </div>
@@ -942,6 +999,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260728c"></script>
+<script src="/static/js/app.js?v=20260728d"></script>
 </body>
 </html>

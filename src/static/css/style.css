@@ -2421,14 +2421,161 @@ fieldset legend {
 }
 .homo-ack input { margin-top: 0.2rem; flex: 0 0 auto; }
 
-/* ─── Ejemplo visual de lo que muestra el RUES ─── */
-.homo-ejemplo {
-    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 0.78rem;
-    background: #F4F7FA; border: 1px solid #D6E2EC;
-    border-radius: var(--radius);
-    padding: 0.5rem 0.7rem; margin-top: 0.45rem;
-    color: #2B4A63;
+/* ══════════════════════════════════════════════════════════════
+   LAS CUATRO RESPUESTAS POSIBLES DEL RUES
+   No es un formulario, es una tabla de veredictos: el abogado
+   acaba de ver una pantalla y tiene que reconocerla, no leerla.
+   Por eso cada opción lleva a la derecha una réplica de lo que
+   el RUES muestra, y a la izquierda un riel de color que dice
+   qué pasa si escoge esa — visible ANTES de escoger.
+   ══════════════════════════════════════════════════════════════ */
+
+.rues-opciones {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+/* Se anida bajo .rues-opciones a propósito: estas opciones son <label> y
+   viven dentro de un .form-group, cuya regla `.form-group label` fuerza
+   display:block y ganaría por especificidad. */
+.rues-opciones .rues-opcion {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.15rem 1fr minmax(185px, 215px);
+    align-items: start;
+    gap: 0 0.95rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    /* El riel de severidad es el borde izquierdo: así siempre abarca todo el
+       alto de la fila, sin depender de cómo se acomode la rejilla. */
+    border-left: 5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.05rem 1.2rem;
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.rues-opcion:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.rues-opcion input { position: absolute; opacity: 0; pointer-events: none; }
+
+.rues-opcion[data-nivel="ok"]    { border-left-color: var(--success); }
+.rues-opcion[data-nivel="aviso"] { border-left-color: #B8860B; }
+.rues-opcion[data-nivel="alto"]  { border-left-color: var(--danger); }
+
+/* Marca de selección */
+.rues-marca {
+    grid-column: 1; margin-top: 0.2rem;
+    width: 1.15rem; height: 1.15rem; border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+    transition: border-color .18s ease, background .18s ease;
+}
+.rues-marca::after {
+    content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%;
+    background: transparent; transition: background .18s ease;
+}
+
+.rues-opcion-main { grid-column: 2; min-width: 0; display: block; }
+
+.rues-chip {
+    display: inline-block;
+    font-size: 0.66rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.09em;
+    padding: 0.22rem 0.6rem; border-radius: 100px;
+    margin-bottom: 0.5rem;
+}
+.rues-opcion[data-nivel="ok"] .rues-chip {
+    background: rgba(30,122,74,0.12); color: var(--success);
+}
+.rues-opcion[data-nivel="aviso"] .rues-chip {
+    background: rgba(184,134,11,0.15); color: #8A6508;
+}
+.rues-opcion[data-nivel="alto"] .rues-chip {
+    background: rgba(192,57,43,0.12); color: var(--danger);
+}
+
+.rues-opcion-titulo {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.02rem; font-weight: 600; line-height: 1.3;
+    color: var(--navy); margin-bottom: 0.35rem;
+}
+.rues-opcion-desc {
+    display: block;
+    font-size: 0.83rem; line-height: 1.5; color: var(--text-secondary);
+}
+.rues-opcion-desc em { color: var(--text); font-style: italic; }
+
+/* ─── Réplica de la pantalla del RUES ─── */
+.rues-mock { grid-column: 3; min-width: 0; display: block; }
+.rues-mock-label {
+    display: block;
+    font-size: 0.6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); margin-bottom: 0.35rem;
+}
+.rues-mock-vacio {
+    display: block;
+    background: #DCEFF7; border: 1px solid #B9DCEC;
+    border-radius: 4px; padding: 0.7rem 0.75rem;
+    font-size: 0.8rem; color: #12496B;
+}
+.rues-mock-card {
+    display: block;
+    background: #fff; border: 1px solid #CFE3EF;
+    border-radius: 6px; padding: 0.6rem 0.7rem;
+    font-size: 0.75rem; line-height: 1.45;
+}
+.rues-mock-rs {
+    display: block; font-weight: 700; color: #12558C;
+    margin-bottom: 0.3rem; word-break: break-word;
+}
+.rues-mock-campo {
+    display: block; font-weight: 600; color: #12558C; font-size: 0.7rem;
+}
+.rues-mock-valor { display: block; color: #1F8A4C; }
+.rues-mock-valor.alerta { color: var(--danger); font-weight: 600; }
+.rues-mock-conteo {
+    display: block; margin-top: 0.4rem;
+    font-size: 0.68rem; color: var(--text-muted); font-style: italic;
+}
+
+/* ─── Estado elegido ─── */
+.rues-opcion.elegida { box-shadow: var(--shadow-md); }
+.rues-opcion.elegida .rues-marca::after { background: currentColor; }
+
+.rues-opcion[data-nivel="ok"].elegida {
+    border-color: rgba(30,122,74,0.5); background: rgba(30,122,74,0.04);
+}
+.rues-opcion[data-nivel="ok"].elegida .rues-marca {
+    border-color: var(--success); color: var(--success);
+}
+.rues-opcion[data-nivel="aviso"].elegida {
+    border-color: rgba(184,134,11,0.55); background: rgba(184,134,11,0.05);
+}
+.rues-opcion[data-nivel="aviso"].elegida .rues-marca {
+    border-color: #B8860B; color: #B8860B;
+}
+.rues-opcion[data-nivel="alto"].elegida {
+    border-color: rgba(192,57,43,0.55); background: rgba(192,57,43,0.04);
+}
+.rues-opcion[data-nivel="alto"].elegida .rues-marca {
+    border-color: var(--danger); color: var(--danger);
+}
+
+.rues-opcion input:focus-visible ~ .rues-marca {
+    outline: 2px solid var(--gold); outline-offset: 2px;
+}
+
+@media (max-width: 680px) {
+    .rues-opcion { grid-template-columns: 1.15rem 1fr; }
+    .rues-mock {
+        grid-column: 2; margin-top: 0.9rem;
+        padding-top: 0.9rem; border-top: 1px dashed var(--border);
+    }
 }
 
 @media (max-width: 640px) {

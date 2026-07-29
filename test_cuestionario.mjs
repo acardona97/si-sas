@@ -362,11 +362,34 @@ console.log('\n─── Homonimia: nombre distintivo, enlace al RUES y niveles 
     assert.equal(w.validateStep(1), false, 'consultó pero no declaró');
     assert.match(w.__alerts[0], /marque cuál de los cuatro resultados/);
 
+    // ── Las cuatro opciones y su semáforo ──
+    const opciones = [...w.document.querySelectorAll('.rues-opcion')];
+    assert.equal(opciones.length, 4, 'deben seguir siendo cuatro opciones');
+    assert.deepEqual(opciones.map(o => o.dataset.nivel),
+        ['ok', 'aviso', 'aviso', 'alto'], 'semáforo de severidad');
+    assert.deepEqual(opciones.map(o => o.querySelector('input').value),
+        ['min', 'similar', 'identica_cancelada', 'identica_activa'],
+        'los valores del cuestionario no pueden cambiar');
+    // Cada opción muestra la réplica de la pantalla del RUES
+    assert.equal(w.document.querySelectorAll('.rues-mock').length, 4);
+    assert.match(opciones[0].textContent, /No se encontraron resultados/);
+    assert.match(opciones[3].textContent, /Cerca de 1 resultados Exacto/);
+    // El instructivo habla de razón social, no de "nombre"
+    const bloque = w.document.getElementById('homonimia-declaracion').textContent;
+    assert.ok(!/\bnombre\b/i.test(bloque),
+        'el instructivo debe decir "razón social": ' +
+        (bloque.match(/.{0,40}\bnombre\b.{0,40}/i) || [''])[0]);
+    console.log('  OK  cuatro opciones con semáforo, réplica del RUES y lenguaje de razón social');
+
     // ── Veredictos ──
     marcarRadio(w, 'homonimia', 'min');
+    // El resaltado de la opción elegida lo maneja onHomonimiaChange, no el
+    // listener genérico de .radio-cards
+    assert.ok(opciones[0].classList.contains('elegida'), 'la opción elegida debía resaltarse');
+    assert.ok(!opciones[3].classList.contains('elegida'));
     const veredicto = w.document.getElementById('homonimia-resultado');
     assert.ok(veredicto.classList.contains('ok'), 'clase del veredicto: ' + veredicto.className);
-    assert.match(veredicto.textContent, /NOMBRE DISPONIBLE/);
+    assert.match(veredicto.textContent, /RAZÓN SOCIAL DISPONIBLE/);
     assert.ok(w.validateStep(1), 'riesgo mínimo debía pasar: ' + w.__alerts);
     assert.equal(w.getHomonimiaData().consulta_realizada, true);
 
@@ -382,13 +405,13 @@ console.log('\n─── Homonimia: nombre distintivo, enlace al RUES y niveles 
 
     marcarRadio(w, 'homonimia', 'identica_activa');
     assert.ok(veredicto.classList.contains('alto'), 'clase: ' + veredicto.className);
-    assert.match(veredicto.textContent, /NOMBRE NO DISPONIBLE/);
+    assert.match(veredicto.textContent, /RAZÓN SOCIAL NO DISPONIBLE/);
     assert.match(veredicto.textContent, /devolver el trámite por homonimia/);
     assert.ok(!w.document.getElementById('homonimia-ack-wrap').classList.contains('hidden'),
         'debía pedir el reconocimiento expreso');
     w.__alerts = [];
     assert.equal(w.validateStep(1), false, 'sin reconocer el riesgo no debía pasar');
-    assert.match(w.__alerts[0], /NO está disponible/);
+    assert.match(w.__alerts[0], /razón social NO está disponible/);
     w.document.getElementById('homonimia_ack').checked = true;
     w.onHomonimiaChange();
     assert.ok(w.validateStep(1), 'con el riesgo aceptado debía pasar (solo advertencia)');
@@ -404,6 +427,8 @@ console.log('\n─── Homonimia: nombre distintivo, enlace al RUES y niveles 
     assert.ok(w.document.getElementById('homonimia-declaracion').classList.contains('hidden'));
     assert.ok(!w.document.getElementById('homonimia-link').classList.contains('consultado'),
         'el botón debía volver a su estado sin consultar');
+    assert.ok(![...w.document.querySelectorAll('.rues-opcion')].some(o => o.classList.contains('elegida')),
+        'al reiniciar no debe quedar ninguna opción resaltada');
     w.__alerts = [];
     assert.equal(w.validateStep(1), false, 'con nombre nuevo hay que consultar otra vez');
     assert.match(w.__alerts[0], /debe consultar la razón social en el RUES/);

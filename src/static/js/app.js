@@ -85,8 +85,8 @@ function validateStep(step) {
             return false;
         }
         if (homonimia.resultado === 'identica_activa' && !homonimia.riesgo_aceptado) {
-            alert('El nombre NO está disponible: ya existe una sociedad activa que se llama igual.\n\n'
-                  + 'Lo recomendable es cambiar la razón social. Si aun así quiere seguir, marque '
+            alert('La razón social NO está disponible: ya existe una sociedad activa registrada '
+                  + 'con ella.\n\nLo recomendable es cambiarla. Si aun así quiere seguir, marque '
                   + 'la casilla donde acepta el riesgo de que la Cámara devuelva el trámite.');
             irAlBloque();
             return false;
@@ -770,8 +770,8 @@ function resetHomonimia() {
     _distintivoConsultado = null;
     document.querySelectorAll('input[name="homonimia"]').forEach(r => {
         r.checked = false;
-        r.closest('.radio-card').classList.remove('selected');
     });
+    document.querySelectorAll('.rues-opcion').forEach(o => o.classList.remove('elegida'));
     const ack = document.getElementById('homonimia_ack');
     if (ack) ack.checked = false;
     document.getElementById('homonimia-declaracion').classList.add('hidden');
@@ -811,32 +811,32 @@ function marcarConsultaRues() {
 const HOMONIMIA_RIESGO = {
     min: {
         nivel: 'mínimo', clase: 'ok', icono: '✓',
-        titulo: 'NOMBRE DISPONIBLE',
-        texto: 'El RUES no encontró ninguna sociedad con este nombre. '
+        titulo: 'RAZÓN SOCIAL DISPONIBLE',
+        texto: 'El RUES no encontró ninguna sociedad registrada con esta razón social. '
              + 'Puede continuar con la constitución.',
     },
     similar: {
         nivel: 'medio', clase: 'aviso', icono: '!',
         titulo: 'ATENCIÓN — puede haber objeción',
-        texto: 'Hay sociedades con nombres parecidos. Como ninguna se llama exactamente '
-             + 'igual, el trámite normalmente pasa, pero la Cámara puede objetarlo si '
+        texto: 'Hay sociedades con razones sociales parecidas. Como ninguna coincide por '
+             + 'completo, el trámite normalmente pasa, pero la Cámara puede objetarlo si '
              + 'considera que se presta a confusión. <strong>Si puede, agregue una palabra '
-             + 'que lo diferencie más.</strong>',
+             + 'que la diferencie más.</strong>',
     },
     identica_cancelada: {
         nivel: 'medio', clase: 'aviso', icono: '!',
-        titulo: 'ATENCIÓN — el nombre existió antes',
-        texto: 'Existe el nombre exacto, pero la sociedad ya no está activa. En general se '
-             + 'admite, aunque la Cámara puede pedir aclaración. '
+        titulo: 'ATENCIÓN — esta razón social ya existió',
+        texto: 'La razón social exacta ya está registrada, pero esa sociedad no está activa. '
+             + 'En general se admite, aunque la Cámara puede pedir aclaración. '
              + '<strong>Confirme en el RUES que el estado dice Cancelada o Liquidada</strong> '
              + 'y no Activa: si estuviera activa, el riesgo es máximo.',
     },
     identica_activa: {
         nivel: 'máximo', clase: 'alto', icono: '✕',
-        titulo: 'NOMBRE NO DISPONIBLE',
-        texto: 'Ya existe una sociedad activa con este mismo nombre distintivo. '
+        titulo: 'RAZÓN SOCIAL NO DISPONIBLE',
+        texto: 'Ya existe una sociedad activa con esta misma razón social. '
              + '<strong>La Cámara va a devolver el trámite por homonimia.</strong> '
-             + 'Lo recomendable es volver arriba y cambiar la razón social ahora, '
+             + 'Lo recomendable es volver arriba y cambiarla ahora, '
              + 'antes de llenar el resto del formulario.',
     },
 };
@@ -845,6 +845,13 @@ function onHomonimiaChange() {
     const sel = document.querySelector('input[name="homonimia"]:checked');
     const caja = document.getElementById('homonimia-resultado');
     const ackWrap = document.getElementById('homonimia-ack-wrap');
+
+    // Estas opciones no usan .radio-card, así que su resaltado no lo maneja
+    // el listener genérico de radio-cards: se marca aquí.
+    document.querySelectorAll('.rues-opcion').forEach(o => {
+        o.classList.toggle('elegida', !!o.querySelector('input')?.checked);
+    });
+
     if (!sel) { caja.classList.add('hidden'); ackWrap.classList.add('hidden'); return; }
 
     const r = HOMONIMIA_RIESGO[sel.value];
