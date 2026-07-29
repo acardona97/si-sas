@@ -1,0 +1,2021 @@
+{
+  "version": "1.0.0",
+  "revisado_el": "2026-07-29",
+  "aplica_a": "SAS",
+  "nota": "El CIIU es un indicador inicial, no una prueba concluyente. Un mismo código puede comprender actividades reguladas y ordinarias. Las decisiones condicionales dependen de la modalidad declarada y del objeto social.",
+  "niveles": {
+    "BLOCK_NOT_COMMERCIAL_ENTITY": "La actividad no corresponde a una sociedad mercantil.",
+    "BLOCK_NOT_SAS": "Requiere otro vehículo jurídico. Cargar una autorización no lo subsana.",
+    "REQUIRES_PRIOR_AUTHORIZATION": "Compatible con S.A.S., pero exige adjuntar el acto administrativo previo.",
+    "CONDITIONAL_REVIEW": "El código es demasiado amplio: se decide con preguntas.",
+    "ALLOWED_WITH_OPERATING_WARNING": "Puede constituirse, pero necesita habilitación antes de operar."
+  },
+  "reglas": [
+    {
+      "codigo": "0010",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Código reservado a personas naturales",
+      "mensaje": "Este código clasifica la situación de una persona natural (empleado, pensionado, rentista de capital o sin actividad económica). No describe una actividad empresarial y no puede ser el objeto de una sociedad.",
+      "fundamento": [
+        "Clasificación especial de uso tributario y registral, no actividad mercantil"
+      ]
+    },
+    {
+      "codigo": "0020",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Código reservado a personas naturales",
+      "mensaje": "Este código clasifica la situación de una persona natural (empleado, pensionado, rentista de capital o sin actividad económica). No describe una actividad empresarial y no puede ser el objeto de una sociedad.",
+      "fundamento": [
+        "Clasificación especial de uso tributario y registral, no actividad mercantil"
+      ]
+    },
+    {
+      "codigo": "0081",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Código reservado a personas naturales",
+      "mensaje": "Este código clasifica la situación de una persona natural (empleado, pensionado, rentista de capital o sin actividad económica). No describe una actividad empresarial y no puede ser el objeto de una sociedad.",
+      "fundamento": [
+        "Clasificación especial de uso tributario y registral, no actividad mercantil"
+      ]
+    },
+    {
+      "codigo": "0082",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Código reservado a personas naturales",
+      "mensaje": "Este código clasifica la situación de una persona natural (empleado, pensionado, rentista de capital o sin actividad económica). No describe una actividad empresarial y no puede ser el objeto de una sociedad.",
+      "fundamento": [
+        "Clasificación especial de uso tributario y registral, no actividad mercantil"
+      ]
+    },
+    {
+      "codigo": "0090",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Código reservado a personas naturales",
+      "mensaje": "Este código clasifica la situación de una persona natural (empleado, pensionado, rentista de capital o sin actividad económica). No describe una actividad empresarial y no puede ser el objeto de una sociedad.",
+      "fundamento": [
+        "Clasificación especial de uso tributario y registral, no actividad mercantil"
+      ]
+    },
+    {
+      "codigo": "2029",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Actividad permitida, salvo que involucre armas o explosivos",
+      "mensaje": "Puede constituirse como S.A.S. Verifique si su operación concreta requiere permisos sectoriales antes de empezar.",
+      "terminos_disparadores": [
+        "armas",
+        "armamento",
+        "municiones",
+        "explosivos",
+        "pólvora",
+        "polvora",
+        "granadas",
+        "misiles",
+        "material de guerra"
+      ],
+      "preguntas": [
+        {
+          "id": "armas_explosivos",
+          "texto": "¿La actividad involucrará armas, municiones, explosivos o material de guerra?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad habilitada bajo el régimen excepcional de material de guerra",
+        "autoridad": "Departamento Control Comercio de Armas, Municiones y Explosivos (DCCAE)",
+        "mensaje": "Las armas, municiones y explosivos están sometidos a reserva estatal y a un régimen excepcional de autorización."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S."
+      },
+      "fundamento": [
+        "Decreto 2535 de 1993"
+      ]
+    },
+    {
+      "codigo": "2520",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Armas, municiones y material de guerra",
+      "tipo_entidad_requerido": "Entidad habilitada bajo el régimen excepcional de material de guerra",
+      "autoridad": "Departamento Control Comercio de Armas, Municiones y Explosivos (DCCAE)",
+      "mensaje": "La fabricación de armas y municiones está sometida a reserva estatal y a un régimen excepcional de autorización. No puede tramitarse por el flujo ordinario de constitución de una S.A.S.",
+      "fundamento": [
+        "Decreto 2535 de 1993",
+        "Reserva estatal sobre material de guerra"
+      ]
+    },
+    {
+      "codigo": "3040",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Vehículos militares de combate",
+      "mensaje": "La fabricación de vehículos militares de combate está sometida al régimen de material de guerra. No se confunde con carrocerías, vehículos especiales o blindaje civil.",
+      "preguntas": [
+        {
+          "id": "vehiculos_combate",
+          "texto": "¿Fabricará vehículos militares de combate o material de guerra?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad habilitada bajo el régimen excepcional de material de guerra",
+        "autoridad": "Departamento Control Comercio de Armas, Municiones y Explosivos (DCCAE)",
+        "mensaje": "El material de guerra está sometido a reserva estatal y no puede tramitarse por el flujo ordinario de constitución."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. La fabricación de carrocerías, vehículos especiales o blindaje civil no es material de guerra."
+      },
+      "fundamento": [
+        "Decreto 2535 de 1993"
+      ]
+    },
+    {
+      "codigo": "3311",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Actividad permitida, salvo que involucre armas o explosivos",
+      "mensaje": "Puede constituirse como S.A.S. Verifique si su operación concreta requiere permisos sectoriales antes de empezar.",
+      "terminos_disparadores": [
+        "armas",
+        "armamento",
+        "municiones",
+        "explosivos",
+        "pólvora",
+        "polvora",
+        "granadas",
+        "misiles",
+        "material de guerra"
+      ],
+      "preguntas": [
+        {
+          "id": "armas_explosivos",
+          "texto": "¿La actividad involucrará armas, municiones, explosivos o material de guerra?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad habilitada bajo el régimen excepcional de material de guerra",
+        "autoridad": "Departamento Control Comercio de Armas, Municiones y Explosivos (DCCAE)",
+        "mensaje": "Las armas, municiones y explosivos están sometidos a reserva estatal y a un régimen excepcional de autorización."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S."
+      },
+      "fundamento": [
+        "Decreto 2535 de 1993"
+      ]
+    },
+    {
+      "codigo": "3511",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3512",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3513",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3514",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3520",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3530",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3600",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3700",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3811",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3812",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3821",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3822",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3830",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "3900",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "4774",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Actividad permitida, salvo que involucre armas o explosivos",
+      "mensaje": "Puede constituirse como S.A.S. Verifique si su operación concreta requiere permisos sectoriales antes de empezar.",
+      "terminos_disparadores": [
+        "armas",
+        "armamento",
+        "municiones",
+        "explosivos",
+        "pólvora",
+        "polvora",
+        "granadas",
+        "misiles",
+        "material de guerra"
+      ],
+      "preguntas": [
+        {
+          "id": "armas_explosivos",
+          "texto": "¿La actividad involucrará armas, municiones, explosivos o material de guerra?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad habilitada bajo el régimen excepcional de material de guerra",
+        "autoridad": "Departamento Control Comercio de Armas, Municiones y Explosivos (DCCAE)",
+        "mensaje": "Las armas, municiones y explosivos están sometidos a reserva estatal y a un régimen excepcional de autorización."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S."
+      },
+      "fundamento": [
+        "Decreto 2535 de 1993"
+      ]
+    },
+    {
+      "codigo": "4911",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "4912",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "4921",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "4922",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "4923",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "4930",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5011",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5012",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5021",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5022",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5111",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5112",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5121",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5122",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Transporte: depende de la modalidad",
+      "mensaje": "El transporte público con rutas y horarios requiere habilitación previa del Ministerio de Transporte o de la autoridad territorial. El transporte privado, de carga propia o los servicios conexos, no.",
+      "preguntas": [
+        {
+          "id": "transporte_publico",
+          "texto": "¿Prestará servicio de transporte público?",
+          "escala": true
+        },
+        {
+          "id": "rutas_horarios",
+          "texto": "¿Operará con rutas y horarios asignados por la autoridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "todas",
+      "escalamiento": {
+        "decision": "REQUIRES_PRIOR_AUTHORIZATION",
+        "autoridad": "Ministerio de Transporte o autoridad territorial competente",
+        "mensaje": "El transporte público con rutas y horarios exige habilitación previa. Adjunte el acto administrativo de habilitación."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Según la modalidad concreta (carga, especial, aéreo o marítimo) puede necesitar habilitación sectorial antes de operar; verifíquelo con la autoridad competente."
+      },
+      "fundamento": [
+        "Ley 336 de 1996",
+        "Ley 105 de 1993"
+      ]
+    },
+    {
+      "codigo": "5222",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Puertos: depende de si será sociedad portuaria",
+      "mensaje": "Las sociedades portuarias son sociedades anónimas por mandato legal. Prestar servicios auxiliares a terceros, en cambio, sí lo puede hacer una S.A.S.",
+      "preguntas": [
+        {
+          "id": "sociedad_portuaria",
+          "texto": "¿Se constituirá jurídicamente como sociedad portuaria?",
+          "escala": true
+        },
+        {
+          "id": "concesion_portuaria",
+          "texto": "¿Será titular de una concesión portuaria?",
+          "escala": true
+        },
+        {
+          "id": "opera_puerto",
+          "texto": "¿Administrará u operará un puerto por cuenta propia?",
+          "escala": true
+        },
+        {
+          "id": "infraestructura_concesionario",
+          "texto": "¿Construirá o mantendrá infraestructura portuaria como concesionario?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Sociedad anónima",
+        "autoridad": "Agencia Nacional de Infraestructura / Ministerio de Transporte",
+        "mensaje": "Las sociedades portuarias deben constituirse como sociedades anónimas."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. para prestar servicios auxiliares portuarios a terceros, sin ser titular de concesión."
+      },
+      "fundamento": [
+        "Ley 1 de 1991"
+      ]
+    },
+    {
+      "codigo": "6110",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "6120",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "6130",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "6190",
+      "decision": "ALLOWED_WITH_OPERATING_WARNING",
+      "titulo": "Servicio público domiciliario: permitido con requisitos sectoriales",
+      "mensaje": "Una S.A.S. es una sociedad por acciones y puede prestar servicios públicos domiciliarios. Debe constituirse como E.S.P., usar esa denominación en la razón social y sujetarse al régimen sectorial. No puede iniciar operaciones sin el registro y las habilitaciones correspondientes.",
+      "fundamento": [
+        "Ley 142 de 1994",
+        "Ley 143 de 1994"
+      ]
+    },
+    {
+      "codigo": "6411",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6412",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6421",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6422",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6423",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6424",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Actividad reservada a una cooperativa financiera",
+      "tipo_entidad_requerido": "Cooperativa financiera",
+      "autoridad": "Superintendencia de la Economía Solidaria",
+      "mensaje": "Las cooperativas financieras son entidades del sector solidario y no pueden reemplazarse por una S.A.S. Cargar una autorización no convierte una S.A.S. en cooperativa.",
+      "fundamento": [
+        "Ley 79 de 1988",
+        "Ley 454 de 1998"
+      ]
+    },
+    {
+      "codigo": "6431",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6432",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6491",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6492",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Actividad reservada a un fondo de empleados u otra forma solidaria",
+      "tipo_entidad_requerido": "Fondo de empleados u otra forma asociativa solidaria",
+      "autoridad": "Superintendencia de la Economía Solidaria",
+      "mensaje": "Los fondos de empleados son entidades del sector solidario, con régimen y vínculo de asociación propios. Una S.A.S. no puede cumplir esa función.",
+      "fundamento": [
+        "Decreto Ley 1481 de 1989",
+        "Ley 454 de 1998"
+      ]
+    },
+    {
+      "codigo": "6493",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6494",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6496",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6499",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6511",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6512",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6513",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6515",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6532",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6611",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6612",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6613",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6614",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Entidad financiera o aseguradora vigilada",
+      "tipo_entidad_requerido": "Sociedad anónima con objeto exclusivo (o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+      "autoridad": "Superintendencia Financiera de Colombia",
+      "mensaje": "La captación y administración profesional de recursos del público, la actividad aseguradora y la intermediación de valores están reservadas a entidades vigiladas, constituidas con objeto exclusivo y autorización previa.\n\nNo se subsana cargando un documento: primero hay que escoger el tipo de entidad correcto y surtir el procedimiento especial ante la Superintendencia Financiera.",
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero (Decreto 663 de 1993)",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6615",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6619",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6621",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6629",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "6630",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Actividad financiera: depende de cómo opere",
+      "mensaje": "Este código cubre tanto actividades reservadas a entidades vigiladas como servicios que una S.A.S. sí puede prestar. Responda para determinarlo.",
+      "preguntas": [
+        {
+          "id": "capta_publico",
+          "texto": "¿La sociedad recibirá depósitos o dinero del público?",
+          "escala": true
+        },
+        {
+          "id": "administra_terceros",
+          "texto": "¿Administrará recursos o valores de terceros?",
+          "escala": true
+        },
+        {
+          "id": "promete_rendimientos",
+          "texto": "¿Prometerá rendimientos a aportantes o inversionistas?",
+          "escala": true
+        },
+        {
+          "id": "intermediacion_valores",
+          "texto": "¿Realizará intermediación de valores?",
+          "escala": true
+        },
+        {
+          "id": "fondos_colectivos",
+          "texto": "¿Administrará fondos colectivos, pensiones o cesantías?",
+          "escala": true
+        },
+        {
+          "id": "aseguradora_fiduciaria",
+          "texto": "¿Actuará como aseguradora, fiduciaria o comisionista de bolsa?",
+          "escala": true
+        },
+        {
+          "id": "presta_recursos_propios",
+          "texto": "¿Otorgará préstamos únicamente con recursos propios?",
+          "escala": false
+        },
+        {
+          "id": "cartera_recursos_propios",
+          "texto": "¿La compra de cartera se hará con recursos propios?",
+          "escala": false
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Entidad financiera vigilada (sociedad anónima o la forma que exija el Estatuto Orgánico del Sistema Financiero)",
+        "autoridad": "Superintendencia Financiera de Colombia",
+        "mensaje": "Por la respuesta marcada, la actividad implica captación, administración profesional de recursos del público o intermediación vigilada. Eso no puede desarrollarse mediante una S.A.S.: exige una entidad financiera autorizada, con objeto exclusivo y autorización previa de la Superintendencia Financiera."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. Prestar servicios con recursos propios, asesoría, análisis o apoyo administrativo no constituye actividad financiera vigilada. Verifique de todos modos si su operación concreta requiere registro o habilitación sectorial antes de empezar."
+      },
+      "fundamento": [
+        "Estatuto Orgánico del Sistema Financiero",
+        "Ley 964 de 2005"
+      ]
+    },
+    {
+      "codigo": "8010",
+      "decision": "BLOCK_NOT_SAS",
+      "titulo": "Servicio de vigilancia y seguridad privada",
+      "tipo_entidad_requerido": "Sociedad de responsabilidad limitada u otra forma admitida por el estatuto de vigilancia y seguridad privada",
+      "autoridad": "Superintendencia de Vigilancia y Seguridad Privada",
+      "mensaje": "La prestación de servicios de vigilancia y seguridad privada, con o sin armas, está sometida a un estatuto especial que exige una forma societaria determinada, objeto exclusivo y licencia de funcionamiento previa.",
+      "fundamento": [
+        "Decreto Ley 356 de 1994"
+      ]
+    },
+    {
+      "codigo": "8020",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Sistemas de seguridad: depende del servicio concreto",
+      "mensaje": "Este código abarca desde cerrajería e instalación de equipos —que una S.A.S. puede prestar— hasta monitoreo y reacción, que es vigilancia privada.",
+      "preguntas": [
+        {
+          "id": "central_monitoreo",
+          "texto": "¿Operará una central de monitoreo?",
+          "escala": true
+        },
+        {
+          "id": "monitoreo_alarmas",
+          "texto": "¿Prestará monitoreo de alarmas a terceros?",
+          "escala": true
+        },
+        {
+          "id": "servicio_reaccion",
+          "texto": "¿Prestará servicio de reacción?",
+          "escala": true
+        },
+        {
+          "id": "vigilancia_humana",
+          "texto": "¿Dispondrá de personal de vigilancia humana?",
+          "escala": true
+        },
+        {
+          "id": "patrullaje",
+          "texto": "¿Hará patrullaje o rondas de seguridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Sociedad de responsabilidad limitada u otra forma admitida por el estatuto de vigilancia y seguridad privada",
+        "autoridad": "Superintendencia de Vigilancia y Seguridad Privada",
+        "mensaje": "Con monitoreo, reacción o vigilancia humana la actividad es materialmente vigilancia y seguridad privada, sometida al estatuto especial."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S.: instalar, reparar y mantener equipos o cerraduras no es vigilancia privada. Si más adelante presta monitoreo o reacción, necesitará el vehículo y la licencia del estatuto especial."
+      },
+      "fundamento": [
+        "Decreto Ley 356 de 1994"
+      ]
+    },
+    {
+      "codigo": "8030",
+      "decision": "CONDITIONAL_REVIEW",
+      "titulo": "Investigación: depende de si es seguridad privada",
+      "mensaje": "Investigación empresarial, análisis de riesgos, auditoría, estudios de mercado y debida diligencia no son vigilancia privada. La investigación sometida al estatuto especial sí lo es.",
+      "preguntas": [
+        {
+          "id": "detectives_estatuto",
+          "texto": "¿Prestará servicios de detectives o investigación sometidos al estatuto de vigilancia y seguridad privada?",
+          "escala": true
+        },
+        {
+          "id": "investigacion_personas",
+          "texto": "¿Investigará personas por encargo de terceros con fines de seguridad?",
+          "escala": true
+        }
+      ],
+      "modo_escalamiento": "alguna",
+      "escalamiento": {
+        "decision": "BLOCK_NOT_SAS",
+        "tipo_entidad_requerido": "Sociedad admitida por el estatuto de vigilancia y seguridad privada",
+        "autoridad": "Superintendencia de Vigilancia y Seguridad Privada",
+        "mensaje": "La investigación privada sometida al estatuto especial exige licencia y una forma societaria determinada."
+      },
+      "sin_escalamiento": {
+        "decision": "ALLOWED_WITH_OPERATING_WARNING",
+        "mensaje": "Puede constituirse como S.A.S. La consultoría, la auditoría, el análisis de riesgos y la debida diligencia empresarial no son vigilancia privada."
+      },
+      "fundamento": [
+        "Decreto Ley 356 de 1994"
+      ]
+    },
+    {
+      "codigo": "8411",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8412",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8413",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8414",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8415",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8421",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8422",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8423",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8424",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "8430",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Administración pública, defensa y seguridad social obligatoria",
+      "mensaje": "Corresponde a funciones legislativas, ejecutivas, regulatorias, diplomáticas, de defensa, policía, justicia o administración de sistemas obligatorios. Son funciones del Estado y no pueden ser el objeto de una sociedad privada.",
+      "fundamento": [
+        "Constitución Política, arts. 113 y ss.",
+        "Función administrativa reservada al Estado"
+      ]
+    },
+    {
+      "codigo": "9411",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Actividad propia de una entidad sin ánimo de lucro",
+      "tipo_entidad_requerido": "Entidad sin ánimo de lucro (asociación, corporación, sindicato u organización religiosa según el caso)",
+      "mensaje": "El código describe la naturaleza institucional de una asociación gremial, profesional, sindical, religiosa o política. Una S.A.S. no puede presentarse a sí misma como tal.\n\nEsto no impide que una S.A.S. le preste servicios administrativos, contables, tecnológicos o de organización de eventos a una entidad de esa naturaleza: en ese caso escoja el código del servicio que efectivamente presta.",
+      "fundamento": [
+        "Naturaleza institucional descrita por el código",
+        "Decreto 2150 de 1995"
+      ]
+    },
+    {
+      "codigo": "9412",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Actividad propia de una entidad sin ánimo de lucro",
+      "tipo_entidad_requerido": "Entidad sin ánimo de lucro (asociación, corporación, sindicato u organización religiosa según el caso)",
+      "mensaje": "El código describe la naturaleza institucional de una asociación gremial, profesional, sindical, religiosa o política. Una S.A.S. no puede presentarse a sí misma como tal.\n\nEsto no impide que una S.A.S. le preste servicios administrativos, contables, tecnológicos o de organización de eventos a una entidad de esa naturaleza: en ese caso escoja el código del servicio que efectivamente presta.",
+      "fundamento": [
+        "Naturaleza institucional descrita por el código",
+        "Decreto 2150 de 1995"
+      ]
+    },
+    {
+      "codigo": "9420",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Actividad propia de una entidad sin ánimo de lucro",
+      "tipo_entidad_requerido": "Entidad sin ánimo de lucro (asociación, corporación, sindicato u organización religiosa según el caso)",
+      "mensaje": "El código describe la naturaleza institucional de una asociación gremial, profesional, sindical, religiosa o política. Una S.A.S. no puede presentarse a sí misma como tal.\n\nEsto no impide que una S.A.S. le preste servicios administrativos, contables, tecnológicos o de organización de eventos a una entidad de esa naturaleza: en ese caso escoja el código del servicio que efectivamente presta.",
+      "fundamento": [
+        "Naturaleza institucional descrita por el código",
+        "Decreto 2150 de 1995"
+      ]
+    },
+    {
+      "codigo": "9491",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Actividad propia de una entidad sin ánimo de lucro",
+      "tipo_entidad_requerido": "Entidad sin ánimo de lucro (asociación, corporación, sindicato u organización religiosa según el caso)",
+      "mensaje": "El código describe la naturaleza institucional de una asociación gremial, profesional, sindical, religiosa o política. Una S.A.S. no puede presentarse a sí misma como tal.\n\nEsto no impide que una S.A.S. le preste servicios administrativos, contables, tecnológicos o de organización de eventos a una entidad de esa naturaleza: en ese caso escoja el código del servicio que efectivamente presta.",
+      "fundamento": [
+        "Naturaleza institucional descrita por el código",
+        "Decreto 2150 de 1995"
+      ]
+    },
+    {
+      "codigo": "9492",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Actividad propia de una entidad sin ánimo de lucro",
+      "tipo_entidad_requerido": "Entidad sin ánimo de lucro (asociación, corporación, sindicato u organización religiosa según el caso)",
+      "mensaje": "El código describe la naturaleza institucional de una asociación gremial, profesional, sindical, religiosa o política. Una S.A.S. no puede presentarse a sí misma como tal.\n\nEsto no impide que una S.A.S. le preste servicios administrativos, contables, tecnológicos o de organización de eventos a una entidad de esa naturaleza: en ese caso escoja el código del servicio que efectivamente presta.",
+      "fundamento": [
+        "Naturaleza institucional descrita por el código",
+        "Decreto 2150 de 1995"
+      ]
+    },
+    {
+      "codigo": "9499",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Actividad propia de una entidad sin ánimo de lucro",
+      "tipo_entidad_requerido": "Entidad sin ánimo de lucro (asociación, corporación, sindicato u organización religiosa según el caso)",
+      "mensaje": "El código describe la naturaleza institucional de una asociación gremial, profesional, sindical, religiosa o política. Una S.A.S. no puede presentarse a sí misma como tal.\n\nEsto no impide que una S.A.S. le preste servicios administrativos, contables, tecnológicos o de organización de eventos a una entidad de esa naturaleza: en ese caso escoja el código del servicio que efectivamente presta.",
+      "fundamento": [
+        "Naturaleza institucional descrita por el código",
+        "Decreto 2150 de 1995"
+      ]
+    },
+    {
+      "codigo": "9700",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Hogares como empleadores o productores para consumo propio",
+      "mensaje": "Clasifica actividades de hogares individuales y producción para uso propio. No es actividad empresarial de una persona jurídica comercial.",
+      "fundamento": [
+        "Clasificación CIIU Rev. 4 A.C., sección T"
+      ]
+    },
+    {
+      "codigo": "9810",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Hogares como empleadores o productores para consumo propio",
+      "mensaje": "Clasifica actividades de hogares individuales y producción para uso propio. No es actividad empresarial de una persona jurídica comercial.",
+      "fundamento": [
+        "Clasificación CIIU Rev. 4 A.C., sección T"
+      ]
+    },
+    {
+      "codigo": "9820",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Hogares como empleadores o productores para consumo propio",
+      "mensaje": "Clasifica actividades de hogares individuales y producción para uso propio. No es actividad empresarial de una persona jurídica comercial.",
+      "fundamento": [
+        "Clasificación CIIU Rev. 4 A.C., sección T"
+      ]
+    },
+    {
+      "codigo": "9900",
+      "decision": "BLOCK_NOT_COMMERCIAL_ENTITY",
+      "titulo": "Organizaciones y órganos extraterritoriales",
+      "mensaje": "Corresponde a organismos internacionales, representaciones diplomáticas y entidades sometidas a régimen extraterritorial. No a una sociedad privada.",
+      "fundamento": [
+        "Clasificación CIIU Rev. 4 A.C., sección U"
+      ]
+    }
+  ]
+}

@@ -135,6 +135,38 @@ function validateStep(step) {
             return false;
         }
     }
+    if (step === 4) {
+        // Restricciones regulatorias del CIIU. El backend las vuelve a
+        // evaluar antes de generar; esto es para no dejar avanzar en vano.
+        for (const v of ['principal', 'secundario']) {
+            const est = ciiuEstado[v];
+            if (!est.code || !est.evaluacion) continue;
+            const ev = est.evaluacion;
+            const cual = v === 'principal' ? 'principal' : 'secundario';
+
+            if (ev.bloquea) {
+                alert(`El CIIU ${cual} ${est.code} no puede usarse en una S.A.S.\n\n`
+                      + `${ev.titulo}\n\n${ev.mensaje}`
+                      + (ev.tipo_entidad_requerido
+                         ? `\n\nVehículo requerido: ${ev.tipo_entidad_requerido}`
+                         : '')
+                      + '\n\nEscoja otra actividad económica para continuar.');
+                return false;
+            }
+            if (ev.pendiente) {
+                alert(`Responda las preguntas del CIIU ${cual} ${est.code}.\n\n`
+                      + 'De esas respuestas depende si la actividad puede desarrollarse '
+                      + 'mediante una S.A.S.');
+                return false;
+            }
+            if (ev.requiere_autorizacion && !est.autorizacion) {
+                alert(`El CIIU ${cual} ${est.code} exige adjuntar la autorización previa`
+                      + (ev.autoridad ? ` expedida por ${ev.autoridad}` : '')
+                      + '.\n\nCárguela para continuar.');
+                return false;
+            }
+        }
+    }
     if (step === 5) {
         const autorizado = _parseCop(document.getElementById('capital_autorizado').value);
         const suscrito = _parseCop(document.getElementById('capital_suscrito').value);
@@ -413,11 +445,18 @@ function searchCIIU(query, variant) {
             if (data.length === 0) {
                 results.innerHTML = '<div class="result-item" style="color:#999">No se encontraron resultados</div>';
             } else {
-                results.innerHTML = data.map(item =>
-                    `<div class="result-item" onclick="selectCIIUVariant('${item.code}', '${item.description.replace(/'/g, "\\'")}', '${variant}')">
-                        <span class="code">${item.code}</span> ${item.description}
-                    </div>`
-                ).join('');
+                results.innerHTML = data.map(item => {
+                    // Los códigos restringidos no se ocultan: se marcan, para
+                    // que el usuario vea antes de elegirlos que no están
+                    // plenamente disponibles.
+                    const r = item.restriccion;
+                    const marca = r
+                        ? `<span class="ciiu-marca ${r.nivel}">${r.etiqueta}</span>`
+                        : '';
+                    return `<div class="result-item" onclick="selectCIIUVariant('${item.code}', '${item.description.replace(/'/g, "\\'")}', '${variant}')">
+                        <span class="code">${item.code}</span> ${item.description}${marca}
+                    </div>`;
+                }).join('');
             }
             results.classList.remove('hidden');
         } catch (e) { console.error('CIIU search error:', e); }
@@ -434,6 +473,183 @@ function selectCIIUVariant(code, desc, variant) {
     const tag = document.getElementById('ciiu_selected' + suffix);
     tag.textContent = code + ' - ' + desc;
     tag.classList.remove('hidden');
+
+    // Cambiar de código invalida lo declarado y lo adjuntado para el anterior
+    ciiuEstado[variant] = { code: code, respuestas: {}, autorizacion: null, evaluacion: null };
+    evaluarCIIU(variant);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESTRICCIONES POR CÓDIGO CIIU
+// ═══════════════════════════════════════════════════════════
+// Ni el buscador ni la lista cambian: los códigos restringidos se siguen
+// encontrando igual. Lo que se agrega es la marca en el resultado y este
+// panel al elegirlo, con la consecuencia y lo que hay que hacer.
+
+const ciiuEstado = {
+    principal:  { code: '', respuestas: {}, autorizacion: null, evaluacion: null },
+    secundario: { code: '', respuestas: {}, autorizacion: null, evaluacion: null },
+};
+
+const CIIU_PRESENTACION = {
+    BLOCK_NOT_COMMERCIAL_ENTITY: { clase: 'bloqueado',    icono: '✕' },
+    BLOCK_NOT_SAS:               { clase: 'bloqueado',    icono: '✕' },
+    REQUIRES_PRIOR_AUTHORIZATION:{ clase: 'autorizacion', icono: '!' },
+    CONDITIONAL_REVIEW:          { clase: 'preguntas',    icono: '?' },
+    ALLOWED_WITH_OPERATING_WARNING: { clase: 'aviso',     icono: '!' },
+    ALLOWED:                     { clase: 'ok',           icono: '✓' },
+};
+
+async function evaluarCIIU(variant) {
+    const est = ciiuEstado[variant];
+    const panel = document.getElementById('ciiu_panel' + (variant === 'principal' ? '' : '_sec'));
+    if (!panel) return;
+    if (!est.code) { panel.innerHTML = ''; panel.classList.add('hidden'); return; }
+
+    const params = new URLSearchParams();
+    params.set('objeto_social', document.getElementById('objeto_social')?.value || '');
+    for (const [id, val] of Object.entries(est.respuestas)) params.set('r_' + id, val);
+
+    try {
+        const resp = await fetch(`/api/ciiu/regla/${est.code}?${params}`);
+        est.evaluacion = await resp.json();
+    } catch (e) {
+        console.error('evaluarCIIU:', e);
+        return;
+    }
+    renderCIIUPanel(variant);
+}
+
+function renderCIIUPanel(variant) {
+    const est = ciiuEstado[variant];
+    const ev = est.evaluacion;
+    const panel = document.getElementById('ciiu_panel' + (variant === 'principal' ? '' : '_sec'));
+    if (!panel || !ev) return;
+
+    if (ev.decision === 'ALLOWED') { panel.innerHTML = ''; panel.classList.add('hidden'); return; }
+
+    const p = CIIU_PRESENTACION[ev.decision] || CIIU_PRESENTACION.ALLOWED;
+    let h = `<div class="ciiu-panel-titulo">
+                 <span class="ciiu-panel-icono">${p.icono}</span>
+                 <span>${ev.titulo || ''}</span>
+             </div>
+             <div class="ciiu-panel-texto">${ev.mensaje || ''}</div>`;
+
+    if (ev.tipo_entidad_requerido) {
+        h += `<div class="ciiu-panel-dato"><strong>Vehículo requerido:</strong> ${ev.tipo_entidad_requerido}</div>`;
+    }
+    if (ev.autoridad) {
+        h += `<div class="ciiu-panel-dato"><strong>Autoridad competente:</strong> ${ev.autoridad}</div>`;
+    }
+
+    // Preguntas que deciden el caso
+    if (ev.preguntas && ev.preguntas.length && !ev.bloquea) {
+        h += '<div class="ciiu-preguntas">';
+        for (const q of ev.preguntas) {
+            const val = est.respuestas[q.id];
+            h += `<div class="ciiu-pregunta">
+                    <span class="ciiu-pregunta-texto">${q.texto}</span>
+                    <span class="ciiu-pregunta-ops">
+                      <label class="${val === 'si' ? 'elegida' : ''}">
+                        <input type="radio" name="ciiu_${variant}_${q.id}" value="si"
+                               ${val === 'si' ? 'checked' : ''}
+                               onchange="responderCIIU('${variant}', '${q.id}', 'si')"> Sí
+                      </label>
+                      <label class="${val === 'no' ? 'elegida' : ''}">
+                        <input type="radio" name="ciiu_${variant}_${q.id}" value="no"
+                               ${val === 'no' ? 'checked' : ''}
+                               onchange="responderCIIU('${variant}', '${q.id}', 'no')"> No
+                      </label>
+                    </span>
+                  </div>`;
+        }
+        h += '</div>';
+    }
+
+    // Carga del acto administrativo, solo cuando la S.A.S. sí es compatible
+    if (ev.requiere_autorizacion) {
+        h += `<div class="ciiu-autorizacion">
+                <div class="upload-doc-section">
+                  <div class="upload-doc-info">
+                    <strong>📎 Adjunte la autorización previa</strong>
+                    <span class="upload-hint">Sin este documento no se pueden generar los documentos de constitución.</span>
+                  </div>
+                  <label class="upload-doc-btn">
+                    Cargar autorización
+                    <input type="file" accept="image/*,application/pdf"
+                           onchange="subirAutorizacionCIIU(this, '${variant}')">
+                  </label>
+                  <span class="upload-status" id="ciiu_auth_status_${variant}"></span>
+                </div>`;
+        if (est.autorizacion) {
+            h += `<div class="ciiu-auth-ok">✓ Adjuntado: ${est.autorizacion.nombre}</div>`;
+        }
+        h += '</div>';
+    }
+
+    if (ev.fundamento && ev.fundamento.length) {
+        h += `<div class="ciiu-fundamento">Fundamento: ${ev.fundamento.join(' · ')}</div>`;
+    }
+
+    panel.className = 'ciiu-panel ' + p.clase;
+    panel.innerHTML = h;
+    panel.classList.remove('hidden');
+}
+
+function responderCIIU(variant, preguntaId, valor) {
+    const est = ciiuEstado[variant];
+    est.respuestas[preguntaId] = valor;
+    // Cambiar una respuesta invalida la autorización que se hubiera adjuntado
+    // bajo la respuesta anterior.
+    est.autorizacion = null;
+    evaluarCIIU(variant);
+}
+
+async function subirAutorizacionCIIU(input, variant) {
+    const file = input.files[0];
+    if (!file) return;
+    const est = ciiuEstado[variant];
+    const statusEl = document.getElementById(`ciiu_auth_status_${variant}`);
+    _setStatus(statusEl, 'processing', '<span class="spinner"></span> Subiendo...');
+
+    try {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('codigo', est.code);
+        fd.append('objeto_social', document.getElementById('objeto_social')?.value || '');
+        for (const [id, val] of Object.entries(est.respuestas)) fd.append('r_' + id, val);
+
+        const resp = await fetch('/api/ciiu/autorizacion', { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (!resp.ok || data.error) throw new Error(data.error || 'Error desconocido');
+
+        est.autorizacion = data;
+        renderCIIUPanel(variant);
+    } catch (e) {
+        _setStatus(statusEl, 'error', `✗ ${e.message}`);
+    } finally {
+        input.value = '';
+    }
+}
+
+/** Vuelve a evaluar ambos códigos: el objeto social puede disparar reglas. */
+function reevaluarCIIU() {
+    for (const v of ['principal', 'secundario']) {
+        if (ciiuEstado[v].code) evaluarCIIU(v);
+    }
+}
+
+function getCiiuRespuestas() {
+    return Object.assign({}, ciiuEstado.principal.respuestas, ciiuEstado.secundario.respuestas);
+}
+
+function getCiiuAutorizaciones() {
+    const out = {};
+    for (const v of ['principal', 'secundario']) {
+        const est = ciiuEstado[v];
+        if (est.code && est.autorizacion) out[est.code] = est.autorizacion;
+    }
+    return out;
 }
 
 // ─── APODERADO (toggle) ───
@@ -1473,6 +1689,8 @@ function collectAllData() {
         ciiu_description: document.getElementById('ciiu_description').value,
         ciiu_code_sec: document.getElementById('ciiu_code_sec').value,
         ciiu_description_sec: document.getElementById('ciiu_description_sec').value,
+        ciiu_respuestas: getCiiuRespuestas(),
+        ciiu_autorizaciones: getCiiuAutorizaciones(),
         objeto_social: document.getElementById('objeto_social').value.trim(),
         capital_autorizado: document.getElementById('capital_autorizado').value,
         valor_nominal: document.getElementById('valor_nominal').value,

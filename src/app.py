@@ -10,6 +10,7 @@ import json
 import zipfile
 import tempfile
 import re
+import uuid
 import functools
 from datetime import date, datetime
 from dotenv import load_dotenv
@@ -25,6 +26,12 @@ from auth import (
     init_db, seed_admin, seed_staff_user, get_user_by_id, verify_password,
     create_user, get_all_users, update_user_plan, set_user_active,
     check_puede_generar, decrement_generacion, set_generaciones, PLAN_LABELS
+)
+from processors.ciiu_reglas import (
+    evaluar as evaluar_ciiu,
+    resumen_para_listado,
+    validar_seleccion as validar_ciiu,
+    version_matriz as version_matriz_ciiu,
 )
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
@@ -50,6 +57,9 @@ DATA_DIR = os.path.join(PROJECT_DIR, "data")
 # Datos estáticos dentro de src/ — no se ven afectados por el Volume de Railway
 STATIC_DATA_DIR = os.path.join(BASE_DIR, "data")
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "output")
+# Actos administrativos que habilitan una actividad restringida. Se adjuntan
+# al paquete generado.
+AUTORIZACIONES_DIR = os.path.join(OUTPUT_DIR, "_autorizaciones")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -378,12 +388,79 @@ def ciiu_search():
         codigos = data.get("codigos", {})
         for code, desc in codigos.items():
             if q in code.lower() or q in desc.lower():
-                results.append({"code": code, "description": desc})
+                # Los códigos restringidos siguen apareciendo en la lista: se
+                # marcan, no se ocultan. La restricción se explica al elegirlos.
+                item = {"code": code, "description": desc}
+                marca = resumen_para_listado(code)
+                if marca:
+                    item["restriccion"] = marca
+                results.append(item)
                 if len(results) >= 20:
                     break
     except Exception:
         pass
     return jsonify(results)
+
+
+@app.route("/api/ciiu/regla/<codigo>")
+@login_required
+def ciiu_regla(codigo):
+    """Evalúa un código con lo que el usuario lleva declarado hasta ahora."""
+    respuestas = {}
+    for clave, valor in request.args.items():
+        if clave.startswith("r_"):
+            respuestas[clave[2:]] = valor
+    objeto_social = request.args.get("objeto_social", "")
+    resultado = evaluar_ciiu(codigo, respuestas, objeto_social)
+    resultado["matriz"] = version_matriz_ciiu()
+    return jsonify(resultado)
+
+
+@app.route("/api/ciiu/autorizacion", methods=["POST"])
+@login_required
+def ciiu_autorizacion():
+    """
+    Recibe el acto administrativo que habilita una actividad.
+
+    Solo tiene sentido cuando la S.A.S. es jurídicamente compatible con el
+    código: si la actividad exige otro vehículo, el bloqueo no se subsana
+    adjuntando nada y aquí se rechaza.
+    """
+    codigo = (request.form.get("codigo") or "").strip()
+    if not codigo:
+        return jsonify({"error": "Falta el código CIIU"}), 400
+    if "file" not in request.files or not request.files["file"].filename:
+        return jsonify({"error": "No se recibió archivo"}), 400
+
+    respuestas = {}
+    for clave, valor in request.form.items():
+        if clave.startswith("r_"):
+            respuestas[clave[2:]] = valor
+
+    evaluacion = evaluar_ciiu(codigo, respuestas, request.form.get("objeto_social", ""))
+    if evaluacion["bloquea"] or not evaluacion.get("requiere_autorizacion"):
+        return jsonify({
+            "error": "Esta actividad no se habilita adjuntando un documento. "
+                     + (evaluacion.get("mensaje") or "")
+        }), 400
+
+    archivo = request.files["file"]
+    datos = archivo.read()
+    if len(datos) > 15 * 1024 * 1024:
+        return jsonify({"error": "Archivo muy grande (máx 15MB)"}), 400
+
+    os.makedirs(AUTORIZACIONES_DIR, exist_ok=True)
+    nombre_seguro = re.sub(r"[^\w.\-]", "_", archivo.filename)[-80:]
+    documento_id = f"{uuid.uuid4().hex}_{nombre_seguro}"
+    with open(os.path.join(AUTORIZACIONES_DIR, documento_id), "wb") as f:
+        f.write(datos)
+
+    return jsonify({
+        "documento_id": documento_id,
+        "nombre": archivo.filename,
+        "codigo": codigo,
+        "autoridad": evaluacion.get("autoridad"),
+    })
 
 
 @app.route("/api/generate", methods=["POST"])
@@ -560,8 +637,25 @@ def generate():
             if "cedula" in rl_suplente and "cc" not in rl_suplente:
                 rl_suplente["cc"] = rl_suplente["cedula"]
 
-        # Derivaciones automáticas
+        # ─── Revalidación regulatoria de los CIIU ───
+        # El formulario ya la hizo, pero se puede saltar. Se vuelve a evaluar
+        # aquí con el objeto social definitivo y antes de generar nada: una
+        # aprobación anterior no vale si cambiaron el código, las respuestas o
+        # el objeto social.
         ciiu_codes = [c for c in [ciiu_code, ciiu_code_sec] if c]
+        ciiu_respuestas = data.get("ciiu_respuestas") or {}
+        ciiu_autorizaciones = data.get("ciiu_autorizaciones") or {}
+        ok_ciiu, errores_ciiu, detalle_ciiu = validar_ciiu(
+            ciiu_codes, ciiu_respuestas, objeto_social, ciiu_autorizaciones
+        )
+        if not ok_ciiu:
+            return jsonify({
+                "error": "La actividad económica seleccionada no permite continuar:\n\n"
+                         + "\n\n".join(errores_ciiu),
+                "ciiu": detalle_ciiu,
+            }), 400
+
+        # Derivaciones automáticas
         incluir_consumo = determinar_incluir_consumo(ciiu_codes, objeto_social)
         responsabilidades = construir_responsabilidades(regimen, incluir_consumo)
         controlante = determinar_situacion_control(accionistas)
@@ -770,6 +864,26 @@ def generate():
                 generated.append(out)
             except Exception as e:
                 errors.append(f"Empresa Familiar: {e}")
+
+        # ─── 10. AUTORIZACIONES PREVIAS ADJUNTADAS ───
+        # Van dentro del paquete: son parte de lo que se radica.
+        anexos = []
+        for codigo, aut in ciiu_autorizaciones.items():
+            doc_id = (aut or {}).get("documento_id")
+            if not doc_id:
+                continue
+            origen = os.path.join(AUTORIZACIONES_DIR, os.path.basename(doc_id))
+            if not os.path.exists(origen):
+                errors.append(f"Autorización de CIIU {codigo}: archivo no encontrado")
+                continue
+            ext = os.path.splitext(doc_id)[1] or ".pdf"
+            destino = os.path.join(
+                tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Autorizacion_CIIU_{codigo}{ext}"
+            )
+            with open(origen, "rb") as f_in, open(destino, "wb") as f_out:
+                f_out.write(f_in.read())
+            anexos.append(destino)
+        generated.extend(anexos)
 
         # ─── ZIP ───
         zip_name = f"{fecha_pfx}_{nombre_limpio}.zip"

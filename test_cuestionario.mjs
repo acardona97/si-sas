@@ -560,4 +560,133 @@ console.log('\n─── Revisor fiscal: cargas de cédula y tarjeta profesional
     console.log('  OK  cuatro cargas: cédula y tarjeta, para natural y para el contador designado');
 }
 
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── CIIU: marcas en la lista y panel de restricciones');
+{
+    const w = nuevaApp();
+
+    // La lista desplegable marca los códigos restringidos sin ocultarlos
+    const resultados = w.document.getElementById('ciiu_results');
+    w.fetch = async () => ({
+        ok: true,
+        json: async () => ([
+            { code: '6201', description: 'Desarrollo de sistemas informáticos' },
+            { code: '9499', description: 'Actividades de otras asociaciones n.c.p.',
+              restriccion: { decision: 'BLOCK_NOT_COMMERCIAL_ENTITY', nivel: 'bloqueado',
+                             etiqueta: 'No corresponde a una sociedad' } },
+            { code: '8020', description: 'Servicios de sistemas de seguridad',
+              restriccion: { decision: 'CONDITIONAL_REVIEW', nivel: 'preguntas',
+                             etiqueta: 'Requiere responder preguntas' } },
+        ]),
+    });
+    w.searchCIIU('seg', 'principal');
+    await new Promise(r => setTimeout(r, 400));
+
+    const items = [...resultados.querySelectorAll('.result-item')];
+    assert.equal(items.length, 3, 'los códigos restringidos no se ocultan de la lista');
+    assert.equal(items[0].querySelectorAll('.ciiu-marca').length, 0, '6201 no lleva marca');
+    const marcaBloq = items[1].querySelector('.ciiu-marca');
+    assert.ok(marcaBloq, '9499 debía llevar marca');
+    assert.ok(marcaBloq.classList.contains('bloqueado'), marcaBloq.className);
+    assert.match(marcaBloq.textContent, /No corresponde a una sociedad/);
+    assert.ok(items[2].querySelector('.ciiu-marca').classList.contains('preguntas'));
+    console.log('  OK  la lista marca los restringidos y no los oculta');
+
+    // Se recorre el flujo real: elegir el código dispara la evaluación contra
+    // el backend, que aquí se simula devolviendo lo que devolvería de verdad.
+    const panel = w.document.getElementById('ciiu_panel');
+    let evaluacionActual = null;
+    let ultimaConsulta = null;
+    w.fetch = async (url, opts) => {
+        ultimaConsulta = url;
+        if (String(url).includes('/api/ciiu/autorizacion')) {
+            return { ok: true, json: async () => ({ documento_id: 'abc', nombre: 'resolucion.pdf' }) };
+        }
+        return { ok: true, json: async () => evaluacionActual };
+    };
+    const elegir = async (code, evaluacion) => {
+        evaluacionActual = evaluacion;
+        w.selectCIIUVariant(code, 'descripción', 'principal');
+        await new Promise(r => setTimeout(r, 30));
+    };
+
+    // ── Código bloqueado ──
+    await elegir('9499', {
+        decision: 'BLOCK_NOT_COMMERCIAL_ENTITY', bloquea: true, preguntas: [],
+        titulo: 'Actividad propia de una entidad sin ánimo de lucro',
+        mensaje: 'El código describe la naturaleza institucional de una asociación.',
+        tipo_entidad_requerido: 'Entidad sin ánimo de lucro',
+        fundamento: ['Decreto 2150 de 1995'],
+    });
+    assert.ok(panel.classList.contains('bloqueado'), panel.className);
+    assert.match(panel.textContent, /Entidad sin ánimo de lucro/);
+    assert.match(panel.textContent, /Decreto 2150 de 1995/);
+    w.__alerts = [];
+    assert.equal(w.validateStep(4), false, 'un código bloqueado no debe dejar avanzar');
+    assert.match(w.__alerts[0], /no puede usarse en una S\.A\.S\./);
+    console.log('  OK  código bloqueado: panel rojo y no deja continuar');
+
+    // ── Preguntas pendientes ──
+    await elegir('8020', {
+        decision: 'CONDITIONAL_REVIEW', bloquea: false, pendiente: true,
+        titulo: 'Sistemas de seguridad', mensaje: 'Depende del servicio concreto',
+        preguntas: [
+            { id: 'central_monitoreo', texto: '¿Operará una central de monitoreo?' },
+            { id: 'patrullaje', texto: '¿Hará patrullaje?' },
+        ],
+        fundamento: [],
+    });
+    assert.ok(panel.classList.contains('preguntas'), panel.className);
+    assert.equal(panel.querySelectorAll('.ciiu-pregunta').length, 2);
+    w.__alerts = [];
+    assert.equal(w.validateStep(4), false, 'con preguntas sin responder no debe avanzar');
+    assert.match(w.__alerts[0], /Responda las preguntas/);
+
+    // Responder vuelve a consultar al backend con la respuesta
+    evaluacionActual = {
+        decision: 'ALLOWED_WITH_OPERATING_WARNING', bloquea: false, preguntas: [],
+        titulo: 'Permitido', mensaje: 'La cerrajería no es vigilancia privada.',
+        fundamento: [],
+    };
+    w.responderCIIU('principal', 'central_monitoreo', 'no');
+    await new Promise(r => setTimeout(r, 30));
+    assert.match(String(ultimaConsulta), /r_central_monitoreo=no/,
+        'la respuesta debía viajar al backend: ' + ultimaConsulta);
+    assert.ok(w.validateStep(4), 'ya resuelto, debía avanzar: ' + w.__alerts);
+    console.log('  OK  preguntas condicionales bloquean y se resuelven contra el backend');
+
+    // ── Autorización previa ──
+    await elegir('4921', {
+        decision: 'REQUIRES_PRIOR_AUTHORIZATION', bloquea: false,
+        requiere_autorizacion: true, preguntas: [],
+        titulo: 'Transporte público', mensaje: 'Exige habilitación previa',
+        autoridad: 'Ministerio de Transporte', fundamento: [],
+    });
+    assert.ok(panel.querySelector('input[type="file"]'), 'debía ofrecer carga del acto');
+    assert.match(panel.textContent, /Ministerio de Transporte/);
+    w.__alerts = [];
+    assert.equal(w.validateStep(4), false, 'sin adjuntar la autorización no avanza');
+    assert.match(w.__alerts[0], /adjuntar la autorización previa/);
+
+    // Se sube el acto administrativo
+    const inputFalso = { files: [new w.File(['x'], 'resolucion.pdf')], value: '' };
+    await w.subirAutorizacionCIIU(inputFalso, 'principal');
+    await new Promise(r => setTimeout(r, 30));
+    assert.match(panel.textContent, /resolucion\.pdf/);
+    assert.ok(w.validateStep(4), 'con la autorización adjunta debía avanzar: ' + w.__alerts);
+
+    const d = w.collectAllData();
+    assert.equal(d.ciiu_autorizaciones['4921'].documento_id, 'abc');
+    console.log('  OK  autorización previa: pide el archivo, lo adjunta y deja avanzar');
+
+    // ── Cambiar de código invalida lo declarado antes ──
+    await elegir('6201', { decision: 'ALLOWED', bloquea: false, preguntas: [] });
+    assert.ok(panel.classList.contains('hidden'), 'sin restricción no se muestra panel');
+    const d2 = w.collectAllData();
+    assert.equal(Object.keys(d2.ciiu_autorizaciones).length, 0,
+        'al cambiar el código debe invalidarse la autorización adjunta');
+    assert.ok(w.validateStep(4), 'un código sin restricción debe pasar');
+    console.log('  OK  cambiar el código invalida respuestas y autorización previas');
+}
+
 console.log('\nCuestionario verificado.\n');

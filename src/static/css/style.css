@@ -2581,3 +2581,105 @@ fieldset legend {
 @media (max-width: 640px) {
     .homo-veredicto { flex-direction: column; gap: 0.7rem; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   RESTRICCIONES POR CÓDIGO CIIU
+   La lista desplegable no cambia: los códigos restringidos siguen
+   apareciendo y buscándose igual. Lo que se agrega es una marca en
+   el resultado y, al elegirlo, este panel con la consecuencia.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Marca dentro del resultado de búsqueda */
+.ciiu-marca {
+    display: inline-block; margin-left: 0.5rem;
+    font-size: 0.62rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0.12rem 0.45rem; border-radius: 100px;
+    vertical-align: middle;
+}
+.ciiu-marca.bloqueado    { background: rgba(192,57,43,0.12); color: var(--danger); }
+.ciiu-marca.autorizacion { background: rgba(184,134,11,0.15); color: #8A6508; }
+.ciiu-marca.preguntas    { background: rgba(30,58,95,0.10); color: var(--navy-mid); }
+.ciiu-marca.aviso        { background: rgba(184,134,11,0.12); color: #8A6508; }
+
+/* Panel de consecuencia */
+.ciiu-panel {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--border);
+    padding: 1.1rem 1.25rem;
+    margin-top: 1rem;
+    background: var(--bg-card);
+}
+.ciiu-panel.bloqueado { border-left-color: var(--danger); background: rgba(192,57,43,0.04); }
+.ciiu-panel.autorizacion,
+.ciiu-panel.preguntas,
+.ciiu-panel.aviso     { border-left-color: #B8860B; background: rgba(184,134,11,0.05); }
+.ciiu-panel.ok        { border-left-color: var(--success); background: rgba(30,122,74,0.05); }
+
+.ciiu-panel-titulo {
+    display: flex; align-items: center; gap: 0.55rem;
+    font-family: var(--font-display);
+    font-size: 1.02rem; font-weight: 600; color: var(--navy);
+    margin-bottom: 0.5rem;
+}
+.ciiu-panel-icono {
+    flex: 0 0 auto;
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 700; color: #fff; line-height: 1;
+}
+.ciiu-panel.bloqueado .ciiu-panel-icono { background: var(--danger); }
+.ciiu-panel.autorizacion .ciiu-panel-icono,
+.ciiu-panel.preguntas .ciiu-panel-icono,
+.ciiu-panel.aviso .ciiu-panel-icono     { background: #B8860B; }
+.ciiu-panel.ok .ciiu-panel-icono        { background: var(--success); }
+
+.ciiu-panel-texto {
+    font-size: 0.875rem; line-height: 1.6; color: var(--text);
+    white-space: pre-line;
+}
+.ciiu-panel-dato {
+    margin-top: 0.7rem; font-size: 0.83rem; line-height: 1.5;
+    color: var(--text-secondary);
+}
+.ciiu-panel-dato strong { color: var(--text); }
+.ciiu-fundamento {
+    margin-top: 0.7rem; padding-top: 0.6rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;
+}
+
+/* Preguntas condicionales */
+.ciiu-preguntas { margin-top: 1rem; }
+.ciiu-pregunta {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 0.65rem 0;
+    border-top: 1px solid var(--border-light);
+    font-size: 0.875rem; line-height: 1.45;
+}
+.ciiu-pregunta:first-child { border-top: none; }
+.ciiu-pregunta-texto { flex: 1; }
+.ciiu-pregunta-ops { display: flex; gap: 0.4rem; flex: 0 0 auto; }
+.ciiu-pregunta-ops label {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.28rem 0.7rem; border-radius: 100px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg-card);
+    font-size: 0.8rem; margin: 0;
+}
+.ciiu-pregunta-ops label:hover { border-color: var(--gold); }
+.ciiu-pregunta-ops input { margin: 0; }
+.ciiu-pregunta-ops label.elegida {
+    border-color: var(--navy); background: var(--navy); color: #fff;
+}
+
+/* Carga de la autorización */
+.ciiu-autorizacion { margin-top: 1rem; }
+.ciiu-auth-ok {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.6rem; font-size: 0.83rem; color: var(--success);
+}
+
+@media (max-width: 560px) {
+    .ciiu-pregunta { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
