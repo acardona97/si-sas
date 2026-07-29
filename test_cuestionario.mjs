@@ -437,11 +437,62 @@ console.log('\n─── Homonimia: nombre distintivo, enlace al RUES y niveles 
     // Cambio que no altera el nombre distintivo NO obliga a repetir
     w.marcarConsultaRues();
     marcarRadio(w, 'homonimia', 'min');
-    set(w, 'nombre_sas', 'Otra Cosa Ltda');   // mismo distintivo: OTRA COSA
+    set(w, 'nombre_sas', 'otra cosa sas');   // mismo distintivo: OTRA COSA
     w.onRazonSocialInput();
     assert.ok(w.getHomonimiaData(), 'mismo nombre distintivo: no debía caducar');
     assert.ok(w.validateStep(1), 'mismo distintivo: debía seguir pasando');
     console.log('  OK  no caduca si el nombre distintivo no cambió');
+}
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Razón social: el indicativo S.A.S. es obligatorio');
+{
+    const w = nuevaApp();
+
+    // Formas válidas del indicativo
+    for (const valida of ['ACME S.A.S.', 'ACME SAS', 'Acme s.a.s', 'ACME S A S',
+                          'ACME Sociedad por Acciones Simplificada',
+                          'ACME S.A.S. B.I.C.', 'AGUAS DEL SUR S.A.S. E.S.P.']) {
+        assert.ok(w.tieneIndicativoSAS(valida), `debía aceptar: ${valida}`);
+    }
+    // Formas que no llevan el indicativo, o lo llevan donde no va
+    for (const invalida of ['ACME', 'ACME LTDA', 'ACME S.A.', 'Inversiones Acme',
+                            'SAS ACME', 'ACME LIMITADA']) {
+        assert.ok(!w.tieneIndicativoSAS(invalida), `no debía aceptar: ${invalida}`);
+    }
+    console.log('  OK  reconocimiento del indicativo en todas sus formas');
+
+    // Sin indicativo, el paso 1 no deja avanzar
+    llenarPaso1(w);
+    set(w, 'nombre_sas', 'FAMILIA ANDINA');
+    w.onRazonSocialInput();
+    w.__alerts = [];
+    assert.equal(w.validateStep(1), false, 'sin S.A.S. no debía dejar continuar');
+    assert.match(w.__alerts[0], /debe terminar en "S\.A\.S\."/);
+    assert.match(w.__alerts[0], /Ley 1258 de 2008/);
+    // Y sugiere exactamente qué escribir
+    assert.match(w.__alerts[0], /FAMILIA ANDINA S\.A\.S\./);
+
+    // Solo el indicativo tampoco sirve: falta el nombre distintivo
+    set(w, 'nombre_sas', 'S.A.S.');
+    w.onRazonSocialInput();
+    w.__alerts = [];
+    assert.equal(w.validateStep(1), false, 'solo el indicativo no debía pasar');
+    assert.match(w.__alerts[0], /no puede ser solo el indicativo/);
+    // Lo mismo con otro tipo societario suelto
+    set(w, 'nombre_sas', 'LTDA');
+    w.__alerts = [];
+    assert.equal(w.validateStep(1), false);
+    assert.match(w.__alerts[0], /no puede ser solo el indicativo/);
+
+    // Con el indicativo sí avanza
+    set(w, 'nombre_sas', 'FAMILIA ANDINA S.A.S.');
+    w.onRazonSocialInput();
+    w.marcarConsultaRues();
+    marcarRadio(w, 'homonimia', 'min');
+    w.__alerts = [];
+    assert.ok(w.validateStep(1), 'con S.A.S. debía pasar: ' + w.__alerts);
+    console.log('  OK  bloquea sin indicativo y deja pasar con él');
 }
 
 // ════════════════════════════════════════════════════════════════

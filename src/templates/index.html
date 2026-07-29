@@ -79,7 +79,10 @@
                     <label for="nombre_sas">Razón Social *</label>
                     <input type="text" id="nombre_sas" placeholder="Ej: ACME INNOVACIONES S.A.S."
                            oninput="onRazonSocialInput()" required>
-                    <span class="hint">Debe terminar en S.A.S.</span>
+                    <span class="hint">
+                        <strong>Debe terminar en S.A.S.</strong> — lo exige el artículo 5 de la
+                        Ley 1258 de 2008. Sin el indicativo no se puede continuar.
+                    </span>
                 </div>
 
                 <!-- ═══ Verificación de homonimia en el RUES ═══ -->
@@ -999,6 +1002,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260728d"></script>
+<script src="/static/js/app.js?v=20260729a"></script>
 </body>
 </html>

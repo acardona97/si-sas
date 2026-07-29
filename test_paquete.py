@@ -306,6 +306,27 @@ def test_validaciones(client):
     assert "múltiplos" in r2.get_json()["error"]
     print("  OK  validaciones de capital")
 
+    # ── Indicativo del tipo societario ──
+    sin_sas = dict(PAYLOAD_B, nombre_sas="SOLO UNO")
+    r3 = client.post("/api/generate", json=sin_sas)
+    assert r3.status_code == 400, "debía rechazar la razón social sin S.A.S."
+    assert "S.A.S." in r3.get_json()["error"]
+
+    solo_indicativo = dict(PAYLOAD_B, nombre_sas="S.A.S.")
+    r4 = client.post("/api/generate", json=solo_indicativo)
+    assert r4.status_code == 400, "debía rechazar solo el indicativo"
+    assert "falta el nombre" in r4.get_json()["error"]
+
+    # Las variantes de escritura se aceptan y se normalizan
+    for variante in ("SOLO UNO SAS", "Solo Uno S.A.S", "SOLO UNO S A S",
+                     "SOLO UNO SOCIEDAD POR ACCIONES SIMPLIFICADA"):
+        r5 = client.post("/api/generate", json=dict(PAYLOAD_B, nombre_sas=variante))
+        assert r5.status_code == 200, (
+            f"{variante!r} debía aceptarse: HTTP {r5.status_code} "
+            f"{r5.get_data(as_text=True)[:200]}"
+        )
+    print("  OK  indicativo S.A.S. obligatorio y variantes normalizadas")
+
 
 if __name__ == "__main__":
     cli = _cliente()

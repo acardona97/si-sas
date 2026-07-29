@@ -53,10 +53,26 @@ function validateStep(step) {
     if (step === 1) {
         const nombre = document.getElementById('nombre_sas').value.trim();
         if (!nombre) { alert('Ingrese la razón social'); return false; }
-        // Normalize S.A.S.
-        const upper = nombre.toUpperCase();
-        if (!upper.includes('S.A.S')) {
-            if (!confirm('La razón social no incluye "S.A.S." — ¿desea continuar?')) return false;
+        // Se revisa primero que exista nombre distintivo: si el usuario solo
+        // escribió el indicativo, el mensaje correcto es ese y no el de que
+        // falta el indicativo.
+        if (!nombreDistintivo(nombre)) {
+            alert('La razón social no puede ser solo el indicativo del tipo societario.\n\n'
+                  + 'Agregue el nombre que identifica a la sociedad, por ejemplo: '
+                  + 'ACME INNOVACIONES S.A.S.');
+            document.getElementById('nombre_sas').focus();
+            return false;
+        }
+        // El indicativo es obligatorio y va al final (artículo 5 de la Ley
+        // 1258 de 2008). Sin él la Cámara devuelve el trámite.
+        if (!tieneIndicativoSAS(nombre)) {
+            alert('La razón social debe terminar en "S.A.S."\n\n'
+                  + 'Lo exige el artículo 5 de la Ley 1258 de 2008: la denominación va '
+                  + 'seguida de las letras S.A.S. o de las palabras "sociedad por '
+                  + 'acciones simplificada".\n\n'
+                  + `Escriba, por ejemplo: ${nombre.trim()} S.A.S.`);
+            document.getElementById('nombre_sas').focus();
+            return false;
         }
         const email = document.getElementById('email').value.trim();
         if (email) {
@@ -714,6 +730,34 @@ function _normalizarNombre(s) {
         .replace(/[^A-Z0-9\s]/g, ' ')                       // puntuación, &, guiones
         .replace(/\s+/g, ' ')
         .trim();
+}
+
+// Formas admitidas del indicativo, ya normalizadas (sin puntos ni tildes).
+const INDICATIVOS_SAS = ['S A S', 'SAS', 'SOCIEDAD POR ACCIONES SIMPLIFICADA'];
+
+/**
+ * ¿La razón social termina con el indicativo del tipo societario?
+ * Acepta "S.A.S.", "SAS", "S A S" y la forma en palabras. El indicativo puede
+ * ir seguido de otros distintivos legales (B.I.C., E.S.P.), que también son
+ * sufijos societarios.
+ */
+function tieneIndicativoSAS(razonSocial) {
+    let n = _normalizarNombre(razonSocial);
+    if (!n) return false;
+    // Se descartan los sufijos que pueden ir después del indicativo
+    const POSTERIORES = ['B I C', 'BIC', 'E S P', 'ESP', 'EN LIQUIDACION'];
+    let cambio = true;
+    while (cambio) {
+        cambio = false;
+        for (const suf of POSTERIORES) {
+            if (n.endsWith(' ' + suf)) {
+                n = n.slice(0, n.length - suf.length - 1).trim();
+                cambio = true;
+                break;
+            }
+        }
+    }
+    return INDICATIVOS_SAS.some(ind => n.endsWith(' ' + ind));
 }
 
 /** "Café Montaña S.A.S. B.I.C." -> "CAFE MONTANA" */

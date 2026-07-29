@@ -406,9 +406,27 @@ def generate():
         # ─── EXTRAER Y NORMALIZAR ───
         nombre_sas = data["nombre_sas"].upper().strip()
         if not nombre_sas.endswith("S.A.S."):
+            # Se admiten las variantes de escritura del indicativo y se llevan
+            # todas a la forma canónica "S.A.S.".
             nombre_sas = re.sub(
-                r"\s*(SAS|S\s*A\s*S|S\.A\.S)\s*\.?\s*$", " S.A.S.", nombre_sas
+                r"\s*(SOCIEDAD\s+POR\s+ACCIONES\s+SIMPLIFICADA|SAS|S\s*A\s*S|S\.A\.S)"
+                r"\s*\.?\s*$",
+                " S.A.S.", nombre_sas
             ).strip()
+
+        # El indicativo del tipo societario es obligatorio y va al final
+        # (artículo 5 de la Ley 1258 de 2008). El cuestionario ya lo exige;
+        # esto cubre el caso de que se llame al endpoint por fuera.
+        if not nombre_sas.endswith("S.A.S."):
+            return jsonify({
+                "error": 'La razón social debe terminar en "S.A.S." '
+                         "(artículo 5 de la Ley 1258 de 2008)."
+            }), 400
+        if not nombre_sas[:-len("S.A.S.")].strip(" .,-"):
+            return jsonify({
+                "error": 'La razón social no puede ser solo el indicativo "S.A.S.": '
+                         "falta el nombre que identifica a la sociedad."
+            }), 400
 
         fecha = date.today()
         municipio = data.get("municipio", "Medellín")
