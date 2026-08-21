@@ -37,7 +37,7 @@ function showStep(n) {
 
     currentStep = n;
     if (n === 3) populateRLSelects();
-    if (n === 5) syncCapital();
+    if (n === 5) { syncCapital(); cargarResponsabilidades(); }
     if (n === 6) { refreshControlBlock(); renderNucleoFamiliar(); populateJuntaSelects(); }
     if (n === 7) buildSummary();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -133,6 +133,30 @@ function validateStep(step) {
         if (Math.abs(totalPct - 100) > 0.01) {
             alert('Los porcentajes deben sumar 100%. Actual: ' + totalPct.toFixed(2) + '%');
             return false;
+        }
+    }
+    if (step === 3) {
+        if (getRepresentantes('principal').length === 0) {
+            alert('Debe designar al menos un representante legal principal.');
+            return false;
+        }
+        const lim = getLimitacionesRL();
+        if (lim.tiene_limitaciones) {
+            if (!lim.limita_cuantia && !lim.limita_naturaleza) {
+                alert('Marcó que el representante legal tendrá limitaciones.\n\n'
+                      + 'Indique si la limitación es por cuantía, por naturaleza del '
+                      + 'contrato, o por ambas.');
+                return false;
+            }
+            if (lim.limita_cuantia && !lim.cuantia_smmlv) {
+                alert('Indique la cuantía máxima en salarios mínimos mensuales legales '
+                      + 'vigentes que el representante legal podrá contratar sin autorización.');
+                return false;
+            }
+            if (lim.limita_naturaleza && !lim.naturaleza) {
+                alert('Describa la naturaleza de los contratos que requerirán autorización previa.');
+                return false;
+            }
         }
     }
     if (step === 4) {
@@ -394,12 +418,10 @@ function removeAccionista(n) {
 // ─── RL SELECTS ───
 function populateRLSelects() {
     const accionistas = getAccionistasData();
-    ['principal', 'suplente'].forEach(tipo => {
-        const sel = document.getElementById('rl_' + tipo + '_select');
-        const currentVal = sel.value;
-        sel.innerHTML = tipo === 'suplente'
-            ? '<option value="">-- Ninguno --</option>'
-            : '<option value="">-- Escribir manualmente --</option>';
+    const llenar = (sel, vacio) => {
+        if (!sel) return;
+        const previo = sel.value;
+        sel.innerHTML = `<option value="">${vacio}</option>`;
         accionistas.forEach((acc, i) => {
             if (acc.tipo === 'natural') {
                 const opt = document.createElement('option');
@@ -408,27 +430,290 @@ function populateRLSelects() {
                 sel.appendChild(opt);
             }
         });
-        sel.value = currentVal;
-    });
+        sel.value = previo;
+    };
+    llenar(document.getElementById('rl_principal_select'), '-- Escribir manualmente --');
+    llenar(document.getElementById('rl_suplente_select'), '-- Ninguno --');
+    // Los representantes adicionales tienen su propio selector
+    document.querySelectorAll('[data-rl-select]').forEach(sel =>
+        llenar(sel, '-- Escribir manualmente --'));
 }
 
 function selectRL(tipo) {
-    const sel = document.getElementById('rl_' + tipo + '_select');
+    // `tipo` puede ser 'principal'/'suplente' (el primero de cada clase) o un
+    // prefijo completo como 'rl_principal_2' para los adicionales.
+    const prefijo = tipo.startsWith('rl_') ? tipo : 'rl_' + tipo;
+    const sel = document.getElementById(prefijo + '_select');
+    if (!sel) return;
     const idx = parseInt(sel.value);
+    const set = (campo, valor) => {
+        const el = document.getElementById(prefijo + '_' + campo);
+        if (el) el.value = valor;
+    };
     if (isNaN(idx)) {
-        document.getElementById('rl_' + tipo + '_nombre').value = '';
-        document.getElementById('rl_' + tipo + '_cedula').value = '';
-        document.getElementById('rl_' + tipo + '_expedicion').value = '';
+        set('nombre', ''); set('cedula', ''); set('expedicion', '');
         return;
     }
     const accionistas = getAccionistasData();
-    if (accionistas[idx]) {
-        document.getElementById('rl_' + tipo + '_nombre').value = accionistas[idx].nombre;
-        document.getElementById('rl_' + tipo + '_cedula').value = accionistas[idx].id_num;
-        document.getElementById('rl_' + tipo + '_expedicion').value = accionistas[idx].expedicion || '';
-        document.getElementById('rl_' + tipo + '_tipo_doc').value = accionistas[idx].tipo_doc || 'CC';
-        document.getElementById('rl_' + tipo + '_genero').value = accionistas[idx].genero || 'M';
+    const acc = accionistas[idx];
+    if (acc) {
+        set('nombre', acc.nombre);
+        set('cedula', acc.id_num);
+        set('expedicion', acc.expedicion || '');
+        set('tipo_doc', acc.tipo_doc || 'CC');
+        set('genero', acc.genero || 'M');
     }
+}
+
+// ═══════════════════════════════════════════════════════════
+// REPRESENTANTES LEGALES ADICIONALES
+// ═══════════════════════════════════════════════════════════
+// El primer principal y el primer suplente conservan sus campos originales
+// —son los que figuran en los formularios y firman ante las entidades—; los
+// demás se agregan como tarjetas con el mismo juego de campos.
+
+const rlExtra = { principal: 1, suplente: 1 };
+// El plural no sale de concatenar: principal → principales, suplente → suplentes.
+const RL_CONTENEDOR = { principal: 'rl-principales-extra', suplente: 'rl-suplentes-extra' };
+
+function addRepresentante(tipo) {
+    rlExtra[tipo] += 1;
+    const n = rlExtra[tipo];
+    const prefijo = `rl_${tipo}_${n}`;
+    const titulo = tipo === 'principal'
+        ? `Representante Legal Principal ${n}`
+        : `Representante Legal Suplente ${n}`;
+
+    const cont = document.getElementById(RL_CONTENEDOR[tipo]);
+    const card = document.createElement('fieldset');
+    card.dataset.rlExtra = tipo;
+    card.innerHTML = `
+        <legend>${titulo}
+            <button type="button" class="btn btn-danger" style="margin-left:.75rem"
+                    onclick="this.closest('fieldset').remove(); populateRLSelects()">Eliminar</button>
+        </legend>
+        <div class="upload-doc-section">
+            <div class="upload-doc-info">
+                <strong>📷 Autocompletar desde cédula o pasaporte</strong>
+                <span class="upload-hint">Suba el documento y Sí S.A.S. completa los campos.</span>
+            </div>
+            <label class="upload-doc-btn">
+                Cargar documento
+                <input type="file" accept="image/*,application/pdf"
+                       onchange="extractFromCedula(this, '${prefijo}', 0)">
+            </label>
+            <span class="upload-status" id="${prefijo}_upload_status"></span>
+        </div>
+        <div class="form-group">
+            <label>Seleccionar de accionistas</label>
+            <select id="${prefijo}_select" data-rl-select onchange="selectRL('${prefijo}')">
+                <option value="">-- Escribir manualmente --</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" id="${prefijo}_nombre">
+            </div>
+            <div class="form-group">
+                <label>Tipo documento</label>
+                <select id="${prefijo}_tipo_doc">
+                    <option value="CC">C.C.</option>
+                    <option value="CE">C.E.</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Género</label>
+                <select id="${prefijo}_genero">
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Número de documento</label>
+                <input type="text" id="${prefijo}_cedula">
+            </div>
+            <div class="form-group">
+                <label>Ciudad de expedición</label>
+                <input type="text" id="${prefijo}_expedicion">
+            </div>
+        </div>`;
+    cont.appendChild(card);
+    populateRLSelects();
+}
+
+/** Lee un representante legal a partir de su prefijo de campos. */
+function _leerRL(prefijo) {
+    const v = (campo) => (document.getElementById(prefijo + '_' + campo)?.value || '').trim();
+    const nombre = v('nombre');
+    if (!nombre) return null;
+    return {
+        nombre: nombre,
+        cc: v('cedula'),
+        tipo_doc: document.getElementById(prefijo + '_tipo_doc')?.value || 'CC',
+        expedicion: v('expedicion'),
+        genero: document.getElementById(prefijo + '_genero')?.value || 'M',
+    };
+}
+
+function getRepresentantes(tipo) {
+    const lista = [];
+    const primero = _leerRL(`rl_${tipo}`);
+    if (primero) lista.push(primero);
+    document.querySelectorAll(`[data-rl-extra="${tipo}"]`).forEach(card => {
+        const sel = card.querySelector('[data-rl-select]');
+        if (!sel) return;
+        const rl = _leerRL(sel.id.replace('_select', ''));
+        if (rl) lista.push(rl);
+    });
+    return lista;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LIMITACIONES DEL REPRESENTANTE LEGAL
+// ═══════════════════════════════════════════════════════════
+
+function toggleLimitacionesRL(mostrar) {
+    document.querySelectorAll('input[name="rl_limitaciones"]').forEach(r => {
+        r.closest('.radio-card').classList.toggle('selected', r.checked);
+    });
+    document.getElementById('limitaciones-fields').classList.toggle('hidden', !mostrar);
+}
+
+function toggleLimCuantia(mostrar) {
+    document.getElementById('lim-cuantia-fields').classList.toggle('hidden', !mostrar);
+}
+
+function toggleLimNaturaleza(mostrar) {
+    document.getElementById('lim-naturaleza-fields').classList.toggle('hidden', !mostrar);
+}
+
+function getLimitacionesRL() {
+    const tiene = document.querySelector('input[name="rl_limitaciones"]:checked')?.value === 'si';
+    if (!tiene) return { tiene_limitaciones: false };
+    const cuantia = document.querySelector('input[name="lim_cuantia"]:checked')?.value === 'si';
+    const naturaleza = document.querySelector('input[name="lim_naturaleza"]:checked')?.value === 'si';
+    return {
+        tiene_limitaciones: true,
+        limita_cuantia: cuantia,
+        cuantia_smmlv: cuantia ? (document.getElementById('lim_cuantia_smmlv')?.value || '').trim() : '',
+        organo_cuantia: document.getElementById('lim_cuantia_organo')?.value || 'asamblea',
+        limita_naturaleza: naturaleza,
+        naturaleza: naturaleza ? (document.getElementById('lim_naturaleza_texto')?.value || '').trim() : '',
+        organo_naturaleza: document.getElementById('lim_naturaleza_organo')?.value || 'asamblea',
+    };
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESPONSABILIDADES TRIBUTARIAS
+// ═══════════════════════════════════════════════════════════
+// Las del régimen van fijas; el usuario solo puede agregar de la lista de
+// adicionales, que el backend calcula descontando las ya incluidas y las
+// excluyentes con el régimen elegido.
+
+let respAdicionalesMarcadas = new Set();
+// El anexo impreso de la Cámara tiene un número fijo de filas: no se puede
+// marcar más de lo que cabe, porque el formulario saldría incompleto.
+let respCupo = 10;
+
+async function cargarResponsabilidades() {
+    const bloque = document.getElementById('resp-predeterminadas');
+    if (!bloque) return;
+    const regimen = document.getElementById('regimen')?.value || 'ordinario';
+    // El INC lo determina la actividad económica, igual que en el backend
+    const consumo = _detectaConsumo() ? '1' : '0';
+
+    let data;
+    try {
+        const resp = await fetch(`/api/responsabilidades?regimen=${regimen}&consumo=${consumo}`);
+        data = await resp.json();
+    } catch (e) {
+        console.error('cargarResponsabilidades:', e);
+        return;
+    }
+
+    bloque.innerHTML =
+        '<div class="resp-fijas"><span class="resp-fijas-titulo">Van siempre con este régimen</span>'
+        + data.predeterminadas.map(r =>
+            `<span class="resp-chip fija"><span class="resp-cod">${r.codigo}</span> ${r.nombre}</span>`
+          ).join('')
+        + '</div>';
+
+    respCupo = data.cupo_adicionales;
+
+    const cont = document.getElementById('resp-adicionales');
+    if (!data.adicionales.length) {
+        cont.innerHTML = '<p class="hint">No hay responsabilidades adicionales disponibles para este régimen.</p>';
+    } else {
+        cont.innerHTML =
+            `<div class="resp-extra-titulo">Puede agregar
+                <span id="resp-cupo" class="resp-cupo"></span>
+             </div>`
+            + data.adicionales.map(r => `
+                <label class="resp-opcion">
+                    <input type="checkbox" value="${r.codigo}"
+                           ${respAdicionalesMarcadas.has(r.codigo) ? 'checked' : ''}
+                           onchange="toggleRespAdicional('${r.codigo}', this.checked)">
+                    <span class="resp-opcion-cuerpo">
+                        <span class="resp-opcion-titulo"><span class="resp-cod">${r.codigo}</span> ${r.nombre}</span>
+                        <span class="resp-opcion-desc">${r.descripcion}</span>
+                    </span>
+                </label>`).join('');
+    }
+
+    document.getElementById('resp-vetadas').innerHTML = data.no_seleccionables.map(r =>
+        `<div class="resp-vetada"><span class="resp-cod">${r.codigo}</span> ${r.nombre} — ${r.motivo}</div>`
+    ).join('');
+
+    // Si al cambiar de régimen alguna marcada dejó de ofrecerse, se descarta
+    const ofrecidas = new Set(data.adicionales.map(r => r.codigo));
+    respAdicionalesMarcadas = new Set([...respAdicionalesMarcadas].filter(c => ofrecidas.has(c)));
+    // Y si el cupo se redujo, se sueltan las que ya no caben
+    while (respAdicionalesMarcadas.size > respCupo) {
+        respAdicionalesMarcadas.delete([...respAdicionalesMarcadas].pop());
+    }
+    actualizarCupoResp();
+}
+
+function toggleRespAdicional(codigo, marcada) {
+    if (marcada) respAdicionalesMarcadas.add(codigo);
+    else respAdicionalesMarcadas.delete(codigo);
+    actualizarCupoResp();
+}
+
+/**
+ * Refleja cuántas quedan y desactiva las que ya no caben.
+ * El anexo tiene filas contadas: mejor impedir marcarlas que fallar al
+ * generar o, peor, recortar el formulario en silencio.
+ */
+function actualizarCupoResp() {
+    const restantes = respCupo - respAdicionalesMarcadas.size;
+    const etiqueta = document.getElementById('resp-cupo');
+    if (etiqueta) {
+        etiqueta.textContent = restantes > 0
+            ? `— quedan ${restantes} de ${respCupo}`
+            : '— no cabe ninguna más en el anexo';
+        etiqueta.classList.toggle('lleno', restantes <= 0);
+    }
+    document.querySelectorAll('#resp-adicionales input[type="checkbox"]').forEach(chk => {
+        chk.disabled = restantes <= 0 && !chk.checked;
+        chk.closest('.resp-opcion').classList.toggle('deshabilitada', chk.disabled);
+    });
+}
+
+/** Misma heurística de consumo que usa el backend, para previsualizar. */
+function _detectaConsumo() {
+    const CIIU_CONSUMO = ['5611','5612','5613','5619','5621','5629','5630',
+                          '6120','6110','9200','0128'];
+    const codigos = [document.getElementById('ciiu_code')?.value,
+                     document.getElementById('ciiu_code_sec')?.value].filter(Boolean);
+    if (codigos.some(c => CIIU_CONSUMO.includes(String(c).slice(0, 4)))) return true;
+    const obj = (document.getElementById('objeto_social')?.value || '').toLowerCase();
+    return ['restaurante', 'bar ', 'café', 'expendio de bebida',
+            'telefonía móvil', 'internet', 'cannabis'].some(k => obj.includes(k));
 }
 
 // ─── CIIU SEARCH ───
@@ -1239,12 +1524,15 @@ function recalcCapitalPagadoTotal() {
 
 function selectRegimen(valor) {
     document.getElementById('regimen').value = valor;
-    document.querySelectorAll('#step5 .radio-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('#step5 .radio-cards .radio-card').forEach(c => c.classList.remove('selected'));
     const radio = document.getElementById('regimen_' + valor);
     if (radio) {
         radio.checked = true;
         radio.closest('.radio-card').classList.add('selected');
     }
+    // Cambiar de régimen cambia qué responsabilidades van fijas y cuáles se
+    // pueden agregar: la 05 y la 47 son excluyentes entre sí.
+    cargarResponsabilidades();
 }
 
 function toggleJunta(val) {
@@ -1685,6 +1973,11 @@ function collectAllData() {
             expedicion: document.getElementById('rl_suplente_expedicion').value.trim(),
             genero: document.getElementById('rl_suplente_genero').value,
         } : null,
+        // Listas completas: los estatutos indican cuántos hay y todos firman
+        rl_principales: getRepresentantes('principal'),
+        rl_suplentes: getRepresentantes('suplente'),
+        limitaciones_rl: getLimitacionesRL(),
+        responsabilidades_adicionales: [...respAdicionalesMarcadas],
         ciiu_code: document.getElementById('ciiu_code').value,
         ciiu_description: document.getElementById('ciiu_description').value,
         ciiu_code_sec: document.getElementById('ciiu_code_sec').value,

@@ -33,6 +33,11 @@ from processors.ciiu_reglas import (
     validar_seleccion as validar_ciiu,
     version_matriz as version_matriz_ciiu,
 )
+from processors.responsabilidades import (
+    construir as construir_resps,
+    disponibles as resps_disponibles,
+    no_seleccionables as resps_no_seleccionables,
+)
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
 from processors.pdf_filler import (
@@ -70,14 +75,6 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 CAPITAL_AUTORIZADO = 1_000_000_000
 VALOR_NOMINAL_ACCION = 1
 
-RESP_BASE = [
-    ("07", "Retención en la Fuente a título de renta"),
-    ("14", "Informante de Exógena"),
-    ("42", "Obligado a llevar contabilidad"),
-    ("48", "Impuesto sobre las ventas"),
-    ("55", "Informante de Beneficiarios Finales"),
-]
-
 CIIU_CONSUMO = [
     "5611", "5612", "5613", "5619", "5621", "5629", "5630",
     "6120", "6110", "9200", "0128",
@@ -114,17 +111,9 @@ def determinar_incluir_consumo(ciiu_codes, objeto_social=""):
     return any(kw in obj_lower for kw in keywords)
 
 
-def construir_responsabilidades(regimen, incluir_consumo):
-    resps = []
-    if regimen == "ordinario":
-        resps.append(("05", "Impuesto sobre la Renta y Complementarios Régimen Ordinario"))
-    else:
-        resps.append(("47", "Régimen Simple de Tributación"))
-    resps.extend(RESP_BASE)
-    if incluir_consumo:
-        resps.append(("33", "Impuesto Nacional al Consumo"))
-    resps.sort(key=lambda x: int(x[0]))
-    return resps
+def construir_responsabilidades(regimen, incluir_consumo, adicionales=None):
+    """Anexo de responsabilidades: las del régimen más las que marcó el usuario."""
+    return construir_resps(regimen, incluir_consumo, adicionales)
 
 
 def determinar_ley_1780(accionistas):
@@ -402,6 +391,33 @@ def ciiu_search():
     return jsonify(results)
 
 
+@app.route("/api/responsabilidades")
+@login_required
+def api_responsabilidades():
+    """
+    Responsabilidades tributarias según el régimen elegido.
+
+    Devuelve las que van por defecto (no se pueden quitar), las que el
+    usuario puede agregar y las que nunca se ofrecen, con el motivo.
+    """
+    from processors.responsabilidades import (
+        predeterminadas, cupo_adicionales, maximo_anexo,
+    )
+    regimen = request.args.get("regimen", "ordinario")
+    incluir_consumo = request.args.get("consumo") == "1"
+    return jsonify({
+        "predeterminadas": [
+            {"codigo": c, "nombre": n}
+            for c, n in predeterminadas(regimen, incluir_consumo)
+        ],
+        "adicionales": resps_disponibles(regimen, incluir_consumo),
+        "no_seleccionables": resps_no_seleccionables(),
+        # El anexo impreso tiene un número fijo de filas
+        "maximo_anexo": maximo_anexo(),
+        "cupo_adicionales": cupo_adicionales(regimen, incluir_consumo),
+    })
+
+
 @app.route("/api/ciiu/regla/<codigo>")
 @login_required
 def ciiu_regla(codigo):
@@ -519,8 +535,12 @@ def generate():
         tenencia = data.get("tenencia", "arriendo")
 
         accionistas = data.get("accionistas", [])
-        rl_principal = data.get("rl_principal", {})
-        rl_suplente = data.get("rl_suplente", None)
+        # Puede haber varios representantes legales; el primero de cada lista
+        # es el que figura en los formularios y firma ante las entidades.
+        _principales = [r for r in (data.get("rl_principales") or []) if r and r.get("nombre")]
+        _suplentes = [r for r in (data.get("rl_suplentes") or []) if r and r.get("nombre")]
+        rl_principal = _principales[0] if _principales else data.get("rl_principal", {})
+        rl_suplente = _suplentes[0] if _suplentes else data.get("rl_suplente", None)
 
         objeto_social = data.get("objeto_social", "")
         ciiu_code = data.get("ciiu_code", "")
@@ -657,7 +677,19 @@ def generate():
 
         # Derivaciones automáticas
         incluir_consumo = determinar_incluir_consumo(ciiu_codes, objeto_social)
-        responsabilidades = construir_responsabilidades(regimen, incluir_consumo)
+        responsabilidades, avisos_resp = construir_responsabilidades(
+            regimen, incluir_consumo, data.get("responsabilidades_adicionales")
+        )
+        # Si algo quedó por fuera del anexo no se sigue: el formulario saldría
+        # incompleto y es un documento que se radica ante la DIAN.
+        if any("anexo solo admite" in a for a in avisos_resp):
+            return jsonify({
+                "error": "No caben todas las responsabilidades tributarias "
+                         "seleccionadas:\n\n" + "\n".join(avisos_resp)
+                         + "\n\nQuite alguna para continuar."
+            }), 400
+        if avisos_resp:
+            errors.extend(avisos_resp)
         controlante = determinar_situacion_control(accionistas)
         aplica_1780 = determinar_ley_1780(accionistas)
 
@@ -688,6 +720,9 @@ def generate():
                 "valor_nominal": valor_nominal,
                 "rl_principal": rl_principal,
                 "rl_suplente": rl_suplente,
+                "rl_principales": data.get("rl_principales"),
+                "rl_suplentes": data.get("rl_suplentes"),
+                "limitaciones_rl": data.get("limitaciones_rl"),
                 "tiene_junta": tiene_junta,
                 "tiene_revisor": tiene_revisor,
                 "junta_directiva": junta_directiva,

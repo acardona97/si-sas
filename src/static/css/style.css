@@ -2683,3 +2683,79 @@ fieldset legend {
 @media (max-width: 560px) {
     .ciiu-pregunta { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSABILIDADES TRIBUTARIAS
+   Las del régimen se muestran como fichas fijas —no se pueden
+   quitar— y las opcionales como casillas con su explicación.
+   ══════════════════════════════════════════════════════════════ */
+
+.resp-fijas {
+    background: var(--gold-light);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.1rem;
+}
+.resp-fijas-titulo,
+.resp-extra-titulo {
+    display: block;
+    font-size: 0.68rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 0.55rem;
+}
+.resp-extra-titulo { margin-top: 0.2rem; }
+
+.resp-chip {
+    display: inline-block;
+    background: #fff; border: 1px solid var(--gold-border);
+    border-radius: 100px;
+    padding: 0.22rem 0.7rem; margin: 0 0.35rem 0.35rem 0;
+    font-size: 0.78rem; color: var(--navy);
+}
+.resp-cod {
+    display: inline-block;
+    font-weight: 700; color: var(--gold-hover);
+    margin-right: 0.3rem;
+}
+
+.resp-opcion {
+    display: flex; align-items: flex-start; gap: 0.7rem;
+    padding: 0.7rem 0.85rem; margin-bottom: 0.5rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; background: var(--bg-card);
+    transition: border-color .15s ease, background .15s ease;
+}
+.resp-opcion:hover { border-color: var(--gold); }
+.resp-opcion:has(input:checked) {
+    border-color: var(--gold); background: var(--gold-light);
+}
+.resp-opcion input { margin-top: 0.2rem; flex: 0 0 auto; }
+.resp-opcion-cuerpo { flex: 1; min-width: 0; }
+.resp-opcion-titulo {
+    display: block; font-size: 0.875rem; font-weight: 500; color: var(--text);
+}
+.resp-opcion-desc {
+    display: block; font-size: 0.8rem; line-height: 1.45;
+    color: var(--text-secondary); margin-top: 0.2rem;
+}
+
+.resp-vetada {
+    font-size: 0.78rem; line-height: 1.5;
+    color: var(--text-muted);
+    padding: 0.3rem 0; border-top: 1px solid var(--border-light);
+}
+.resp-vetada:first-child { border-top: none; }
+
+/* Cupo del anexo: tiene un número fijo de filas */
+.resp-cupo {
+    text-transform: none; letter-spacing: 0;
+    font-weight: 400; color: var(--text-muted);
+}
+.resp-cupo.lleno { color: var(--danger); font-weight: 500; }
+
+.resp-opcion.deshabilitada {
+    opacity: 0.5; cursor: not-allowed;
+}
+.resp-opcion.deshabilitada:hover { border-color: var(--border); }

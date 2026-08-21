@@ -502,11 +502,131 @@ def test_empresa_familiar():
     print(f"OK  formato empresa familiar -> {out}")
 
 
+def test_varios_representantes_y_limitaciones():
+    """Dos principales, dos suplentes y limitaciones de cuantía y naturaleza."""
+    base = {
+        "nombre_sas": "MULTI RL S.A.S.",
+        "fecha": date(2026, 7, 29),
+        "municipio": "Medellín", "ciudad": "Medellín", "departamento": "Antioquia",
+        "accionistas": [
+            {"tipo": "natural", "nombre": "Ana Restrepo", "id_tipo": "C.C.",
+             "id_num": "43000111", "expedicion": "Medellín", "domicilio": "Medellín",
+             "porcentaje": 100, "genero": "F"},
+        ],
+        "objeto_social": "Actividades de prueba.",
+        "capital_autorizado": 1_000_000_000,
+        "capital_suscrito": 1_000_000, "capital_pagado": 1_000_000, "valor_nominal": 1,
+        "rl_principales": [
+            {"nombre": "Ana Restrepo", "cc": "43000111", "tipo_doc": "CC",
+             "expedicion": "Medellín", "genero": "F"},
+            {"nombre": "Pedro Gómez", "cc": "71222333", "tipo_doc": "CC",
+             "expedicion": "Envigado", "genero": "M"},
+        ],
+        "rl_suplentes": [
+            {"nombre": "Luisa Mora", "cc": "43555666", "tipo_doc": "CC",
+             "expedicion": "Medellín", "genero": "F"},
+            {"nombre": "Carlos Ruiz", "cc": "71888999", "tipo_doc": "CC",
+             "expedicion": "Itagüí", "genero": "M"},
+        ],
+        "limitaciones_rl": {
+            "tiene_limitaciones": True,
+            "limita_cuantia": True, "cuantia_smmlv": "500", "organo_cuantia": "asamblea",
+            "limita_naturaleza": True,
+            "naturaleza": "la enajenación o gravamen de bienes inmuebles",
+            "organo_naturaleza": "junta",
+        },
+        "tiene_junta": False, "tiene_revisor": False,
+        "junta_directiva": None, "revisor_fiscal": None, "apoderado": None,
+    }
+    out = os.path.join(OUT, "estatutos_multi_rl.docx")
+    generar_estatutos(base, os.path.join(PLANTILLAS, "estatutos_template.docx"), out)
+    txt = texto_doc(out)
+    assert "{{" not in txt
+
+    # ── Artículo 44: el número real de representantes legales ──
+    assert "La sociedad tendrá dos (2) representantes legales" in txt, \
+        "el artículo 44 debe decir cuántos representantes legales hay"
+    assert "La sociedad tendrá un representante legal," not in txt
+    # Y concuerda toda la frase, no solo el número
+    assert "quienes estarán a cargo" in txt
+    assert "serán elegidos por la asamblea" in txt
+    assert "podrán ser reelegidos indefinidamente o removidos" in txt
+    # La frase de los suplentes de la plantilla se conserva
+    assert "podrá tener uno o varios suplentes" in txt
+
+    # ── Nombramientos: los cuatro, con etiqueta en plural ──
+    assert "Representantes legales principales:" in txt
+    assert "Representantes legales suplentes:" in txt
+    for nombre in ["ANA RESTREPO", "PEDRO GÓMEZ", "LUISA MORA", "CARLOS RUIZ"]:
+        assert nombre in txt, f"falta {nombre} en los nombramientos"
+    assert "; y PEDRO GÓMEZ" in txt, "los principales deben ir enumerados"
+
+    # ── Todos firman ──
+    firmas = [p.text.strip() for p in Document(out).paragraphs]
+    for nombre in ["PEDRO GÓMEZ", "CARLOS RUIZ"]:
+        assert nombre in firmas, f"{nombre} debía tener bloque de firma propio"
+    assert "Acepto cargo como representante legal principal." in firmas
+    assert "Acepto cargo como representante legal suplente." in firmas
+
+    # ── Limitaciones en el artículo de funciones ──
+    assert "Parágrafo Segundo:" in txt
+    assert "500 salarios mínimos mensuales legales vigentes" in txt
+    assert "sin la autorización previa de la asamblea general de accionistas" in txt
+    assert "la enajenación o gravamen de bienes inmuebles" in txt
+    assert "sin la autorización previa de la junta directiva" in txt
+    assert "artículo 196 del Código de Comercio" in txt
+
+    # ── Y sin romper la forma ──
+    saltos, dobles = defectos_de_formato(out)
+    assert not saltos, saltos
+    assert not dobles, dobles
+
+    # El parágrafo nuevo hereda el formato del Parágrafo Primero
+    from docx.oxml.ns import qn as _q
+    d = Document(out)
+    p1 = next(p for p in d.paragraphs
+              if p.text.strip().startswith("Parágrafo Primero: El representante legal"))
+    p2 = next(p for p in d.paragraphs if p.text.strip().startswith("Parágrafo Segundo:"))
+
+    def _props(p):
+        pPr = p._element.find(_q("w:pPr"))
+        if pPr is None:
+            return (None, None, None)
+        jc = pPr.find(_q("w:jc"))
+        sp = pPr.find(_q("w:spacing"))
+        ind = pPr.find(_q("w:ind"))
+        return (
+            jc.get(_q("w:val")) if jc is not None else None,
+            (sp.get(_q("w:after")), sp.get(_q("w:line"))) if sp is not None else None,
+            (ind.get(_q("w:left")), ind.get(_q("w:firstLine"))) if ind is not None else None,
+        )
+
+    assert _props(p2) == _props(p1), (
+        f"el parágrafo de limitaciones debe tener el mismo formato que el "
+        f"Parágrafo Primero: {_props(p2)} vs {_props(p1)}"
+    )
+    print(f"OK  varios representantes legales y limitaciones -> {out}")
+    print("OK  el parágrafo de limitaciones hereda el formato del anterior")
+
+
+def test_un_solo_representante_no_cambia():
+    """Con un principal y un suplente el texto queda como siempre."""
+    txt = texto_doc(os.path.join(OUT, "estatutos_simple.docx"))
+    assert "La sociedad tendrá un representante legal," in txt
+    assert "Representante legal principal:" in txt
+    assert "Representantes legales principales:" not in txt
+    assert "Parágrafo Segundo:" not in txt, \
+        "sin limitaciones no debe aparecer el parágrafo"
+    print("OK  con un solo representante y sin limitaciones nada cambia")
+
+
 if __name__ == "__main__":
     test_valor_nominal_frase()
     test_texto_revisor()
     test_estatutos()
     test_estatutos_defaults()
+    test_varios_representantes_y_limitaciones()
+    test_un_solo_representante_no_cambia()
     test_carta_no_control()
     test_empresa_familiar()
     print("\nTodas las pruebas pasaron.")

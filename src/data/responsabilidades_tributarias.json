@@ -1,0 +1,71 @@
+{
+  "version": "1.0.0",
+  "revisado_el": "2026-07-29",
+  "aplica_a": "SAS",
+  "fuente": "Guía para seleccionar las responsabilidades tributarias en la asignación del NIT — Cámara de Comercio de Medellín para Antioquia, V.01 2024",
+  "nota": "Las del régimen y las de base van siempre; el usuario solo agrega de la lista de adicionales. Nunca se ofrece una que ya esté incluida ni una excluyente con el régimen elegido.",
+  "maximo_anexo": 10,
+  "nota_maximo": "El anexo de responsabilidades tributarias de la Cámara tiene diez filas. No se puede exceder: truncar la lista dejaría el formulario incompleto.",
+
+  "por_regimen": {
+    "ordinario": { "codigo": "05", "nombre": "Impuesto sobre la Renta y Complementarios Régimen Ordinario" },
+    "simple":    { "codigo": "47", "nombre": "Régimen Simple de Tributación" }
+  },
+
+  "base_sociedad": [
+    { "codigo": "07", "nombre": "Retención en la Fuente a título de renta" },
+    { "codigo": "14", "nombre": "Informante de Exógena" },
+    { "codigo": "42", "nombre": "Obligado a llevar contabilidad" },
+    { "codigo": "48", "nombre": "Impuesto sobre las ventas" },
+    { "codigo": "55", "nombre": "Informante de Beneficiarios Finales" }
+  ],
+
+  "adicionales": [
+    {
+      "codigo": "10",
+      "nombre": "Usuario aduanero",
+      "descripcion": "La sociedad actuará como usuario u obligado aduanero: importará, exportará o intervendrá en operaciones de comercio exterior ante la DIAN."
+    },
+    {
+      "codigo": "16",
+      "nombre": "Obligación de facturar por ingresos de bienes y/o servicios excluidos",
+      "descripcion": "Aplica si la sociedad debe facturar ingresos por bienes o servicios excluidos del IVA, o presta servicios no gravados."
+    },
+    {
+      "codigo": "18",
+      "nombre": "Precios de transferencia",
+      "descripcion": "Aplica si la sociedad realizará operaciones con vinculados económicos del exterior o en zona franca."
+    },
+    {
+      "codigo": "19",
+      "nombre": "Productor de bienes y/o servicios exentos",
+      "descripcion": "Incluye exportadores. Bienes y servicios exentos del artículo 477 del Estatuto Tributario."
+    },
+    {
+      "codigo": "33",
+      "nombre": "Impuesto Nacional al Consumo",
+      "descripcion": "Expendio de comidas y bebidas, telefonía móvil y demás hechos generadores del INC.",
+      "incompatible_con": ["47"],
+      "motivo_incompatible": "El Régimen Simple ya integra el impuesto nacional al consumo por expendio de comidas y bebidas."
+    }
+  ],
+
+  "excluyentes": {
+    "05": ["47"],
+    "47": ["05"],
+    "48": ["49"],
+    "49": ["48"]
+  },
+
+  "no_seleccionables": [
+    { "codigo": "04", "nombre": "Régimen Tributario Especial", "motivo": "Las sociedades no pueden incluirla en el RUT." },
+    { "codigo": "06", "nombre": "Declarante de ingresos y patrimonio", "motivo": "Las sociedades no pueden incluirla en el RUT." },
+    { "codigo": "49", "nombre": "No responsable de IVA", "motivo": "Las sociedades no pueden incluirla en el RUT; además es excluyente con la 48." },
+    { "codigo": "13", "nombre": "Gran contribuyente", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "15", "nombre": "Autorretenedor", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "17", "nombre": "Profesionales de compra y venta de divisas", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "23", "nombre": "Agente de retención en el impuesto sobre las ventas", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "45", "nombre": "Autorretenedor de rendimientos financieros", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "52", "nombre": "Facturador Electrónico", "motivo": "Exige habilitación previa en el portal de la DIAN; se incluye después de asignado el NIT." }
+  ]
+}

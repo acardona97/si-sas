@@ -689,4 +689,196 @@ console.log('\n─── CIIU: marcas en la lista y panel de restricciones');
     console.log('  OK  cambiar el código invalida respuestas y autorización previas');
 }
 
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Varios representantes legales y limitaciones');
+{
+    const w = nuevaApp();
+    llenarPaso1(w);
+    llenarAccionista(w, 1, { nombre: 'Ana Restrepo', id: '43000111', pct: 100, genero: 'F' });
+    w.showStep(3);
+
+    // Primer principal y primer suplente: campos de siempre
+    set(w, 'rl_principal_nombre', 'Ana Restrepo');
+    set(w, 'rl_principal_cedula', '43000111');
+    set(w, 'rl_suplente_nombre', 'Luisa Mora');
+    set(w, 'rl_suplente_cedula', '43555666');
+
+    // Adicionales
+    w.addRepresentante('principal');
+    set(w, 'rl_principal_2_nombre', 'Pedro Gómez');
+    set(w, 'rl_principal_2_cedula', '71222333');
+    w.addRepresentante('suplente');
+    set(w, 'rl_suplente_2_nombre', 'Carlos Ruiz');
+    set(w, 'rl_suplente_2_cedula', '71888999');
+
+    const principales = w.getRepresentantes('principal');
+    const suplentes = w.getRepresentantes('suplente');
+    assert.equal(principales.length, 2, 'debía haber dos principales');
+    assert.equal(suplentes.length, 2, 'debía haber dos suplentes');
+    assert.equal(principales[1].nombre, 'Pedro Gómez');
+    assert.equal(suplentes[1].cc, '71888999');
+
+    // Cada tarjeta nueva trae su carga de documento y su selector
+    assert.ok(w.document.getElementById('rl_principal_2_upload_status'));
+    assert.equal(w.document.querySelectorAll('[data-rl-select]').length, 2);
+    console.log('  OK  se agregan principales y suplentes adicionales');
+
+    // ── Limitaciones ──
+    marcarRadio(w, 'rl_limitaciones', 'si');
+    assert.ok(!w.document.getElementById('limitaciones-fields').classList.contains('hidden'));
+    w.__alerts = [];
+    assert.equal(w.validateStep(3), false, 'sin escoger el tipo de limitación no avanza');
+    assert.match(w.__alerts[0], /por cuantía, por naturaleza/);
+
+    marcarRadio(w, 'lim_cuantia', 'si');
+    w.__alerts = [];
+    assert.equal(w.validateStep(3), false, 'falta la cuantía');
+    assert.match(w.__alerts[0], /cuantía máxima/);
+    set(w, 'lim_cuantia_smmlv', '500');
+    set(w, 'lim_cuantia_organo', 'asamblea');
+
+    marcarRadio(w, 'lim_naturaleza', 'si');
+    w.__alerts = [];
+    assert.equal(w.validateStep(3), false, 'falta describir la naturaleza');
+    assert.match(w.__alerts[0], /naturaleza de los contratos/);
+    set(w, 'lim_naturaleza_texto', 'la enajenación o gravamen de bienes inmuebles');
+    set(w, 'lim_naturaleza_organo', 'junta');
+
+    assert.ok(w.validateStep(3), 'completo debía avanzar: ' + w.__alerts);
+
+    const d = w.collectAllData();
+    assert.equal(d.rl_principales.length, 2);
+    assert.equal(d.rl_suplentes.length, 2);
+    assert.equal(d.limitaciones_rl.cuantia_smmlv, '500');
+    assert.equal(d.limitaciones_rl.organo_cuantia, 'asamblea');
+    assert.equal(d.limitaciones_rl.organo_naturaleza, 'junta');
+    // El primero sigue viajando suelto: es el que usan los formularios
+    assert.equal(d.rl_principal.nombre, 'Ana Restrepo');
+    console.log('  OK  limitaciones: exige cuantía y naturaleza según lo marcado');
+}
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Responsabilidades tributarias: checklist sin duplicar ni chocar');
+{
+    const w = nuevaApp();
+    // Respuesta del backend para régimen ordinario
+    w.fetch = async (url) => ({
+        ok: true,
+        json: async () => (String(url).includes('regimen=simple') ? {
+            predeterminadas: [
+                { codigo: '07', nombre: 'Retención en la Fuente a título de renta' },
+                { codigo: '14', nombre: 'Informante de Exógena' },
+                { codigo: '42', nombre: 'Obligado a llevar contabilidad' },
+                { codigo: '47', nombre: 'Régimen Simple de Tributación' },
+                { codigo: '48', nombre: 'Impuesto sobre las ventas' },
+                { codigo: '55', nombre: 'Informante de Beneficiarios Finales' },
+            ],
+            // Sin la 33: el Régimen Simple ya la integra
+            adicionales: [
+                { codigo: '10', nombre: 'Usuario aduanero', descripcion: 'Comercio exterior.' },
+                { codigo: '16', nombre: 'Obligación de facturar por excluidos', descripcion: '...' },
+            ],
+            no_seleccionables: [
+                { codigo: '49', nombre: 'No responsable de IVA', motivo: 'Las sociedades no pueden incluirla.' },
+            ],
+            maximo_anexo: 10, cupo_adicionales: 4,
+        } : {
+            predeterminadas: [
+                { codigo: '05', nombre: 'Impuesto sobre la Renta Régimen Ordinario' },
+                { codigo: '07', nombre: 'Retención en la Fuente a título de renta' },
+                { codigo: '14', nombre: 'Informante de Exógena' },
+                { codigo: '42', nombre: 'Obligado a llevar contabilidad' },
+                { codigo: '48', nombre: 'Impuesto sobre las ventas' },
+                { codigo: '55', nombre: 'Informante de Beneficiarios Finales' },
+            ],
+            adicionales: [
+                { codigo: '10', nombre: 'Usuario aduanero', descripcion: 'Comercio exterior.' },
+                { codigo: '16', nombre: 'Obligación de facturar por excluidos', descripcion: '...' },
+                { codigo: '33', nombre: 'Impuesto Nacional al Consumo', descripcion: '...' },
+            ],
+            no_seleccionables: [
+                { codigo: '49', nombre: 'No responsable de IVA', motivo: 'Las sociedades no pueden incluirla.' },
+            ],
+            // Con el INC ya incluido solo quedan dos cupos en el anexo
+            maximo_anexo: 10, cupo_adicionales: 2,
+        }),
+    });
+
+    w.showStep(5);
+    await new Promise(r => setTimeout(r, 40));
+
+    const fijas = w.document.getElementById('resp-predeterminadas');
+    const extras = w.document.getElementById('resp-adicionales');
+    assert.match(fijas.textContent, /Van siempre con este régimen/);
+    assert.match(fijas.textContent, /05/);
+
+    // Ninguna de las fijas puede aparecer también como opción para agregar
+    const codigosFijos = [...fijas.querySelectorAll('.resp-cod')].map(e => e.textContent.trim());
+    const codigosExtra = [...extras.querySelectorAll('input[type="checkbox"]')].map(e => e.value);
+    const repetidos = codigosFijos.filter(c => codigosExtra.includes(c));
+    assert.equal(repetidos.length, 0, 'no se puede ofrecer lo que ya está: ' + repetidos);
+    console.log('  OK  no ofrece las que ya vienen con el régimen');
+
+    // Marcar la 10, que es el caso que pidió el usuario
+    const casilla10 = extras.querySelector('input[value="10"]');
+    assert.ok(casilla10, 'la 10 debía ofrecerse');
+    casilla10.checked = true;
+    w.toggleRespAdicional('10', true);
+    assert.deepEqual([...w.collectAllData().responsabilidades_adicionales], ['10']);
+
+    // Cambiar a Régimen Simple: la 33 deja de ofrecerse y se descarta si estaba
+    w.toggleRespAdicional('33', true);
+    w.selectRegimen('simple');
+    await new Promise(r => setTimeout(r, 40));
+    const codigosSimple = [...w.document.querySelectorAll('#resp-adicionales input[type="checkbox"]')]
+        .map(e => e.value);
+    assert.ok(!codigosSimple.includes('33'),
+        'la 33 no debe ofrecerse en Régimen Simple: ya está integrada');
+    assert.ok(!w.collectAllData().responsabilidades_adicionales.includes('33'),
+        'al cambiar de régimen debe soltarse la que ya no aplica');
+    assert.ok(w.collectAllData().responsabilidades_adicionales.includes('10'),
+        'la 10 sigue siendo válida y debe conservarse');
+    console.log('  OK  al cambiar de régimen suelta las excluyentes y conserva las válidas');
+
+    // Se explica por qué no se ofrecen otras
+    assert.match(w.document.getElementById('resp-vetadas').textContent,
+        /No responsable de IVA .* no pueden incluirla/);
+    console.log('  OK  explica por qué no se ofrecen las prohibidas');
+
+    // ── El anexo tiene filas contadas: no se puede marcar de más ──
+    const w2 = nuevaApp();
+    w2.fetch = async () => ({
+        ok: true,
+        json: async () => ({
+            predeterminadas: [{ codigo: '05', nombre: 'Renta' }],
+            adicionales: [
+                { codigo: '10', nombre: 'Usuario aduanero', descripcion: '' },
+                { codigo: '16', nombre: 'Facturar excluidos', descripcion: '' },
+                { codigo: '18', nombre: 'Precios de transferencia', descripcion: '' },
+            ],
+            no_seleccionables: [],
+            maximo_anexo: 10,
+            cupo_adicionales: 2,        // solo caben dos
+        }),
+    });
+    w2.showStep(5);
+    await new Promise(r => setTimeout(r, 40));
+
+    const casillas = [...w2.document.querySelectorAll('#resp-adicionales input[type="checkbox"]')];
+    assert.match(w2.document.getElementById('resp-cupo').textContent, /quedan 2 de 2/);
+
+    casillas[0].checked = true; w2.toggleRespAdicional('10', true);
+    casillas[1].checked = true; w2.toggleRespAdicional('16', true);
+
+    assert.match(w2.document.getElementById('resp-cupo').textContent, /no cabe ninguna más/);
+    assert.equal(casillas[2].disabled, true,
+        'sin cupo, la tercera debe quedar deshabilitada en vez de fallar al generar');
+    assert.equal(casillas[0].disabled, false, 'las ya marcadas se pueden desmarcar');
+
+    // Al soltar una, vuelve a haber cupo
+    casillas[0].checked = false; w2.toggleRespAdicional('10', false);
+    assert.equal(casillas[2].disabled, false);
+    console.log('  OK  respeta las diez filas del anexo: bloquea antes de desbordar');
+}
+
 console.log('\nCuestionario verificado.\n');

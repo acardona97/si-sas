@@ -685,6 +685,34 @@ def _split_comparecencia_paragraph(doc):
             insert_after = clon
 
 
+def _reemplazar_frase(doc, viejo, nuevo):
+    """
+    Sustituye una frase literal en el cuerpo, aunque el párrafo no traiga
+    tokens.
+
+    `_replace_in_paragraph` solo actúa sobre párrafos con "{{", así que los
+    textos fijos de la plantilla —como la frase del artículo de nombramiento
+    del representante legal— necesitan este camino. Se reemplaza dentro del
+    run que la contiene, de modo que el resto del párrafo conserva su formato
+    (por ejemplo el título en negrilla que lo antecede).
+    """
+    if not viejo or not nuevo:
+        return False
+    for p_elem in doc._element.body.findall(qn("w:p")):
+        if viejo not in _get_para_text(p_elem):
+            continue
+        for run in p_elem.findall(qn("w:r")):
+            t_elems = run.findall(qn("w:t"))
+            if len(t_elems) != 1:
+                continue
+            contenido = t_elems[0].text or ""
+            if viejo in contenido:
+                t_elems[0].text = contenido.replace(viejo, nuevo)
+                t_elems[0].set(qn("xml:space"), "preserve")
+                return True
+    return False
+
+
 def _colapsar_espacios_dobles(doc):
     """
     Deja un solo espacio entre palabras en todo el documento.
@@ -798,7 +826,8 @@ def _remove_extra_empty_paras(doc):
             parent.remove(p_elem)
 
 
-def _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombre_sas):
+def _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombre_sas,
+                              rl_principales=None, rl_suplentes=None):
     """
     Reemplaza el párrafo de firmas (vacío tras token replacement) con
     bloques de firma bien espaciados y alineados a la izquierda.
@@ -841,7 +870,8 @@ def _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombr
         return
 
     # Construir lista de firmantes
-    firmantes = _build_firmantes_list(accionistas, rl_principal, rl_suplente, nombre_sas)
+    firmantes = _build_firmantes_list(accionistas, rl_principal, rl_suplente,
+                                      nombre_sas, rl_principales, rl_suplentes)
 
     # Insertar párrafos de firma antes del target (o después del "proceden a firmarlo")
     insert_point = target_elem
@@ -877,7 +907,8 @@ def _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombr
             parent.remove(poderdante_elem)
 
 
-def _build_firmantes_list(accionistas, rl_principal, rl_suplente, nombre_sas):
+def _build_firmantes_list(accionistas, rl_principal, rl_suplente, nombre_sas,
+                          rl_principales=None, rl_suplentes=None):
     """Construye la lista de firmantes para el bloque de firmas.
 
     Cada firmante tiene banderas:
@@ -965,6 +996,26 @@ def _build_firmantes_list(accionistas, rl_principal, rl_suplente, nombre_sas):
                 "es_rl": False,
                 "es_rl_suplente": True,
             })
+
+    # ── Representantes adicionales ──
+    # Todo el bloque anterior razona sobre el primer principal y el primer
+    # suplente, que son los que figuran ante las entidades. Los demás también
+    # firman y aceptan su cargo, así que se agregan aquí.
+    def _agregar(extras, calidad, clave):
+        for rl in extras:
+            nombre = (rl.get("nombre") or "").upper()
+            if not nombre or any(f["nombre"] == nombre for f in firmantes):
+                continue
+            firmantes.append({
+                "nombre": nombre,
+                "documento": f"{_label_tipo_doc(rl.get('tipo_doc'))} No. {rl.get('cc', '')}",
+                "calidad": f"En calidad de {calidad} de {nombre_sas}",
+                "es_rl": clave == "principal",
+                "es_rl_suplente": clave == "suplente",
+            })
+
+    _agregar((rl_principales or [])[1:], "representante legal principal", "principal")
+    _agregar((rl_suplentes or [])[1:], "representante legal suplente", "suplente")
 
     return firmantes
 
@@ -1301,6 +1352,64 @@ def _normalizar_bloque(texto):
     return "\n".join(limpias)
 
 
+# ════════════════════════════════════════════════════════════════
+# REPRESENTANTES LEGALES (pueden ser varios)
+# ════════════════════════════════════════════════════════════════
+
+def _lista_representantes(data, clave_plural, clave_singular):
+    """Normaliza los representantes legales a una lista.
+
+    Acepta la forma nueva (una lista) y la antigua (uno solo), para que el
+    resto del sistema y los paquetes ya generados sigan funcionando.
+    """
+    lista = data.get(clave_plural)
+    if lista is None:
+        uno = data.get(clave_singular)
+        lista = [uno] if uno else []
+    return [r for r in lista if r and (r.get("nombre") or "").strip()]
+
+
+def _linea_representantes(representantes):
+    """
+    Enumera a los representantes legales en una sola frase.
+
+    Uno:    'JUAN PÉREZ, identificado con C.C. No. 1, expedida en Medellín'
+    Varios: '... ; y MARÍA GIL, identificada con C.C. No. 2, expedida en Cali'
+    """
+    partes = []
+    for rl in representantes:
+        genero = _resolve_gender(rl.get("nombre", ""), rl.get("genero", "M"))
+        partes.append(
+            f"{(rl.get('nombre') or '').upper()}, "
+            f"{_genero(genero, 'identificado', 'identificada')} con "
+            f"{_label_tipo_doc(rl.get('tipo_doc'))} No. {rl.get('cc', '')}, "
+            f"expedida en {rl.get('expedicion', '')}"
+        )
+    if not partes:
+        return ""
+    if len(partes) == 1:
+        return partes[0]
+    return "; ".join(partes[:-1]) + "; y " + partes[-1]
+
+
+def _frase_numero_representantes(n):
+    """Reescribe el artículo 44 con el número real de representantes legales.
+
+    La plantilla dice "La sociedad tendrá un representante legal, quien
+    estará... será elegido... podrá ser reelegido... o removido". Con dos o
+    más hay que concordar toda la frase, no solo el número.
+    """
+    if n <= 1:
+        return None
+    return (
+        f"La sociedad tendrá {_numero_a_letras(n)} ({n}) representantes legales, "
+        f"quienes estarán a cargo de la representación legal de la sociedad y que "
+        f"serán elegidos por la asamblea general de accionistas para períodos de "
+        f"un (1) año y podrán ser reelegidos indefinidamente o removidos en "
+        f"cualquier tiempo."
+    )
+
+
 def _segmentos_a_texto(segmentos):
     """Aplana una lista de (texto, negrilla) a texto plano."""
     if isinstance(segmentos, str):
@@ -1420,7 +1529,7 @@ def _bold_substring(p_elem, texto):
     return False
 
 
-def _nombres_propios(accionistas, rl_principal, rl_suplente, junta, revisor,
+def _nombres_propios(accionistas, rl_principales, rl_suplentes, junta, revisor,
                      apoderado):
     """Reúne todos los nombres propios que deben ir resaltados.
 
@@ -1434,7 +1543,7 @@ def _nombres_propios(accionistas, rl_principal, rl_suplente, junta, revisor,
         if acc.get("tipo") == "juridica":
             nombres.append((acc.get("rl_nombre") or "").upper())
 
-    for rl in (rl_principal, rl_suplente):
+    for rl in list(rl_principales or []) + list(rl_suplentes or []):
         if rl:
             nombres.append((rl.get("nombre") or "").upper())
 
@@ -1648,8 +1757,11 @@ def _insert_nombramientos_organos(doc, junta, revisor):
 
     body = doc._element.body
     anchor = None
+    # La etiqueta va en plural cuando hay más de un suplente.
     for p_elem in body.findall(qn("w:p")):
-        if _get_para_text(p_elem).strip().startswith("Representante legal suplente:"):
+        texto = _get_para_text(p_elem).strip()
+        if (texto.startswith("Representante legal suplente:")
+                or texto.startswith("Representantes legales suplentes:")):
             anchor = p_elem
             break
     if anchor is None:
@@ -1720,6 +1832,96 @@ def _insert_nombramientos_organos(doc, junta, revisor):
         _insert(_make_labeled_paragraph(
             anchor, "Revisor fiscal: ", _texto_revisor(revisor)
         ))
+
+
+def _texto_limitaciones(lim):
+    """
+    Redacta el parágrafo de limitaciones del representante legal.
+
+    Es determinista: el usuario elige cuantía, naturaleza o ambas, y el
+    órgano que autoriza. No se genera con IA, para que el texto no varíe
+    entre documentos ni introduzca espaciados ajenos al resto del artículo.
+
+    Devuelve segmentos (texto, negrilla) o None si no hay limitaciones.
+    """
+    if not lim or not lim.get("tiene_limitaciones"):
+        return None
+
+    ORGANOS = {
+        "junta": "la junta directiva",
+        "asamblea": "la asamblea general de accionistas",
+    }
+    frases = []
+
+    if lim.get("limita_cuantia"):
+        cuantia = str(lim.get("cuantia_smmlv") or "").strip()
+        organo = ORGANOS.get(lim.get("organo_cuantia"), ORGANOS["asamblea"])
+        if cuantia:
+            frases.append(
+                f"celebrar actos o contratos cuya cuantía exceda de {cuantia} "
+                f"salarios mínimos mensuales legales vigentes, sin la autorización "
+                f"previa de {organo}"
+            )
+
+    if lim.get("limita_naturaleza"):
+        naturaleza = " ".join(str(lim.get("naturaleza") or "").split())
+        organo = ORGANOS.get(lim.get("organo_naturaleza"), ORGANOS["asamblea"])
+        if naturaleza:
+            naturaleza = naturaleza.rstrip(".")
+            frases.append(
+                f"celebrar actos o contratos que versen sobre {naturaleza}, "
+                f"sin la autorización previa de {organo}"
+            )
+
+    if not frases:
+        return None
+
+    if len(frases) == 1:
+        cuerpo = frases[0]
+    else:
+        cuerpo = frases[0] + "; ni " + frases[1]
+
+    return [
+        ("Parágrafo Segundo: ", True),
+        (f"El representante legal no podrá {cuerpo}. "
+         f"Los actos que se celebren en contravención de esta limitación no "
+         f"obligarán a la sociedad, en los términos del artículo 196 del Código "
+         f"de Comercio.", False),
+    ]
+
+
+def _insertar_limitaciones(doc, ref_p_elem, limitaciones):
+    """
+    Inserta el parágrafo de limitaciones después del Parágrafo Primero del
+    artículo de funciones del representante legal.
+
+    Se clona el párrafo de referencia para heredar alineación, interlineado y
+    sangría: nada de espaciados propios que rompan la homogeneidad del texto.
+    """
+    segmentos = _texto_limitaciones(limitaciones)
+    if not segmentos:
+        return False
+
+    body = doc._element.body
+    ancla = None
+    for p_elem in body.findall(qn("w:p")):
+        if _get_para_text(p_elem).strip().startswith("Parágrafo Primero: El representante legal"):
+            ancla = p_elem
+            break
+    if ancla is None:
+        return False
+
+    # Línea en blanco de separación, igual a la que ya usa el documento
+    blanco = ancla.getnext()
+    if blanco is not None and blanco.tag == qn("w:p") and not _get_para_text(blanco).strip():
+        separador = deepcopy(blanco)
+    else:
+        separador = _make_paragraph("", font_name="Cambria")
+
+    parrafo = _make_labeled_paragraph(ancla, segmentos[0][0], segmentos[1:])
+    ancla.addnext(parrafo)
+    parrafo.addprevious(separador)
+    return True
 
 
 def _texto_revisor(revisor):
@@ -1839,8 +2041,14 @@ def generar_estatutos(data, template_path, output_path):
         fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
 
     accionistas = data.get("accionistas", [])
-    rl_principal = data.get("rl_principal", {})
-    rl_suplente = data.get("rl_suplente", None)
+
+    # Puede haber más de un representante legal principal y más de un
+    # suplente. El resto del documento —poder, formularios— trabaja con el
+    # primero de cada lista, que es el que firma y figura ante las entidades.
+    rl_principales = _lista_representantes(data, "rl_principales", "rl_principal")
+    rl_suplentes = _lista_representantes(data, "rl_suplentes", "rl_suplente")
+    rl_principal = rl_principales[0] if rl_principales else {}
+    rl_suplente = rl_suplentes[0] if rl_suplentes else None
 
     capital_autorizado = data.get("capital_autorizado", 1_000_000_000)
     capital_suscrito = data.get("capital_suscrito", 1_000_000)
@@ -1853,15 +2061,9 @@ def generar_estatutos(data, template_path, output_path):
     # La detección por nombre prevalece sobre el dropdown del formulario,
     # para evitar errores como dejar "Yaneth" marcada como masculino por
     # olvidar cambiar el default.
-    rl_principal["genero"] = _resolve_gender(
-        rl_principal.get("nombre", ""), rl_principal.get("genero", "M")
-    )
-    genero_rl = rl_principal["genero"]
-
-    if rl_suplente and rl_suplente.get("nombre"):
-        rl_suplente["genero"] = _resolve_gender(
-            rl_suplente.get("nombre", ""), rl_suplente.get("genero", "M")
-        )
+    for rl in rl_principales + rl_suplentes:
+        rl["genero"] = _resolve_gender(rl.get("nombre", ""), rl.get("genero", "M"))
+    genero_rl = rl_principal.get("genero", "M")
 
     for acc in accionistas:
         if acc.get("tipo") == "juridica":
@@ -1878,17 +2080,9 @@ def generar_estatutos(data, template_path, output_path):
     apoderado = data.get("apoderado", None)
     tiene_apoderado = bool(apoderado and apoderado.get("nombre"))
 
-    # Construir RL suplente línea
-    if rl_suplente and rl_suplente.get("nombre"):
-        tipo_doc_s = _label_tipo_doc(rl_suplente.get("tipo_doc"))
-        genero_rls = rl_suplente.get("genero", "M")
-        rl_suplente_linea = (
-            f"{rl_suplente['nombre'].upper()}, "
-            f"{_genero(genero_rls, 'identificado', 'identificada')} con {tipo_doc_s} No. {rl_suplente.get('cc', '')}, "
-            f"expedida en {rl_suplente.get('expedicion', '')}"
-        )
-    else:
-        rl_suplente_linea = "vacante"
+    # Líneas de nombramiento: enumeran a todos, no solo al primero
+    rl_principal_linea = _linea_representantes(rl_principales)
+    rl_suplente_linea = _linea_representantes(rl_suplentes) or "vacante"
 
     # Mapa de reemplazos
     replacements = {
@@ -1912,6 +2106,12 @@ def generar_estatutos(data, template_path, output_path):
             _valor_nominal_frase(valor_nominal, "moneda legal colombiana"),
         "un peso colombiano (COP $1)":
             _valor_nominal_frase(valor_nominal, "colombiano"),
+        # Con varios representantes se sustituye la secuencia completa de
+        # tokens por la enumeración; va antes que los tokens sueltos para
+        # ganarles, porque los reemplazos se aplican en orden.
+        "{{RL_PRINCIPAL_NOMBRE}}, {{RL_PRINCIPAL_IDENTIFICADO}} con "
+        "{{RL_PRINCIPAL_TIPO_DOC}} No. {{RL_PRINCIPAL_NUM_DOC}}, expedida en "
+        "{{RL_PRINCIPAL_CIUDAD_EXPEDICION}}": rl_principal_linea,
         "{{RL_PRINCIPAL_NOMBRE}}": rl_principal.get("nombre", "").upper(),
         "{{RL_PRINCIPAL_IDENTIFICADO}}": _genero(genero_rl, "identificado", "identificada"),
         # El formulario envía "CC"/"CE"; se normaliza a la etiqueta de
@@ -1927,8 +2127,27 @@ def generar_estatutos(data, template_path, output_path):
         "{{BLOQUE_FIRMAS_FINALES}}": "",  # Se maneja con párrafos propios
     }
 
+    # Concordancia cuando hay más de un representante legal: la etiqueta del
+    # nombramiento y la frase del artículo 44 pasan a plural.
+    if len(rl_principales) > 1:
+        replacements["Representante legal principal:"] = "Representantes legales principales:"
+    if len(rl_suplentes) > 1:
+        replacements["Representante legal suplente:"] = "Representantes legales suplentes:"
+
     # Reemplazar en todos los párrafos del documento
     _replace_in_doc(doc, replacements)
+
+    # El artículo de nombramiento del representante legal no tiene tokens, así
+    # que su frase se cambia aparte para que diga cuántos hay.
+    if len(rl_principales) > 1:
+        _reemplazar_frase(
+            doc,
+            "La sociedad tendrá un representante legal, quien estará a cargo de la "
+            "representación legal de la sociedad y que será elegido por la asamblea "
+            "general de accionistas para períodos de un (1) año y podrá ser reelegido "
+            "indefinidamente o removido en cualquier tiempo.",
+            _frase_numero_representantes(len(rl_principales)),
+        )
 
     # Manejar sección de apoderado (eliminar o llenar según el caso)
     _handle_apoderado_section(doc, tiene_apoderado, apoderado, rl_principal, nombre_sas, genero_rl)
@@ -1944,6 +2163,9 @@ def generar_estatutos(data, template_path, output_path):
     # - Eliminar párrafos vacíos consecutivos (espaciado armónico)
     _post_process_doc(doc, nombre_sas)
 
+    # Limitaciones del representante legal, en el artículo de sus funciones
+    _insertar_limitaciones(doc, None, data.get("limitaciones_rl"))
+
     # Nombramientos de junta directiva y revisor fiscal en el Artículo
     # Primero Transitorio (van después del representante legal suplente)
     _insert_nombramientos_organos(
@@ -1956,12 +2178,13 @@ def generar_estatutos(data, template_path, output_path):
     # el texto ya montado. Se hace antes de las firmas porque esos bloques ya
     # salen resaltados desde su construcción.
     _resaltar_nombres(doc, _nombres_propios(
-        accionistas, rl_principal, rl_suplente,
+        accionistas, rl_principales, rl_suplentes,
         data.get("junta_directiva"), data.get("revisor_fiscal"), apoderado,
     ))
 
     # Insertar firmas como párrafos individuales con espacio para firma
-    _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombre_sas)
+    _insert_firmas_paragraphs(doc, accionistas, rl_principal, rl_suplente, nombre_sas,
+                              rl_principales, rl_suplentes)
 
     # Llenar tabla de accionistas / acciones / capital
     _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,

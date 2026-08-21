@@ -86,6 +86,16 @@ def _payload(nombre, respaldo):
     return respaldo
 
 
+def _campos_pdf(path):
+    """Valores de los campos AcroForm.
+
+    Los formularios se llenan por campo, no estampando texto en la página, así
+    que extract_text() no los ve: hay que leer el diccionario de campos.
+    """
+    campos = PdfReader(path).get_fields() or {}
+    return {k: (v.get("/V") if v.get("/V") is not None else "") for k, v in campos.items()}
+
+
 def _pdf_txt(path):
     """Texto de un PDF con espacios normalizados."""
     partes = [p.extract_text() or "" for p in PdfReader(path).pages]
@@ -326,6 +336,40 @@ def test_validaciones(client):
             f"{r5.get_data(as_text=True)[:200]}"
         )
     print("  OK  indicativo S.A.S. obligatorio y variantes normalizadas")
+
+    # ── Responsabilidades tributarias: lo marcado llega al anexo ──
+    con_extras = dict(PAYLOAD_B, responsabilidades_adicionales=["10", "19"])
+    archivos = _generar(client, con_extras, "resp_extras")
+    campos = _campos_pdf(_buscar(archivos, "Responsabilidades_Tributarias"))
+    numeros = [campos.get(f"resp{i}_num") for i in range(1, 11)]
+    nombres = [campos.get(f"resp{i}_nombre") for i in range(1, 11)]
+
+    # Las del régimen más las dos marcadas, ordenadas y sin repetir
+    assert [n for n in numeros if n] == ["05", "07", "10", "14", "19", "42", "48", "55"], numeros
+    assert "Usuario aduanero" in nombres, "la 10 marcada debía llegar al anexo"
+    assert any("Productor de bienes" in (n or "") for n in nombres), \
+        "la 19 marcada debía llegar al anexo"
+    assert [n for n in numeros if n].count("42") == 1, "no se puede duplicar una del régimen"
+
+    # Una prohibida no entra aunque se mande
+    r6 = client.post("/api/generate", json=dict(PAYLOAD_B,
+                                                responsabilidades_adicionales=["49"]))
+    assert r6.status_code == 200, r6.get_data(as_text=True)[:200]
+    archivos6 = _generar(client, dict(PAYLOAD_B, responsabilidades_adicionales=["49"]),
+                         "resp_vetada")
+    campos6 = _campos_pdf(_buscar(archivos6, "Responsabilidades_Tributarias"))
+    assert "49" not in [campos6.get(f"resp{i}_num") for i in range(1, 11)], \
+        "la 49 está prohibida para sociedades: no puede llegar al anexo"
+
+    # Y si no caben todas, se detiene en vez de recortar el formulario
+    r7 = client.post("/api/generate", json=dict(
+        PAYLOAD_B,
+        ciiu_code="5611",                      # restaurante: agrega la 33
+        responsabilidades_adicionales=["10", "16", "18", "19"],
+    ))
+    assert r7.status_code == 400, "debía rechazar: no caben en el anexo"
+    assert "anexo solo admite" in r7.get_json()["error"]
+    print("  OK  el anexo refleja lo marcado y se detiene si no cabe")
 
 
 if __name__ == "__main__":

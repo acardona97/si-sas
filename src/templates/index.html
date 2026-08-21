@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260729a">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260729b">
 </head>
 <body>
 
@@ -374,6 +374,7 @@
 
                 <div class="info-box">
                     Si el representante legal es uno de los accionistas, selecciónelo del menú desplegable para autocompletar sus datos.
+                    Puede nombrar <strong>más de un principal y más de un suplente</strong>: los estatutos indicarán cuántos hay.
                 </div>
 
                 <fieldset>
@@ -428,6 +429,11 @@
                     </div>
                 </fieldset>
 
+                <div id="rl-principales-extra"></div>
+                <button type="button" class="btn btn-outline" onclick="addRepresentante('principal')">
+                    + Agregar otro representante legal principal
+                </button>
+
                 <fieldset>
                     <legend>Representante Legal Suplente (opcional)</legend>
                     <div class="upload-doc-section">
@@ -476,6 +482,107 @@
                         <div class="form-group">
                             <label for="rl_suplente_expedicion">Ciudad de expedición</label>
                             <input type="text" id="rl_suplente_expedicion">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div id="rl-suplentes-extra"></div>
+                <button type="button" class="btn btn-outline" onclick="addRepresentante('suplente')">
+                    + Agregar otro representante legal suplente
+                </button>
+
+                <!-- ═══ Limitaciones del representante legal ═══ -->
+                <div class="form-group" style="margin-top:2rem">
+                    <label>¿El representante legal tendrá limitaciones?</label>
+                    <span class="hint" style="display:block;margin-bottom:.6rem">
+                        Indique si necesitará autorización de un órgano social para celebrar
+                        ciertos contratos. Queda como parágrafo del artículo de funciones.
+                    </span>
+                    <div class="radio-cards">
+                        <label class="radio-card selected">
+                            <input type="radio" name="rl_limitaciones" value="no" checked
+                                   onchange="toggleLimitacionesRL(false)">
+                            <span class="radio-title">No</span>
+                            <span class="radio-desc">Facultades plenas, sin autorización previa</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="rl_limitaciones" value="si"
+                                   onchange="toggleLimitacionesRL(true)">
+                            <span class="radio-title">Sí</span>
+                            <span class="radio-desc">Requerirá autorización para ciertos contratos</span>
+                        </label>
+                    </div>
+                </div>
+
+                <fieldset id="limitaciones-fields" class="hidden">
+                    <legend>Limitaciones</legend>
+
+                    <div class="form-group">
+                        <label>¿Limitación en cuanto a la cuantía del contrato?</label>
+                        <div class="radio-cards">
+                            <label class="radio-card selected">
+                                <input type="radio" name="lim_cuantia" value="no" checked
+                                       onchange="toggleLimCuantia(false)">
+                                <span class="radio-title">No</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="lim_cuantia" value="si"
+                                       onchange="toggleLimCuantia(true)">
+                                <span class="radio-title">Sí</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="lim-cuantia-fields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lim_cuantia_organo">¿Órgano que autoriza?</label>
+                                <select id="lim_cuantia_organo">
+                                    <option value="asamblea">Asamblea de Accionistas</option>
+                                    <option value="junta">Junta Directiva</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lim_cuantia_smmlv">Cuantía del contrato (SMMLV) *</label>
+                                <input type="text" id="lim_cuantia_smmlv" placeholder="Ej: 500"
+                                       oninput="this.value = this.value.replace(/\D/g,'')">
+                                <span class="hint">En salarios mínimos mensuales legales vigentes.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>¿Limitación en cuanto a la naturaleza del contrato?</label>
+                        <div class="radio-cards">
+                            <label class="radio-card selected">
+                                <input type="radio" name="lim_naturaleza" value="no" checked
+                                       onchange="toggleLimNaturaleza(false)">
+                                <span class="radio-title">No</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="lim_naturaleza" value="si"
+                                       onchange="toggleLimNaturaleza(true)">
+                                <span class="radio-title">Sí</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="lim-naturaleza-fields" class="hidden">
+                        <div class="form-group">
+                            <label for="lim_naturaleza_organo">¿Órgano que autoriza?</label>
+                            <select id="lim_naturaleza_organo">
+                                <option value="asamblea">Asamblea de Accionistas</option>
+                                <option value="junta">Junta Directiva</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="lim_naturaleza_texto">Naturaleza del contrato *</label>
+                            <textarea id="lim_naturaleza_texto" rows="3"
+                                      placeholder="Ej: la enajenación o gravamen de bienes inmuebles"></textarea>
+                            <span class="hint">
+                                Descríbala en minúscula y sin punto final: se inserta dentro de la
+                                frase «actos o contratos que versen sobre ...».
+                            </span>
                         </div>
                     </div>
                 </fieldset>
@@ -584,6 +691,24 @@
                         </label>
                     </div>
                     <input type="hidden" id="regimen" value="ordinario">
+                </div>
+
+                <!-- ═══ Responsabilidades tributarias ═══ -->
+                <div class="form-group" id="resp-block">
+                    <label>Responsabilidades tributarias</label>
+                    <span class="hint" style="display:block;margin-bottom:.7rem">
+                        Las del régimen elegido van siempre. Puede agregar otras si aplican a la
+                        actividad; no se ofrecen las que ya están incluidas ni las que son
+                        excluyentes con el régimen.
+                    </span>
+                    <div id="resp-predeterminadas"></div>
+                    <div id="resp-adicionales"></div>
+                    <details id="resp-vetadas-wrap" style="margin-top:.9rem">
+                        <summary class="hint" style="cursor:pointer">
+                            ¿Por qué no aparecen otras responsabilidades?
+                        </summary>
+                        <div id="resp-vetadas" style="margin-top:.6rem"></div>
+                    </details>
                 </div>
 
                 <div class="form-group">
@@ -1006,6 +1131,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260729b"></script>
+<script src="/static/js/app.js?v=20260729c"></script>
 </body>
 </html>
