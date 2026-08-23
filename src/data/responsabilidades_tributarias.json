@@ -1,9 +1,10 @@
 {
-  "version": "1.0.0",
-  "revisado_el": "2026-07-29",
+  "version": "2.0.0",
+  "revisado_el": "2026-08-23",
   "aplica_a": "SAS",
-  "fuente": "Guía para seleccionar las responsabilidades tributarias en la asignación del NIT — Cámara de Comercio de Medellín para Antioquia, V.01 2024",
+  "fuente": "Casilla 53 del RUT (DIAN) contrastada con la Guía para seleccionar las responsabilidades tributarias en la asignación del NIT — Cámara de Comercio de Medellín para Antioquia, V.01 2024",
   "nota": "Las del régimen y las de base van siempre; el usuario solo agrega de la lista de adicionales. Nunca se ofrece una que ya esté incluida ni una excluyente con el régimen elegido.",
+  "advertencia": "La clasificación de cada código es criterio tributario. La mecánica y la coherencia interna están verificadas; conviene que un tributarista revise la matriz antes de usarla en producción.",
   "maximo_anexo": 10,
   "nota_maximo": "El anexo de responsabilidades tributarias de la Cámara tiene diez filas. No se puede exceder: truncar la lista dejaría el formulario incompleto.",
 
@@ -22,50 +23,217 @@
 
   "adicionales": [
     {
+      "codigo": "08",
+      "nombre": "Retención de timbre nacional",
+      "descripcion": "La sociedad intervendrá como contratante, aceptante, emisora o suscriptora en documentos gravados con timbre.",
+      "fundamento": ["Estatuto Tributario, art. 518"]
+    },
+    {
+      "codigo": "09",
+      "nombre": "Retención en la fuente en el impuesto sobre las ventas",
+      "descripcion": "Aplica, entre otros, cuando la sociedad contrate servicios gravados con personas o entidades sin residencia ni domicilio en Colombia.",
+      "fundamento": ["Estatuto Tributario, art. 437-2"]
+    },
+    {
       "codigo": "10",
-      "nombre": "Usuario aduanero",
-      "descripcion": "La sociedad actuará como usuario u obligado aduanero: importará, exportará o intervendrá en operaciones de comercio exterior ante la DIAN."
+      "nombre": "Obligado aduanero",
+      "descripcion": "La sociedad importará, exportará o intervendrá en operaciones de comercio exterior ante la DIAN.",
+      "comercio_exterior": true,
+      "fundamento": ["Decreto 1165 de 2019"]
     },
     {
       "codigo": "16",
       "nombre": "Obligación de facturar por ingresos de bienes y/o servicios excluidos",
-      "descripcion": "Aplica si la sociedad debe facturar ingresos por bienes o servicios excluidos del IVA, o presta servicios no gravados."
+      "descripcion": "Aplica si la sociedad debe facturar ingresos por bienes o servicios excluidos del IVA, o presta servicios no gravados.",
+      "fundamento": ["Estatuto Tributario, art. 615"]
     },
     {
       "codigo": "18",
       "nombre": "Precios de transferencia",
-      "descripcion": "Aplica si la sociedad realizará operaciones con vinculados económicos del exterior o en zona franca."
+      "descripcion": "Aplica si la sociedad realizará operaciones con vinculados económicos del exterior, en zona franca o en jurisdicciones no cooperantes.",
+      "fundamento": ["Estatuto Tributario, arts. 260-1 y ss."]
+    },
+    {
+      "codigo": "24",
+      "nombre": "Declaración consolidada de precios de transferencia",
+      "descripcion": "Solo para la entidad controlante de un grupo multinacional obligada al informe país por país.",
+      "requiere": ["18"],
+      "fundamento": ["Estatuto Tributario, art. 260-5"]
+    },
+    {
+      "codigo": "26",
+      "nombre": "Declaración informativa individual de precios de transferencia",
+      "descripcion": "Declaración individual de las operaciones con vinculados.",
+      "requiere": ["18"],
+      "fundamento": ["Estatuto Tributario, art. 260-9"]
     },
     {
       "codigo": "19",
-      "nombre": "Productor de bienes y/o servicios exentos",
-      "descripcion": "Incluye exportadores. Bienes y servicios exentos del artículo 477 del Estatuto Tributario."
+      "nombre": "Productor y/o exportador de bienes y/o servicios exentos",
+      "descripcion": "Bienes y servicios exentos del artículo 477 del Estatuto Tributario, incluidos los exportadores.",
+      "comercio_exterior": true,
+      "fundamento": ["Estatuto Tributario, arts. 477 y 481"]
+    },
+    {
+      "codigo": "21",
+      "nombre": "Declarar el ingreso o salida del país de divisas o moneda legal",
+      "descripcion": "Aplica si la sociedad ingresará o sacará físicamente divisas o moneda legal del país.",
+      "comercio_exterior": true,
+      "fundamento": ["Resolución Externa 1 de 2018 del Banco de la República"]
+    },
+    {
+      "codigo": "41",
+      "nombre": "Declaración anual de activos en el exterior",
+      "descripcion": "Aplica si la sociedad poseerá activos en el exterior por encima del tope legal.",
+      "fundamento": ["Estatuto Tributario, art. 607"]
+    },
+    {
+      "codigo": "53",
+      "nombre": "Persona jurídica no responsable de IVA",
+      "descripcion": "Solo si la sociedad realizará exclusivamente actividades excluidas o no gravadas con IVA. Reemplaza la responsabilidad 48.",
+      "reemplaza": ["48"],
+      "incompatible_con": ["48"],
+      "fundamento": ["Estatuto Tributario, art. 437"]
+    },
+    {
+      "codigo": "59",
+      "nombre": "Autorretención especial de renta",
+      "descripcion": "Aplica a las sociedades nacionales exoneradas de aportes parafiscales por sus trabajadores.",
+      "fundamento": ["Decreto 2201 de 2016", "Estatuto Tributario, art. 114-1"]
+    },
+    {
+      "codigo": "66",
+      "nombre": "Intercambio automático de información — DPI",
+      "descripcion": "Solo si la sociedad operará una plataforma digital obligada a reportar a sus vendedores.",
+      "fundamento": ["Resolución DIAN sobre reporte de operadores de plataformas digitales"]
     },
     {
       "codigo": "33",
       "nombre": "Impuesto Nacional al Consumo",
-      "descripcion": "Expendio de comidas y bebidas, telefonía móvil y demás hechos generadores del INC.",
-      "incompatible_con": ["47"],
-      "motivo_incompatible": "El Régimen Simple ya integra el impuesto nacional al consumo por expendio de comidas y bebidas."
+      "descripcion": "Expendio de comidas y bebidas, telefonía móvil, datos y demás hechos generadores del INC.",
+      "incompatible_con": ["47", "50"],
+      "motivo_incompatible": "El Régimen Simple ya integra el impuesto nacional al consumo por expendio de comidas y bebidas.",
+      "sugerida_si": {
+        "terminos": ["restaurante", "bar", "cafetería", "cafeteria", "expendio de bebidas",
+                     "comidas", "telefonía móvil", "telefonia movil", "servicio de datos"],
+        "ciiu": ["5611", "5612", "5613", "5619", "5621", "5629", "5630", "6120", "6110"]
+      },
+      "fundamento": ["Estatuto Tributario, arts. 512-1 y ss."]
+    },
+    {
+      "codigo": "50",
+      "nombre": "No responsable de consumo de restaurantes y bares",
+      "descripcion": "Expendio de comidas y bebidas por debajo del tope de ingresos que obliga al INC.",
+      "incompatible_con": ["33"],
+      "motivo_incompatible": "O es responsable del impuesto al consumo (33) o no lo es (50); no ambas.",
+      "sugerida_si": {
+        "terminos": ["restaurante", "bar", "cafetería", "cafeteria", "expendio de bebidas", "comidas"],
+        "ciiu": ["5611", "5612", "5613", "5619", "5621", "5629", "5630"]
+      },
+      "fundamento": ["Estatuto Tributario, art. 512-13"]
+    },
+    {
+      "codigo": "32",
+      "nombre": "Impuesto nacional a la gasolina y al ACPM",
+      "descripcion": "Producción, importación o venta de gasolina y ACPM.",
+      "sugerida_si": {
+        "terminos": ["gasolina", "acpm", "combustible", "diésel", "diesel",
+                     "estación de servicio", "estacion de servicio", "hidrocarburos"],
+        "ciiu": ["1921", "1922", "4661", "4731"]
+      },
+      "fundamento": ["Ley 1607 de 2012, arts. 167 y ss."]
+    },
+    {
+      "codigo": "56",
+      "nombre": "Impuesto al carbono",
+      "descripcion": "Venta, importación o retiro de combustibles fósiles.",
+      "sugerida_si": {
+        "terminos": ["combustible", "carbón", "carbon", "gas natural", "hidrocarburos",
+                     "gasolina", "acpm", "fuel oil"],
+        "ciiu": ["1921", "1922", "4661", "0510", "0520", "0610", "0620"]
+      },
+      "fundamento": ["Ley 1819 de 2016, arts. 221 y ss."]
+    },
+    {
+      "codigo": "62",
+      "nombre": "Impuesto sobre productos plásticos de un solo uso",
+      "descripcion": "Venta, retiro o importación de productos plásticos de un solo uso usados para envasar, embalar o empacar bienes.",
+      "sugerida_si": {
+        "terminos": ["plástico", "plastico", "envase", "empaque", "embalaje",
+                     "un solo uso", "desechable"],
+        "ciiu": ["2221", "2229", "4664", "4690"]
+      },
+      "fundamento": ["Ley 2277 de 2022, art. 50"]
+    },
+    {
+      "codigo": "63",
+      "nombre": "Impuesto a las bebidas ultraprocesadas azucaradas",
+      "descripcion": "Producción o importación de bebidas ultraprocesadas azucaradas.",
+      "sugerida_si": {
+        "terminos": ["bebida", "gaseosa", "jugo", "refresco", "azucarada", "azúcar", "azucar"],
+        "ciiu": ["1101", "1102", "1103", "1104", "4632"]
+      },
+      "fundamento": ["Ley 2277 de 2022, arts. 54 y ss."]
+    },
+    {
+      "codigo": "64",
+      "nombre": "Impuesto a los productos comestibles ultraprocesados",
+      "descripcion": "Producción o importación de comestibles ultraprocesados industrialmente con alto contenido de azúcares, sodio o grasas.",
+      "sugerida_si": {
+        "terminos": ["ultraprocesado", "snack", "confitería", "confiteria", "embutido",
+                     "galleta", "chocolate", "panadería industrial"],
+        "ciiu": ["1011", "1020", "1030", "1040", "1051", "1061", "1062", "1071", "1072",
+                 "1081", "1082", "1084", "1089"]
+      },
+      "fundamento": ["Ley 2277 de 2022, arts. 54 y ss."]
     }
   ],
 
   "excluyentes": {
     "05": ["47"],
-    "47": ["05"],
-    "48": ["49"],
-    "49": ["48"]
+    "47": ["05", "33"],
+    "33": ["47", "50"],
+    "50": ["33"],
+    "48": ["49", "53"],
+    "49": ["48", "53"],
+    "53": ["48", "49"]
+  },
+
+  "comercio_exterior": {
+    "pregunta": "¿En qué calidad actuará la sociedad ante la DIAN?",
+    "ayuda": "Marque todas las que apliquen. Es obligatorio: define qué casilla se llena en el formulario RUES.",
+    "opciones": [
+      { "id": "importador", "nombre": "Importador", "casilla_rues": "Casilla 1_30" },
+      { "id": "exportador", "nombre": "Exportador", "casilla_rues": "Casilla 1_31" },
+      { "id": "usuario_aduanero", "nombre": "Usuario aduanero", "casilla_rues": "Casilla 1_32" }
+    ]
   },
 
   "no_seleccionables": [
-    { "codigo": "04", "nombre": "Régimen Tributario Especial", "motivo": "Las sociedades no pueden incluirla en el RUT." },
-    { "codigo": "06", "nombre": "Declarante de ingresos y patrimonio", "motivo": "Las sociedades no pueden incluirla en el RUT." },
-    { "codigo": "49", "nombre": "No responsable de IVA", "motivo": "Las sociedades no pueden incluirla en el RUT; además es excluyente con la 48." },
+    { "codigo": "01", "nombre": "Aporte especial para la administración de justicia", "motivo": "Corresponde a notarios, no a una sociedad comercial." },
+    { "codigo": "02", "nombre": "Gravamen a los Movimientos Financieros", "motivo": "La responsabilidad recae en las entidades que recaudan el gravamen, no en quien lo paga." },
+    { "codigo": "03", "nombre": "Impuesto al patrimonio", "motivo": "Se adquiere cuando el patrimonio líquido supera el tope legal; una sociedad que se constituye aún no lo tiene." },
+    { "codigo": "04", "nombre": "Régimen Tributario Especial", "motivo": "Las sociedades no pueden incluirla en el RUT: es de las entidades sin ánimo de lucro calificadas." },
+    { "codigo": "06", "nombre": "Ingresos y patrimonio", "motivo": "Las sociedades no pueden incluirla: es de las entidades no contribuyentes." },
     { "codigo": "13", "nombre": "Gran contribuyente", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
     { "codigo": "15", "nombre": "Autorretenedor", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
-    { "codigo": "17", "nombre": "Profesionales de compra y venta de divisas", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
-    { "codigo": "23", "nombre": "Agente de retención en el impuesto sobre las ventas", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "17", "nombre": "Profesionales de compra y venta de divisas", "motivo": "Requiere autorización previa y es actividad regulada; no puede ir en el anexo." },
+    { "codigo": "20", "nombre": "Obtención de NIT", "motivo": "Es el trámite que se está surtiendo, no una responsabilidad que se seleccione." },
+    { "codigo": "22", "nombre": "Obligado a cumplir deberes formales a nombre de terceros", "motivo": "Corresponde a quien actúa por cuenta de un tercero, no a la sociedad que se constituye." },
+    { "codigo": "23", "nombre": "Agente de retención en ventas", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
+    { "codigo": "36", "nombre": "Establecimiento permanente", "motivo": "Corresponde a sociedades extranjeras con presencia en Colombia, no a una S.A.S. colombiana." },
+    { "codigo": "37", "nombre": "Obligado a facturar electrónicamente", "motivo": "Se incluye en el RUT después de la habilitación en el portal de la DIAN." },
+    { "codigo": "38", "nombre": "Facturación electrónica voluntaria", "motivo": "Se incluye en el RUT después de la habilitación en el portal de la DIAN." },
+    { "codigo": "39", "nombre": "Proveedor de servicios tecnológicos (PST)", "motivo": "Requiere autorización previa de la DIAN." },
     { "codigo": "45", "nombre": "Autorretenedor de rendimientos financieros", "motivo": "Requiere resolución previa de la DIAN: no puede ir en el anexo de responsabilidades." },
-    { "codigo": "52", "nombre": "Facturador Electrónico", "motivo": "Exige habilitación previa en el portal de la DIAN; se incluye después de asignado el NIT." }
+    { "codigo": "46", "nombre": "IVA prestadores de servicios desde el exterior", "motivo": "Es para prestadores SIN domicilio ni residencia en Colombia. Una S.A.S. colombiana no puede tomarla; si importa servicios, la responsabilidad que le corresponde es la 09." },
+    { "codigo": "49", "nombre": "No responsable de IVA", "motivo": "Las sociedades no pueden incluirla: es exclusiva de personas naturales. El equivalente para persona jurídica es la 53." },
+    { "codigo": "51", "nombre": "Agente de retención de impoconsumo de bienes inmuebles", "motivo": "El impuesto nacional al consumo de bienes inmuebles fue declarado inexequible (Corte Constitucional, C-593 de 2019). Verifique su vigencia antes de incluirla." },
+    { "codigo": "52", "nombre": "Facturador Electrónico", "motivo": "Exige habilitación previa en el portal de la DIAN; se incluye después de asignado el NIT." },
+    { "codigo": "54", "nombre": "Intercambio automático de información CRS", "motivo": "Corresponde a instituciones financieras sujetas a reporte." },
+    { "codigo": "58", "nombre": "Intercambio automático de información FATCA", "motivo": "Corresponde a instituciones financieras sujetas a reporte." },
+    { "codigo": "60", "nombre": "Autorretención por rendimientos financieros", "motivo": "Corresponde a entidades vigiladas por la Superintendencia Financiera." },
+    { "codigo": "61", "nombre": "Autorretención por comisiones", "motivo": "Corresponde a entidades vigiladas por la Superintendencia Financiera." },
+    { "codigo": "65", "nombre": "Renta por Presencia Económica Significativa", "motivo": "Corresponde a no residentes con presencia económica significativa en Colombia." }
   ]
 }

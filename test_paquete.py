@@ -338,7 +338,10 @@ def test_validaciones(client):
     print("  OK  indicativo S.A.S. obligatorio y variantes normalizadas")
 
     # ── Responsabilidades tributarias: lo marcado llega al anexo ──
-    con_extras = dict(PAYLOAD_B, responsabilidades_adicionales=["10", "19"])
+    # La 10 y la 19 son de comercio exterior: exigen declarar la calidad
+    con_extras = dict(PAYLOAD_B,
+                      responsabilidades_adicionales=["10", "19"],
+                      perfil_comercio_exterior=["importador", "exportador"])
     archivos = _generar(client, con_extras, "resp_extras")
     campos = _campos_pdf(_buscar(archivos, "Responsabilidades_Tributarias"))
     numeros = [campos.get(f"resp{i}_num") for i in range(1, 11)]
@@ -346,8 +349,8 @@ def test_validaciones(client):
 
     # Las del régimen más las dos marcadas, ordenadas y sin repetir
     assert [n for n in numeros if n] == ["05", "07", "10", "14", "19", "42", "48", "55"], numeros
-    assert "Usuario aduanero" in nombres, "la 10 marcada debía llegar al anexo"
-    assert any("Productor de bienes" in (n or "") for n in nombres), \
+    assert "Obligado aduanero" in nombres, "la 10 marcada debía llegar al anexo"
+    assert any("Productor y/o exportador" in (n or "") for n in nombres), \
         "la 19 marcada debía llegar al anexo"
     assert [n for n in numeros if n].count("42") == 1, "no se puede duplicar una del régimen"
 
@@ -370,6 +373,47 @@ def test_validaciones(client):
     assert r7.status_code == 400, "debía rechazar: no caben en el anexo"
     assert "anexo solo admite" in r7.get_json()["error"]
     print("  OK  el anexo refleja lo marcado y se detiene si no cabe")
+
+    # ── Comercio exterior: sin la calidad declarada no se genera ──
+    sin_perfil = dict(PAYLOAD_B, responsabilidades_adicionales=["10"])
+    r8 = client.post("/api/generate", json=sin_perfil)
+    assert r8.status_code == 400, "sin declarar la calidad no debía generar"
+    assert "importador" in r8.get_json()["error"]
+
+    invalido = dict(PAYLOAD_B, responsabilidades_adicionales=["10"],
+                    perfil_comercio_exterior=["cualquier cosa"])
+    r9 = client.post("/api/generate", json=invalido)
+    assert r9.status_code == 400, "un perfil inválido no debía pasar"
+
+    # ── Y la casilla correcta queda marcada en el RUES ──
+    CASILLAS = {"importador": "Casilla 1_30",
+                "exportador": "Casilla 1_31",
+                "usuario_aduanero": "Casilla 1_32"}
+    for perfil, casilla in CASILLAS.items():
+        archivos = _generar(client, dict(PAYLOAD_B,
+                                         responsabilidades_adicionales=["10"],
+                                         perfil_comercio_exterior=[perfil]),
+                            f"ce_{perfil}")
+        campos = _campos_pdf(_buscar(archivos, "Formulario_RUES"))
+        assert str(campos.get(casilla)) not in ("", "None", "/Off"), \
+            f"{perfil} debía marcar {casilla}, quedó en {campos.get(casilla)!r}"
+        # Y las otras dos quedan sin marcar
+        for otra_id, otra in CASILLAS.items():
+            if otra_id == perfil:
+                continue
+            assert str(campos.get(otra)) in ("", "None", "/Off"), \
+                f"{perfil} no debía marcar {otra}"
+
+    # Varias calidades a la vez
+    archivos = _generar(client, dict(PAYLOAD_B,
+                                     responsabilidades_adicionales=["10", "19"],
+                                     perfil_comercio_exterior=["importador", "exportador"]),
+                        "ce_ambas")
+    campos = _campos_pdf(_buscar(archivos, "Formulario_RUES"))
+    assert str(campos.get("Casilla 1_30")) not in ("", "None", "/Off")
+    assert str(campos.get("Casilla 1_31")) not in ("", "None", "/Off")
+    assert str(campos.get("Casilla 1_32")) in ("", "None", "/Off")
+    print("  OK  la calidad declarada marca la casilla correcta del RUES")
 
 
 if __name__ == "__main__":

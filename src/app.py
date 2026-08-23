@@ -37,6 +37,9 @@ from processors.responsabilidades import (
     construir as construir_resps,
     disponibles as resps_disponibles,
     no_seleccionables as resps_no_seleccionables,
+    exige_comercio_exterior,
+    casillas_rues_comercio_exterior,
+    config_comercio_exterior,
 )
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
@@ -111,9 +114,11 @@ def determinar_incluir_consumo(ciiu_codes, objeto_social=""):
     return any(kw in obj_lower for kw in keywords)
 
 
-def construir_responsabilidades(regimen, incluir_consumo, adicionales=None):
+def construir_responsabilidades(regimen, incluir_consumo, adicionales=None,
+                                ciiu_codes=None, objeto_social=""):
     """Anexo de responsabilidades: las del régimen más las que marcó el usuario."""
-    return construir_resps(regimen, incluir_consumo, adicionales)
+    return construir_resps(regimen, incluir_consumo, adicionales,
+                           ciiu_codes, objeto_social)
 
 
 def determinar_ley_1780(accionistas):
@@ -405,16 +410,24 @@ def api_responsabilidades():
     )
     regimen = request.args.get("regimen", "ordinario")
     incluir_consumo = request.args.get("consumo") == "1"
+    objeto_social = request.args.get("objeto_social", "")
+    ciiu_codes = [c for c in request.args.getlist("ciiu") if c]
+    # Las ya marcadas importan: la 53 reemplaza a la 48, así que cambian
+    # tanto las predeterminadas como el cupo disponible.
+    marcadas = [c for c in request.args.getlist("marcada") if c]
+
     return jsonify({
         "predeterminadas": [
             {"codigo": c, "nombre": n}
-            for c, n in predeterminadas(regimen, incluir_consumo)
+            for c, n in predeterminadas(regimen, incluir_consumo, marcadas)
         ],
-        "adicionales": resps_disponibles(regimen, incluir_consumo),
+        "adicionales": resps_disponibles(regimen, incluir_consumo, ciiu_codes,
+                                         objeto_social, marcadas),
         "no_seleccionables": resps_no_seleccionables(),
         # El anexo impreso tiene un número fijo de filas
         "maximo_anexo": maximo_anexo(),
-        "cupo_adicionales": cupo_adicionales(regimen, incluir_consumo),
+        "cupo_adicionales": cupo_adicionales(regimen, incluir_consumo, marcadas),
+        "comercio_exterior": config_comercio_exterior(),
     })
 
 
@@ -678,16 +691,40 @@ def generate():
         # Derivaciones automáticas
         incluir_consumo = determinar_incluir_consumo(ciiu_codes, objeto_social)
         responsabilidades, avisos_resp = construir_responsabilidades(
-            regimen, incluir_consumo, data.get("responsabilidades_adicionales")
+            regimen, incluir_consumo, data.get("responsabilidades_adicionales"),
+            ciiu_codes, objeto_social,
         )
-        # Si algo quedó por fuera del anexo no se sigue: el formulario saldría
-        # incompleto y es un documento que se radica ante la DIAN.
+
+        # Primero el cupo del anexo: si la selección no cabe, hay que
+        # corregirla antes de preguntar nada más sobre ella.
         if any("anexo solo admite" in a for a in avisos_resp):
             return jsonify({
                 "error": "No caben todas las responsabilidades tributarias "
                          "seleccionadas:\n\n" + "\n".join(avisos_resp)
                          + "\n\nQuite alguna para continuar."
             }), 400
+
+        # ─── Calidad ante la DIAN cuando hay comercio exterior ───
+        # El formulario ya la exige, pero se puede saltar: sin ella el RUES
+        # saldría con las tres casillas vacías.
+        exigen = exige_comercio_exterior(responsabilidades)
+        perfil_ce = [p for p in (data.get("perfil_comercio_exterior") or []) if p]
+        casillas_ce = {}
+        if exigen:
+            if not perfil_ce:
+                return jsonify({
+                    "error": "Seleccionó "
+                             + ", ".join(f"la responsabilidad {c}" for c in exigen)
+                             + ". Debe indicar si la sociedad actuará como importador, "
+                               "exportador o usuario aduanero: de eso depende la casilla "
+                               "que se marca en el formulario RUES."
+                }), 400
+            casillas_ce = casillas_rues_comercio_exterior(perfil_ce)
+            if not casillas_ce:
+                return jsonify({
+                    "error": "La calidad declarada ante la DIAN no es válida. "
+                             "Debe ser importador, exportador o usuario aduanero."
+                }), 400
         if avisos_resp:
             errors.extend(avisos_resp)
         controlante = determinar_situacion_control(accionistas)
@@ -752,6 +789,7 @@ def generate():
                 "zona": zona, "tipo_local": tipo_local,
                 "tenencia": tenencia, "aplica_1780": aplica_1780,
                 "es_empresa_familiar": es_empresa_familiar,
+                "casillas_comercio_exterior": casillas_ce,
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Formulario_RUES.pdf")
             generar_rues(rues_data, os.path.join(PLANTILLAS_DIR, "rues_form.pdf"), out)

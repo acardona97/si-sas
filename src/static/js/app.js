@@ -206,6 +206,18 @@ function validateStep(step) {
                   + nominal.toLocaleString('es-CO') + ').');
             return false;
         }
+        // Comercio exterior: sin la calidad declarada el RUES saldría con las
+        // tres casillas vacías.
+        const disparan = _respsComercioExterior();
+        if (disparan.length && perfilComercioExterior.size === 0) {
+            alert(`Marcó la responsabilidad ${disparan.join(', ')}.\n\n`
+                  + 'Indique si la sociedad actuará como importador, exportador o '
+                  + 'usuario aduanero: de eso depende la casilla que se marca en el '
+                  + 'formulario RUES.');
+            document.getElementById('resp-comercio-exterior')
+                ?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
     }
     if (step === 6) {
         if (document.querySelector('input[name="junta"]:checked')?.value === 'si') {
@@ -619,6 +631,9 @@ let respAdicionalesMarcadas = new Set();
 // marcar más de lo que cabe, porque el formulario saldría incompleto.
 let respCupo = 10;
 
+let respComercioExterior = null;   // configuración que envía el backend
+let respAdicionalesDatos = [];     // últimas adicionales ofrecidas
+
 async function cargarResponsabilidades() {
     const bloque = document.getElementById('resp-predeterminadas');
     if (!bloque) return;
@@ -626,14 +641,28 @@ async function cargarResponsabilidades() {
     // El INC lo determina la actividad económica, igual que en el backend
     const consumo = _detectaConsumo() ? '1' : '0';
 
+    // La actividad declarada permite sugerir las que probablemente apliquen,
+    // y lo ya marcado cambia el cupo (la 53 reemplaza a la 48).
+    const params = new URLSearchParams();
+    params.set('regimen', regimen);
+    params.set('consumo', consumo);
+    params.set('objeto_social', document.getElementById('objeto_social')?.value || '');
+    for (const id of ['ciiu_code', 'ciiu_code_sec']) {
+        const v = document.getElementById(id)?.value;
+        if (v) params.append('ciiu', v);
+    }
+    for (const c of respAdicionalesMarcadas) params.append('marcada', c);
+
     let data;
     try {
-        const resp = await fetch(`/api/responsabilidades?regimen=${regimen}&consumo=${consumo}`);
+        const resp = await fetch(`/api/responsabilidades?${params}`);
         data = await resp.json();
     } catch (e) {
         console.error('cargarResponsabilidades:', e);
         return;
     }
+    respComercioExterior = data.comercio_exterior || null;
+    respAdicionalesDatos = data.adicionales || [];
 
     bloque.innerHTML =
         '<div class="resp-fijas"><span class="resp-fijas-titulo">Van siempre con este régimen</span>'
@@ -648,20 +677,36 @@ async function cargarResponsabilidades() {
     if (!data.adicionales.length) {
         cont.innerHTML = '<p class="hint">No hay responsabilidades adicionales disponibles para este régimen.</p>';
     } else {
-        cont.innerHTML =
-            `<div class="resp-extra-titulo">Puede agregar
-                <span id="resp-cupo" class="resp-cupo"></span>
-             </div>`
-            + data.adicionales.map(r => `
-                <label class="resp-opcion">
-                    <input type="checkbox" value="${r.codigo}"
-                           ${respAdicionalesMarcadas.has(r.codigo) ? 'checked' : ''}
-                           onchange="toggleRespAdicional('${r.codigo}', this.checked)">
-                    <span class="resp-opcion-cuerpo">
-                        <span class="resp-opcion-titulo"><span class="resp-cod">${r.codigo}</span> ${r.nombre}</span>
-                        <span class="resp-opcion-desc">${r.descripcion}</span>
+        const casilla = (r) => `
+            <label class="resp-opcion${r.sugerida ? ' sugerida' : ''}">
+                <input type="checkbox" value="${r.codigo}"
+                       ${respAdicionalesMarcadas.has(r.codigo) ? 'checked' : ''}
+                       onchange="toggleRespAdicional('${r.codigo}', this.checked)">
+                <span class="resp-opcion-cuerpo">
+                    <span class="resp-opcion-titulo">
+                        <span class="resp-cod">${r.codigo}</span> ${r.nombre}
+                        ${r.sugerida ? '<span class="resp-sugerida-marca">por su actividad</span>' : ''}
                     </span>
-                </label>`).join('');
+                    <span class="resp-opcion-desc">${r.descripcion}</span>
+                    ${(r.requiere || []).length
+                        ? `<span class="resp-opcion-nota">Requiere también la ${r.requiere.join(', ')}.</span>` : ''}
+                    ${(r.reemplaza || []).length
+                        ? `<span class="resp-opcion-nota">Reemplaza la ${r.reemplaza.join(', ')}.</span>` : ''}
+                </span>
+            </label>`;
+
+        const sugeridas = data.adicionales.filter(r => r.sugerida);
+        const otras = data.adicionales.filter(r => !r.sugerida);
+
+        cont.innerHTML =
+            (sugeridas.length
+                ? '<div class="resp-extra-titulo">Sugeridas por la actividad que declaró</div>'
+                  + sugeridas.map(casilla).join('')
+                : '')
+            + `<div class="resp-extra-titulo">${sugeridas.length ? 'Otras que puede agregar' : 'Puede agregar'}
+                 <span id="resp-cupo" class="resp-cupo"></span>
+               </div>`
+            + otras.map(casilla).join('');
     }
 
     document.getElementById('resp-vetadas').innerHTML = data.no_seleccionables.map(r =>
@@ -676,12 +721,83 @@ async function cargarResponsabilidades() {
         respAdicionalesMarcadas.delete([...respAdicionalesMarcadas].pop());
     }
     actualizarCupoResp();
+    renderComercioExterior();
 }
 
 function toggleRespAdicional(codigo, marcada) {
-    if (marcada) respAdicionalesMarcadas.add(codigo);
-    else respAdicionalesMarcadas.delete(codigo);
+    if (marcada) {
+        respAdicionalesMarcadas.add(codigo);
+        // Al marcar una se suelta la que le es excluyente (33 vs 50, p. ej.):
+        // más claro que dejar que el error salte al generar.
+        const datos = respAdicionalesDatos.find(r => r.codigo === codigo);
+        (datos && datos.excluye || []).forEach(otro => {
+            if (!respAdicionalesMarcadas.delete(otro)) return;
+            const casilla = document.querySelector(
+                `#resp-adicionales input[value="${otro}"]`);
+            if (casilla) casilla.checked = false;
+        });
+    } else {
+        respAdicionalesMarcadas.delete(codigo);
+    }
     actualizarCupoResp();
+    renderComercioExterior();
+    // La 53 reemplaza a la 48: cambian las fijas y el cupo, así que hay que
+    // recalcular contra el backend.
+    if ((RESP_RECALCULAN.has(codigo))) cargarResponsabilidades();
+}
+
+// Responsabilidades cuyo marcado altera las predeterminadas o el cupo
+const RESP_RECALCULAN = new Set(['53']);
+
+// ─── Calidad ante la DIAN: importador / exportador / usuario aduanero ───
+// Se pregunta solo cuando alguna responsabilidad de comercio exterior está
+// marcada, y define qué casilla se llena en el formulario RUES.
+
+let perfilComercioExterior = new Set();
+
+function _respsComercioExterior() {
+    if (!respComercioExterior) return [];
+    const conCE = new Set(respAdicionalesDatos
+        .filter(r => r.comercio_exterior).map(r => r.codigo));
+    return [...respAdicionalesMarcadas].filter(c => conCE.has(c));
+}
+
+function renderComercioExterior() {
+    const bloque = document.getElementById('resp-comercio-exterior');
+    if (!bloque || !respComercioExterior) return;
+
+    const disparan = _respsComercioExterior();
+    if (!disparan.length) {
+        bloque.classList.add('hidden');
+        bloque.innerHTML = '';
+        perfilComercioExterior.clear();
+        return;
+    }
+
+    bloque.className = 'ce-bloque';
+    bloque.innerHTML = `
+        <div class="ce-titulo">${respComercioExterior.pregunta}
+            <span class="ce-obligatoria">obligatoria</span>
+        </div>
+        <div class="ce-motivo">
+            Marcó la responsabilidad ${disparan.join(', ')}. ${respComercioExterior.ayuda}
+        </div>
+        <div class="ce-opciones">
+            ${respComercioExterior.opciones.map(op => `
+                <label class="ce-opcion${perfilComercioExterior.has(op.id) ? ' elegida' : ''}">
+                    <input type="checkbox" value="${op.id}"
+                           ${perfilComercioExterior.has(op.id) ? 'checked' : ''}
+                           onchange="togglePerfilCE('${op.id}', this.checked)">
+                    <span>${op.nombre}</span>
+                </label>`).join('')}
+        </div>`;
+    bloque.classList.remove('hidden');
+}
+
+function togglePerfilCE(id, marcada) {
+    if (marcada) perfilComercioExterior.add(id);
+    else perfilComercioExterior.delete(id);
+    renderComercioExterior();
 }
 
 /**
@@ -1978,6 +2094,7 @@ function collectAllData() {
         rl_suplentes: getRepresentantes('suplente'),
         limitaciones_rl: getLimitacionesRL(),
         responsabilidades_adicionales: [...respAdicionalesMarcadas],
+        perfil_comercio_exterior: [...perfilComercioExterior],
         ciiu_code: document.getElementById('ciiu_code').value,
         ciiu_description: document.getElementById('ciiu_description').value,
         ciiu_code_sec: document.getElementById('ciiu_code_sec').value,

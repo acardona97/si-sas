@@ -881,4 +881,98 @@ console.log('\n─── Responsabilidades tributarias: checklist sin duplicar n
     console.log('  OK  respeta las diez filas del anexo: bloquea antes de desbordar');
 }
 
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Comercio exterior: importador / exportador / usuario aduanero');
+{
+    const w = nuevaApp();
+    w.fetch = async () => ({
+        ok: true,
+        json: async () => ({
+            predeterminadas: [{ codigo: '05', nombre: 'Renta' }],
+            adicionales: [
+                { codigo: '10', nombre: 'Obligado aduanero', descripcion: '',
+                  sugerida: false, requiere: [], reemplaza: [], comercio_exterior: true },
+                { codigo: '16', nombre: 'Facturar excluidos', descripcion: '',
+                  sugerida: true, requiere: [], reemplaza: [], comercio_exterior: false },
+                { codigo: '24', nombre: 'Consolidada precios de transferencia', descripcion: '',
+                  sugerida: false, requiere: ['18'], reemplaza: [], comercio_exterior: false },
+                { codigo: '33', nombre: 'INC', descripcion: '', sugerida: true,
+                  requiere: [], reemplaza: [], comercio_exterior: false, excluye: ['50'] },
+                { codigo: '50', nombre: 'No responsable de INC', descripcion: '', sugerida: true,
+                  requiere: [], reemplaza: [], comercio_exterior: false, excluye: ['33'] },
+            ],
+            no_seleccionables: [],
+            maximo_anexo: 10, cupo_adicionales: 5,
+            comercio_exterior: {
+                pregunta: '¿En qué calidad actuará la sociedad ante la DIAN?',
+                ayuda: 'Marque todas las que apliquen.',
+                opciones: [
+                    { id: 'importador', nombre: 'Importador', casilla_rues: 'Casilla 1_30' },
+                    { id: 'exportador', nombre: 'Exportador', casilla_rues: 'Casilla 1_31' },
+                    { id: 'usuario_aduanero', nombre: 'Usuario aduanero', casilla_rues: 'Casilla 1_32' },
+                ],
+            },
+        }),
+    });
+
+    w.showStep(5);
+    await new Promise(r => setTimeout(r, 40));
+
+    // Las sugeridas por la actividad se destacan y van primero
+    const primera = w.document.querySelector('#resp-adicionales .resp-opcion');
+    assert.ok(primera.classList.contains('sugerida'), 'la sugerida debía ir primero');
+    assert.match(w.document.getElementById('resp-adicionales').textContent, /por su actividad/);
+    // Las dependencias se anuncian
+    assert.match(w.document.getElementById('resp-adicionales').textContent,
+        /Requiere también la 18/);
+    console.log('  OK  destaca las sugeridas por la actividad y anuncia dependencias');
+
+    // Marcar una excluyente suelta la contraria, sin esperar al error final
+    w.toggleRespAdicional('33', true);
+    w.toggleRespAdicional('50', true);
+    assert.ok(!w.collectAllData().responsabilidades_adicionales.includes('33'),
+        'la 50 debía soltar la 33');
+    assert.equal(w.document.querySelector('#resp-adicionales input[value="33"]').checked,
+        false, 'la casilla de la 33 debía quedar desmarcada');
+    w.toggleRespAdicional('50', false);
+    console.log('  OK  al marcar una excluyente suelta la contraria');
+
+    // El bloque de comercio exterior está oculto hasta marcar una que lo dispare
+    const ce = w.document.getElementById('resp-comercio-exterior');
+    assert.ok(ce.classList.contains('hidden'), 'no debía mostrarse sin disparador');
+
+    // Marcar una que NO es de comercio exterior tampoco lo abre
+    w.toggleRespAdicional('16', true);
+    assert.ok(ce.classList.contains('hidden'), 'la 16 no es de comercio exterior');
+
+    // Marcar la 10 sí
+    w.toggleRespAdicional('10', true);
+    assert.ok(!ce.classList.contains('hidden'), 'la 10 debía abrir la pregunta');
+    assert.match(ce.textContent, /obligatoria/);
+    assert.match(ce.textContent, /Marcó la responsabilidad 10/);
+    assert.equal(ce.querySelectorAll('.ce-opcion').length, 3);
+
+    // Sin responderla no se puede avanzar
+    w.__alerts = [];
+    assert.equal(w.validateStep(5), false, 'sin declarar la calidad no debía avanzar');
+    assert.match(w.__alerts[0], /importador, exportador o usuario aduanero/);
+
+    // Al responder, sí
+    w.togglePerfilCE('importador', true);
+    assert.ok(w.validateStep(5), 'con la calidad declarada debía avanzar: ' + w.__alerts);
+    assert.deepEqual([...w.collectAllData().perfil_comercio_exterior], ['importador']);
+
+    // Se pueden marcar varias
+    w.togglePerfilCE('exportador', true);
+    assert.deepEqual([...w.collectAllData().perfil_comercio_exterior].sort(),
+        ['exportador', 'importador']);
+
+    // Al desmarcar la responsabilidad, la pregunta desaparece y se limpia
+    w.toggleRespAdicional('10', false);
+    assert.ok(ce.classList.contains('hidden'));
+    assert.equal(w.collectAllData().perfil_comercio_exterior.length, 0,
+        'sin disparador no debe quedar calidad declarada');
+    console.log('  OK  la pregunta aparece, es obligatoria y se limpia al quitar el disparador');
+}
+
 console.log('\nCuestionario verificado.\n');

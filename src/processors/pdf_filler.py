@@ -588,6 +588,13 @@ def generar_rues(data, template_path, output_path):
     # Sí autoriza notificación por correo electrónico
     checkboxes["Casilla 1_28"] = True
 
+    # ─── Calidad ante la DIAN: importador / exportador / usuario aduanero ───
+    # Se marca cuando la sociedad tomó alguna responsabilidad de comercio
+    # exterior. Los nombres de casilla los resuelve el módulo de
+    # responsabilidades a partir de la matriz.
+    for casilla, marcar in (data.get("casillas_comercio_exterior") or {}).items():
+        checkboxes[casilla] = bool(marcar)
+
     # ─── Sección 4: Actividades Económicas ───
 
     # CIIU 1 (4 dígitos)

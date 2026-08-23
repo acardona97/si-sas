@@ -18,7 +18,19 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src
 
 from processors.responsabilidades import (
     cargar, construir, disponibles, no_seleccionables, predeterminadas,
+    exige_comercio_exterior, casillas_rues_comercio_exterior,
+    config_comercio_exterior,
 )
+
+# Listado completo de la casilla 53 del RUT que debe quedar clasificado
+LISTADO_DIAN = [
+    "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
+    "13", "14", "15", "16", "17", "18", "19", "20", "21", "22",
+    "23", "24", "26", "32", "33", "36", "37", "38", "39", "41",
+    "42", "45", "46", "47", "48", "49", "50", "51", "52", "53",
+    "54", "55", "56", "58", "59", "60", "61", "62", "63", "64",
+    "65", "66",
+]
 
 
 def codigos(lista):
@@ -131,6 +143,151 @@ def test_tope_del_anexo():
     print("OK  el anexo nunca pasa de diez filas y avisa cuál quedó por fuera")
 
 
+def test_cobertura_del_listado_dian():
+    """Todo código de la casilla 53 debe estar clasificado en alguna parte."""
+    datos = cargar()
+    clasificados = set()
+    clasificados.update(r["codigo"] for r in datos["por_regimen"].values())
+    clasificados.update(r["codigo"] for r in datos["base_sociedad"])
+    clasificados.update(r["codigo"] for r in datos["adicionales"])
+    clasificados.update(r["codigo"] for r in datos["no_seleccionables"])
+
+    faltan = [c for c in LISTADO_DIAN if c not in clasificados]
+    assert not faltan, f"códigos DIAN sin clasificar: {faltan}"
+
+    sobran = [c for c in clasificados if c not in LISTADO_DIAN]
+    assert not sobran, f"códigos que no existen en la casilla 53: {sobran}"
+
+    # Ningún código puede estar en dos listas a la vez
+    for grupo in ("adicionales", "no_seleccionables"):
+        codigos = [r["codigo"] for r in datos[grupo]]
+        assert len(codigos) == len(set(codigos)), f"repetidos en {grupo}"
+    vetadas = {r["codigo"] for r in datos["no_seleccionables"]}
+    ofrecidas = {r["codigo"] for r in datos["adicionales"]}
+    assert not (vetadas & ofrecidas), f"en dos listas: {vetadas & ofrecidas}"
+    print(f"OK  los {len(LISTADO_DIAN)} códigos de la casilla 53 están clasificados")
+
+
+def test_sugeridas_por_actividad():
+    """Las que dependen de la actividad se destacan cuando el CIIU o el objeto la delatan."""
+    # Restaurante: sugiere INC y no responsable de consumo
+    ofrecidas = {r["codigo"]: r for r in
+                 disponibles("ordinario", False, ["5611"], "Operar un restaurante")}
+    assert ofrecidas["33"]["sugerida"], "un restaurante debe sugerir la 33"
+    assert ofrecidas["50"]["sugerida"], "un restaurante debe sugerir la 50"
+    assert not ofrecidas["18"]["sugerida"], "precios de transferencia no lo sugiere un restaurante"
+
+    # Combustibles: gasolina y carbono, detectados por texto
+    ofrecidas = {r["codigo"]: r for r in
+                 disponibles("ordinario", False, [], "Venta de gasolina y ACPM")}
+    assert ofrecidas["32"]["sugerida"]
+    assert ofrecidas["56"]["sugerida"]
+
+    # Plásticos de un solo uso, detectado sin tildes
+    ofrecidas = {r["codigo"]: r for r in
+                 disponibles("ordinario", False, [], "Fabricacion de envases plasticos")}
+    assert ofrecidas["62"]["sugerida"], "debía detectar 'plastico' sin tilde"
+
+    # Sin actividad relacionada no se sugiere nada de eso
+    ofrecidas = {r["codigo"]: r for r in
+                 disponibles("ordinario", False, ["6201"], "Desarrollo de software")}
+    for codigo in ("32", "56", "62", "63", "64"):
+        assert not ofrecidas[codigo]["sugerida"], f"{codigo} no aplica a software"
+    print("OK  se sugieren las que la actividad declarada hace probables")
+
+
+def test_reemplazo_53_por_48():
+    """La 53 sustituye a la 48, no se suma: o se es responsable de IVA o no."""
+    sin = [c for c, _ in predeterminadas("ordinario")]
+    assert "48" in sin
+
+    con = [c for c, _ in predeterminadas("ordinario", adicionales=["53"])]
+    assert "48" not in con, "la 53 debe sacar a la 48 de las predeterminadas"
+
+    resps, avisos = construir("ordinario", adicionales=["53"])
+    codigos_finales = codigos(resps)
+    assert "53" in codigos_finales and "48" not in codigos_finales, codigos_finales
+    assert not avisos, avisos
+    print("OK  la 53 reemplaza a la 48 en lugar de convivir con ella")
+
+
+def test_dependencias():
+    """La 24 y la 26 no van sin la 18."""
+    for codigo in ("24", "26"):
+        resps, avisos = construir("ordinario", adicionales=[codigo])
+        assert codigo not in codigos(resps), f"{codigo} no debía entrar sin la 18"
+        assert any("requiere" in a for a in avisos), avisos
+
+        resps, avisos = construir("ordinario", adicionales=["18", codigo])
+        assert codigo in codigos(resps), f"{codigo} debía entrar junto con la 18"
+        assert not avisos, avisos
+    print("OK  las declaraciones de precios de transferencia exigen la 18")
+
+
+def test_excluyentes_nuevas():
+    """33 vs 50, y 48 vs 53."""
+    # No se puede ser responsable y no responsable del consumo a la vez
+    resps, avisos = construir("ordinario", incluir_consumo=True, adicionales=["50"])
+    assert "50" not in codigos(resps)
+    assert any("excluyente" in a for a in avisos), avisos
+
+    # Ni responsable y no responsable de IVA
+    resps, avisos = construir("ordinario", adicionales=["53", "48"])
+    finales = codigos(resps)
+    assert not ("48" in finales and "53" in finales), finales
+    # La interfaz necesita saberlo para soltar la contraria al marcar una
+    ofrecidas = {r["codigo"]: r for r in disponibles("ordinario", ciiu_codes=["5611"])}
+    assert "50" in ofrecidas["33"]["excluye"], ofrecidas["33"]
+    assert "33" in ofrecidas["50"]["excluye"], ofrecidas["50"]
+    # El código del régimen elegido nunca se lista ahí: no es una casilla que
+    # el usuario pueda soltar desde el checklist.
+    assert all("05" not in r["excluye"] for r in ofrecidas.values()), ofrecidas
+    print("OK  33/50 y 48/53 no pueden convivir, y el cuestionario lo sabe")
+
+
+def test_comercio_exterior():
+    """Las de comercio exterior obligan a declarar la calidad ante la DIAN."""
+    cfg = config_comercio_exterior()
+    ids = {op["id"] for op in cfg["opciones"]}
+    assert ids == {"importador", "exportador", "usuario_aduanero"}, ids
+
+    # Las tres casillas del RUES están mapeadas y no se repiten
+    casillas = [op["casilla_rues"] for op in cfg["opciones"]]
+    assert casillas == ["Casilla 1_30", "Casilla 1_31", "Casilla 1_32"], casillas
+
+    # 10, 19 y 21 disparan la pregunta
+    for codigo in ("10", "19", "21"):
+        resps, _ = construir("ordinario", adicionales=[codigo])
+        assert exige_comercio_exterior(resps) == [codigo], codigo
+
+    # Las que no son de comercio exterior no la disparan
+    resps, _ = construir("ordinario", adicionales=["16", "18"])
+    assert exige_comercio_exterior(resps) == []
+
+    # El perfil declarado se traduce a casillas
+    assert casillas_rues_comercio_exterior(["importador"]) == {"Casilla 1_30": True}
+    assert casillas_rues_comercio_exterior(["exportador"]) == {"Casilla 1_31": True}
+    assert casillas_rues_comercio_exterior(["usuario_aduanero"]) == {"Casilla 1_32": True}
+    assert casillas_rues_comercio_exterior(["importador", "exportador"]) == {
+        "Casilla 1_30": True, "Casilla 1_31": True}
+    # Un perfil inválido no marca nada
+    assert casillas_rues_comercio_exterior(["cualquier cosa"]) == {}
+    assert casillas_rues_comercio_exterior([]) == {}
+    print("OK  comercio exterior: dispara la pregunta y marca la casilla correcta del RUES")
+
+
+def test_46_no_es_para_sociedad_colombiana():
+    """La 46 es de prestadores SIN domicilio en Colombia."""
+    vetadas = {r["codigo"]: r for r in no_seleccionables()}
+    assert "46" in vetadas, "la 46 no puede ofrecerse a una S.A.S. colombiana"
+    assert "09" in vetadas["46"]["motivo"], \
+        "el motivo debe remitir a la 09, que es la que sí le corresponde"
+    resps, avisos = construir("ordinario", adicionales=["46"])
+    assert "46" not in codigos(resps)
+    assert avisos
+    print("OK  la 46 se bloquea y se explica cuál corresponde en su lugar")
+
+
 def test_matriz_coherente():
     datos = cargar()
     assert datos["version"] and datos["revisado_el"]
@@ -155,4 +312,11 @@ if __name__ == "__main__":
     test_prohibidas_para_sociedad()
     test_48_y_49_excluyentes()
     test_tope_del_anexo()
+    test_cobertura_del_listado_dian()
+    test_sugeridas_por_actividad()
+    test_reemplazo_53_por_48()
+    test_dependencias()
+    test_excluyentes_nuevas()
+    test_comercio_exterior()
+    test_46_no_es_para_sociedad_colombiana()
     print("\nTodas las pruebas de responsabilidades pasaron.")
