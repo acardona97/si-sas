@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260823q">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260823r">
 </head>
 <body>
 
@@ -15,7 +15,21 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand">
-            <a href="/"><img src="/static/img/logo_quarta_white.svg" alt="Quarta" class="sidebar-logo-img"></a>
+            <span class="brand-producto">SÍ S.A.S.</span>
+            <a href="/" class="brand-quarta">
+                <img src="/static/img/logo_quarta_white.svg"
+                     alt="Quarta — acompañamiento de negocios" class="sidebar-logo-img"
+                     width="140" height="40">
+            </a>
+        </div>
+        <div class="brand-avance">
+            <div class="brand-avance-texto">
+                <span>Paso <span id="avance-actual">1</span> de 7</span>
+                <span id="avance-pct">14%</span>
+            </div>
+            <div class="brand-avance-barra">
+                <div class="brand-avance-relleno" id="avance-relleno" style="width:14%"></div>
+            </div>
         </div>
         <nav class="step-nav" id="step-nav">
             <div class="step-item active" data-step="1">
@@ -1132,6 +1146,6 @@
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260823q"></script>
+<script src="/static/js/app.js?v=20260823r"></script>
 </body>
 </html>

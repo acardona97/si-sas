@@ -1,11 +1,12 @@
 /**
- * Vista previa visual del paso de responsabilidades tributarias.
+ * Vista previa visual del cuestionario.
  *
- * No es una prueba: renderiza el paso 5 con el app.js real y los datos reales
- * de /api/responsabilidades (volcados a output/_preview/resp.json) y escribe
- * una página estática para revisarla en el navegador con el CSS de producción.
+ * No es una prueba: monta index.html con el app.js real, avanza hasta el paso
+ * pedido y escribe una página estática para revisarla en el navegador con el
+ * CSS de producción. Sirve para mirar el diseño sin abrir sesión.
  *
- * Uso:  node preview_resp.mjs   →  src/static/_preview/responsabilidades.html
+ * Uso:  node preview_paso.mjs [paso]   →  src/static/_preview/paso<n>.html
+ *       node preview_paso.mjs 5        (por defecto, el de responsabilidades)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,11 +27,13 @@ w.fetch = async () => ({ ok: true, json: async () => DATA });
 w.eval(JS);
 w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
 
-w.showStep(5);
+const PASO = Number(process.argv[2]) || 5;
+w.showStep(PASO);
 await new Promise(r => setTimeout(r, 60));
 
-// Estado que vale la pena ver: una sugerida marcada y el bloque de comercio
-// exterior abierto con una calidad ya declarada.
+// Estado que vale la pena ver en el paso 5: una sugerida marcada y el bloque
+// de comercio exterior abierto con una calidad ya declarada.
+if (PASO === 5) {
 w.toggleRespAdicional('16', true);
 w.toggleRespAdicional('10', true);
 w.togglePerfilCE('importador', true);
@@ -38,13 +41,16 @@ w.document.querySelectorAll('#resp-adicionales input[value="16"], #resp-adiciona
     .forEach(i => i.setAttribute('checked', 'checked'));
 w.document.querySelectorAll('#resp-comercio-exterior input[value="importador"]')
     .forEach(i => i.setAttribute('checked', 'checked'));
+}
 
-const paso = w.document.getElementById('step5');
-fs.writeFileSync(
-    path.join(BASE, 'src/static/_preview/responsabilidades.html'),
-    `<!doctype html><meta charset="utf-8"><title>Responsabilidades tributarias</title>
-<style>${CSS}</style>
-<div class="container"><div class="form-container">${paso.innerHTML}</div></div>`,
+// Se conserva el armazón entero —barra lateral, cabecera, paginador— para
+// poder juzgar la composición y no solo el formulario.
+const salida = path.join(BASE, `src/static/_preview/paso${PASO}.html`);
+fs.mkdirSync(path.dirname(salida), { recursive: true });
+fs.writeFileSync(salida,
+    `<!doctype html><meta charset="utf-8"><title>Paso ${PASO}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+${w.document.body.innerHTML}`,
     'utf8');
 
-console.log('vista previa ->', path.join(BASE, 'src/static/_preview/responsabilidades.html'));
+console.log('vista previa ->', salida);

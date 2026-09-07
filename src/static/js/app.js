@@ -22,9 +22,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─── STEP NAVIGATION ───
+/** Refleja en la barra lateral en qué punto va el cuestionario. */
+function actualizarAvance(n) {
+    const pct = Math.round((n / totalSteps) * 100);
+    const actual = document.getElementById('avance-actual');
+    const etiqueta = document.getElementById('avance-pct');
+    const relleno = document.getElementById('avance-relleno');
+    if (actual) actual.textContent = n;
+    if (etiqueta) etiqueta.textContent = pct + '%';
+    if (relleno) relleno.style.width = pct + '%';
+}
+
 function showStep(n) {
     document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
     document.getElementById('step' + n).classList.remove('hidden');
+    actualizarAvance(n);
     document.querySelectorAll('.step-item[data-step]').forEach(s => {
         const step = parseInt(s.dataset.step);
         s.classList.remove('active', 'done');

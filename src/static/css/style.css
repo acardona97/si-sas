@@ -24,6 +24,9 @@
     --accent-light:  #EAF2FB;
     --accent-border: #A9C9E8;
     --accent-hover:  #004483;          /* azul medio del ave */
+    /* Sobre el azul de la barra lateral el acento solo da 2.7:1: para texto
+       e iconos ahí se usa este aclarado, que da 8.4:1.                    */
+    --accent-on-navy: #7FB9F0;
 
     --border:       #DDE3EA;
     --border-light: #EDF1F5;
@@ -51,6 +54,33 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Foco visible en todo lo que se puede alcanzar con el teclado. Antes solo
+   los campos lo mostraban: botones, enlaces y pasos quedaban sin señal. */
+:where(a, button, [role="button"], summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+.sidebar :where(a, button, [tabindex]):focus-visible,
+.step-item:focus-visible {
+    outline-color: var(--accent-on-navy);
+}
+
+/* Cifras en columna: el ancho fijo evita que salten al escribir montos */
+input[inputmode="numeric"], .resp-cod, .capital-resumen, .money {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Quien pide menos movimiento, recibe menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 body {
     font-family: var(--font-body);
     background: var(--bg-page);
@@ -70,38 +100,89 @@ body {
     min-height: 100vh;
 }
 
+/* Este bloque va antes que las reglas de .sidebar y .mobile-progress, así que
+   a igual especificidad perdía por orden: en el teléfono la barra lateral
+   seguía ocupando la pantalla entera y el formulario quedaba debajo del
+   pliegue. Los selectores llevan un nivel de más para ganar sin depender
+   del orden del archivo. */
 @media (max-width: 768px) {
     .app-layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-    .mobile-progress { display: block; }
+    .app-layout > .sidebar { display: none; }
+    .main-content > .mobile-progress { display: block; }
 }
 
 /* ══════════════════════════════════════════════════════════════
    SIDEBAR
    ══════════════════════════════════════════════════════════════ */
 .sidebar {
-    background: var(--navy);
+    /* El azul plano se ve muerto en una columna de 100vh; el resplandor da
+       profundidad sin competir con el contenido. */
+    background:
+        radial-gradient(120% 55% at 0% 0%, rgba(0,93,184,0.22) 0%, transparent 62%),
+        var(--navy);
     color: white;
-    padding: 2.5rem 1.75rem;
+    padding: 2.25rem 1.5rem;
     position: sticky;
     top: 0;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.06);
 }
 
-/* Thin gold line at top of sidebar */
+/* Filete superior, en los dos azules del logotipo */
 .sidebar::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--accent), #D4A820);
+    background: linear-gradient(90deg, var(--accent-hover), var(--accent) 55%, var(--accent-on-navy));
 }
 
-.brand { margin-bottom: 0.5rem; }
+/* Bloque de marca: el producto arriba, el logotipo de Quarta debajo,
+   separados por un filete. El logotipo lleva aire propio: la versión anterior
+   iba pegada al borde y el descriptor no se alcanzaba a leer. */
+.brand { margin-bottom: 1.5rem; }
+
+.brand-producto {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.35rem; font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #FFFFFF;
+    line-height: 1.1;
+}
+
+.brand-quarta {
+    display: block;
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(255,255,255,0.12);
+}
+.brand-quarta:focus-visible { outline-offset: 4px; }
+
+/* Avance del cuestionario: siete pasos son muchos para no decir dónde va */
+.brand-avance { margin-bottom: 1.75rem; }
+.brand-avance-texto {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 0.5rem;
+    font-variant-numeric: tabular-nums;
+}
+.brand-avance-texto span:last-child { color: var(--accent-on-navy); }
+.brand-avance-barra {
+    height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,0.12);
+    overflow: hidden;
+}
+.brand-avance-relleno {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-on-navy));
+    transition: width .3s ease;
+}
 
 .brand h1 {
     font-family: var(--font-display);
@@ -131,7 +212,20 @@ body {
     margin: 1.75rem 0;
 }
 
-.step-nav { flex: 1; }
+.step-nav {
+    flex: 1; min-height: 0; overflow-y: auto;
+    /* En pantallas bajas la lista se desplaza; la barra del sistema se ve
+       como un tajo blanco sobre el azul, así que va discreta. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.18) transparent;
+}
+.step-nav::-webkit-scrollbar { width: 6px; }
+.step-nav::-webkit-scrollbar-track { background: transparent; }
+.step-nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+    border-radius: 3px;
+}
+.step-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
 .step-nav-label {
     font-size: 0.68rem;
@@ -150,10 +244,27 @@ body {
     border-radius: var(--radius);
     margin-bottom: 0.15rem;
     cursor: pointer;
-    transition: all 0.18s ease;
+    transition: background .18s ease, color .18s ease;
     color: rgba(255,255,255,0.42);
     position: relative;
 }
+
+/* Riel que une los siete números: sin él la lista no se lee como un avance,
+   solo como un menú. El tramo recorrido va en azul; el pendiente, apagado. */
+.step-item::after {
+    content: '';
+    position: absolute;
+    left: 27px;                        /* centro del círculo de 26px */
+    top: calc(50% + 15px);
+    bottom: -0.35rem;
+    width: 2px;
+    margin-left: -1px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 2px;
+    transition: background .18s ease;
+}
+.step-item:last-child::after { display: none; }
+.step-item.done::after { background: var(--accent); }
 
 .step-item:hover {
     background: rgba(255,255,255,0.06);
@@ -161,7 +272,7 @@ body {
 }
 
 .step-item.active {
-    background: rgba(0,93,184,0.18);
+    background: rgba(0,93,184,0.20);
     color: #FFFFFF;
 }
 
@@ -170,12 +281,12 @@ body {
     position: absolute;
     left: 0; top: 20%; bottom: 20%;
     width: 2.5px;
-    background: var(--accent);
+    background: var(--accent-on-navy);
     border-radius: 2px;
 }
 
 .step-item.done {
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.62);
 }
 
 .step-num {
@@ -184,21 +295,36 @@ body {
     border: 1.5px solid currentColor;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.75rem; font-weight: 600;
+    font-variant-numeric: tabular-nums;
     flex-shrink: 0;
-    transition: all 0.18s;
+    position: relative;
+    z-index: 1;
+    background: var(--navy);           /* tapa el riel al pasar por detrás */
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
 }
 
 .step-item.active .step-num {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--navy);
+    color: #FFFFFF;                    /* 6.5:1; el navy solo daba 2.7:1 */
     font-weight: 700;
+    box-shadow: 0 0 0 4px rgba(0,93,184,0.22);
 }
 
+/* Cumplido: círculo lleno con visto. El número se oculta pero sigue en el
+   DOM, que es de donde lo leen el lector de pantalla y las pruebas. */
 .step-item.done .step-num {
-    background: rgba(30,122,74,0.25);
-    border-color: var(--success);
-    color: #5DD98C;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: transparent;
+}
+.step-item.done .step-num::after {
+    content: '';
+    position: absolute;
+    width: 5px; height: 9px;
+    border: solid #FFFFFF;
+    border-width: 0 2px 2px 0;
+    transform: translateY(-1px) rotate(45deg);
 }
 
 .step-label {
@@ -223,6 +349,8 @@ body {
 .main-content {
     padding: 3rem 3.5rem;
     max-width: 860px;
+    margin-inline: auto;
+    width: 100%;
 }
 
 .mobile-progress {
@@ -243,30 +371,59 @@ body {
 /* ══════════════════════════════════════════════════════════════
    STEPS
    ══════════════════════════════════════════════════════════════ */
-.step { animation: fadeIn 0.25s ease; }
+.step { animation: fadeIn 0.28s cubic-bezier(.22,.61,.36,1); }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* El paso no aparece de golpe: los primeros bloques entran escalonados, con
+   un desfase corto. Da sensación de orden al cambiar de paso. A partir del
+   sexto todos comparten el mismo retardo: alargarlo más se siente lento. */
+.step > * {
+    animation: subeYAparece .30s cubic-bezier(.22,.61,.36,1) backwards;
+    animation-delay: .22s;
+}
+.step > *:nth-child(1) { animation-delay: .03s; }
+.step > *:nth-child(2) { animation-delay: .07s; }
+.step > *:nth-child(3) { animation-delay: .11s; }
+.step > *:nth-child(4) { animation-delay: .15s; }
+.step > *:nth-child(5) { animation-delay: .19s; }
+
+@keyframes subeYAparece {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .hidden { display: none !important; }
 
-.step-header { margin-bottom: 2rem; }
+/* Regla bajo el encabezado del paso. Va debajo de la descripción cuando la
+   hay —cinco de los siete pasos— y si no, debajo del título. */
+.step > .step-desc,
+.step > h2:not(:has(+ .step-desc)) {
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+}
 
 .step h2 {
     font-family: var(--font-display);
-    font-size: 1.7rem;
+    font-size: 1.85rem;
     color: var(--navy);
-    font-weight: 600;
-    line-height: 1.25;
-    margin-bottom: 0.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    /* Open Sans se abre mucho en tamaños grandes */
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin-bottom: 0.45rem;
 }
 
 .step-desc {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.925rem;
     line-height: 1.6;
+    max-width: 62ch;                   /* medida legible */
 }
 
 /* Step number badge */
@@ -2239,7 +2396,7 @@ fieldset legend {
 .l-nav-logo-img        { height: 44px; width: auto; display: block; }
 .l-footer-logo-img     { height: 36px; width: auto; display: block; margin: 0 auto 0.5rem; filter: opacity(0.75); }
 .auth-logo-img         { height: 60px; width: auto; display: block; margin: 0 auto; }
-.sidebar-logo-img      { height: 54px; width: auto; display: block; max-width: 100%; }
+.sidebar-logo-img      { height: 40px; width: auto; display: block; max-width: 100%; }
 .adm-brand-sub         { font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.2rem; }
 
 /* ─── Landing: plan legal note ─── */
