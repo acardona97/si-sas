@@ -3,43 +3,50 @@
    Design system inspired by quarta.co
    ══════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* ─── Palette ─── */
+    /* ─── Paleta ───
+       Tomada del logotipo vectorial de Quarta y del encabezado de quarta.co:
+       el azul profundo #001A36 es el fondo de la barra del sitio y el punto
+       más oscuro del degradado del ave; #005DB8 y #004483 son los dos azules
+       del ave; #004571 es el del descriptor «acompañamiento de negocios».
+       Todos los pares de texto y fondo verifican 4.5:1 o más.            */
     --bg:           #FFFFFF;
-    --bg-page:      #F7F5F2;          /* warm off-white, not cool gray */
+    --bg-page:      #F5F7FA;           /* gris frío, del lado del azul */
     --bg-card:      #FFFFFF;
 
-    --navy:         #0C1E35;           /* deeper, richer navy */
-    --navy-light:   #162D4A;
-    --navy-mid:     #1E3A5F;
+    --navy:         #001A36;           /* azul Quarta, el de la barra */
+    --navy-light:   #00305C;
+    --navy-mid:     #004571;           /* el del descriptor del logo */
 
-    --gold:         #B8920A;           /* Quarta warm gold */
-    --gold-light:   #FBF6E6;
-    --gold-border:  #E8D48A;
-    --gold-hover:   #9A7A08;
+    --accent:        #005DB8;          /* azul vivo del ave */
+    --accent-light:  #EAF2FB;
+    --accent-border: #A9C9E8;
+    --accent-hover:  #004483;          /* azul medio del ave */
 
-    --border:       #E4E0D8;           /* warm border */
-    --border-light: #F0EDE8;
+    --border:       #DDE3EA;
+    --border-light: #EDF1F5;
 
-    --text:         #1A1612;           /* warm near-black */
-    --text-secondary: #5A5550;
-    --text-muted:   #9A9490;
+    --text:         #10171F;
+    --text-secondary: #4A5560;
+    --text-muted:   #66707A;           /* 5.0:1 sobre blanco */
 
     --danger:       #C0392B;
     --success:      #1E7A4A;
 
-    /* ─── Typography ─── */
-    --font-display: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-    --font-body:    'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+    /* ─── Tipografía ───
+       quarta.co usa Open Sans de punta a punta; aquí también, para que la
+       app y el sitio se lean como una sola marca.                        */
+    --font-display: 'Open Sans', -apple-system, 'Segoe UI', Helvetica, sans-serif;
+    --font-body:    'Open Sans', -apple-system, 'Segoe UI', Helvetica, sans-serif;
 
     /* ─── Geometry ─── */
     --radius:       6px;
     --radius-lg:    10px;
-    --shadow-sm:    0 1px 3px rgba(12,30,53,0.06), 0 1px 2px rgba(12,30,53,0.04);
-    --shadow-md:    0 4px 12px rgba(12,30,53,0.08), 0 2px 4px rgba(12,30,53,0.05);
-    --shadow-lg:    0 8px 30px rgba(12,30,53,0.12), 0 3px 8px rgba(12,30,53,0.06);
+    --shadow-sm:    0 1px 3px rgba(0,26,54,0.06), 0 1px 2px rgba(0,26,54,0.04);
+    --shadow-md:    0 4px 12px rgba(0,26,54,0.08), 0 2px 4px rgba(0,26,54,0.05);
+    --shadow-lg:    0 8px 30px rgba(0,26,54,0.12), 0 3px 8px rgba(0,26,54,0.06);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -91,7 +98,7 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--gold), #D4A820);
+    background: linear-gradient(90deg, var(--accent), #D4A820);
 }
 
 .brand { margin-bottom: 0.5rem; }
@@ -106,7 +113,7 @@ body {
 }
 
 .brand h1 span {
-    color: var(--gold);
+    color: var(--accent);
 }
 
 .brand-sub {
@@ -154,7 +161,7 @@ body {
 }
 
 .step-item.active {
-    background: rgba(184,146,10,0.18);
+    background: rgba(0,93,184,0.18);
     color: #FFFFFF;
 }
 
@@ -163,7 +170,7 @@ body {
     position: absolute;
     left: 0; top: 20%; bottom: 20%;
     width: 2.5px;
-    background: var(--gold);
+    background: var(--accent);
     border-radius: 2px;
 }
 
@@ -182,8 +189,8 @@ body {
 }
 
 .step-item.active .step-num {
-    background: var(--gold);
-    border-color: var(--gold);
+    background: var(--accent);
+    border-color: var(--accent);
     color: var(--navy);
     font-weight: 700;
 }
@@ -228,7 +235,7 @@ body {
 }
 .progress-fill {
     height: 100%;
-    background: var(--gold);
+    background: var(--accent);
     transition: width 0.3s;
     border-radius: 2px;
 }
@@ -265,8 +272,8 @@ body {
 /* Step number badge */
 .step-badge {
     display: inline-block;
-    background: var(--gold-light);
-    color: var(--gold-hover);
+    background: var(--accent-light);
+    color: var(--accent-hover);
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.8px;
@@ -274,7 +281,7 @@ body {
     padding: 0.25rem 0.6rem;
     border-radius: 3px;
     margin-bottom: 0.5rem;
-    border: 1px solid var(--gold-border);
+    border: 1px solid var(--accent-border);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -312,15 +319,15 @@ body {
 .form-group input:hover:not(:focus),
 .form-group select:hover:not(:focus),
 .form-group textarea:hover:not(:focus) {
-    border-color: #C8C4BC;
+    border-color: #C3CBD4;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(184,146,10,0.12);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,93,184,0.12);
 }
 
 .input-disabled {
@@ -364,8 +371,8 @@ fieldset legend {
 
 /* ─── Info box ─── */
 .info-box {
-    background: var(--gold-light);
-    border-left: 3px solid var(--gold);
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
     padding: 0.875rem 1.125rem;
     border-radius: 0 var(--radius) var(--radius) 0;
     margin-bottom: 1.5rem;
@@ -393,13 +400,13 @@ fieldset legend {
 }
 
 .btn-primary {
-    background: var(--gold);
+    background: var(--accent);
     color: #FFF;
-    box-shadow: 0 1px 3px rgba(184,146,10,0.25);
+    box-shadow: 0 1px 3px rgba(0,93,184,0.25);
 }
 .btn-primary:hover {
-    background: var(--gold-hover);
-    box-shadow: 0 3px 8px rgba(184,146,10,0.35);
+    background: var(--accent-hover);
+    box-shadow: 0 3px 8px rgba(0,93,184,0.35);
     transform: translateY(-1px);
 }
 .btn-primary:active { transform: translateY(0); }
@@ -411,18 +418,18 @@ fieldset legend {
 }
 .btn-secondary:hover {
     background: var(--bg-page);
-    border-color: #C8C4BC;
+    border-color: #C3CBD4;
     color: var(--text);
 }
 
 .btn-outline {
     background: transparent;
-    color: var(--gold-hover);
-    border: 1.5px solid var(--gold-border);
+    color: var(--accent-hover);
+    border: 1.5px solid var(--accent-border);
 }
 .btn-outline:hover {
-    background: var(--gold-light);
-    border-color: var(--gold);
+    background: var(--accent-light);
+    border-color: var(--accent);
 }
 
 .btn-danger {
@@ -491,7 +498,7 @@ fieldset legend {
     position: absolute;
     left: 0; top: 1rem; bottom: 1rem;
     width: 3px;
-    background: var(--gold);
+    background: var(--accent);
     border-radius: 0 2px 2px 0;
 }
 
@@ -522,7 +529,7 @@ fieldset legend {
 }
 .pct-bar-fill {
     height: 100%;
-    background: var(--gold);
+    background: var(--accent);
     border-radius: 3px;
     transition: width 0.3s, background 0.3s;
 }
@@ -559,13 +566,13 @@ fieldset legend {
     box-shadow: var(--shadow-sm);
 }
 .radio-card:hover {
-    border-color: var(--gold-border);
+    border-color: var(--accent-border);
     box-shadow: var(--shadow-md);
 }
 .radio-card.selected {
-    border-color: var(--gold);
-    background: var(--gold-light);
-    box-shadow: 0 0 0 3px rgba(184,146,10,0.1);
+    border-color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 3px rgba(0,93,184,0.1);
 }
 .radio-card input { display: none; }
 .radio-title {
@@ -604,24 +611,24 @@ fieldset legend {
     transition: background 0.12s;
 }
 .ciiu-results .result-item:last-child { border-bottom: none; }
-.ciiu-results .result-item:hover { background: var(--gold-light); }
+.ciiu-results .result-item:hover { background: var(--accent-light); }
 .ciiu-results .result-item .code {
     font-weight: 700;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     margin-right: 0.5rem;
     font-size: 0.8rem;
 }
 
 .ciiu-tag {
     display: inline-block;
-    background: var(--gold-light);
-    color: var(--gold-hover);
+    background: var(--accent-light);
+    color: var(--accent-hover);
     padding: 0.25rem 0.7rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 500;
     margin-top: 0.4rem;
-    border: 1px solid var(--gold-border);
+    border: 1px solid var(--accent-border);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -711,7 +718,7 @@ fieldset legend {
 .chat-toggle:hover {
     background: var(--navy-light);
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(12,30,53,0.28);
+    box-shadow: 0 10px 30px rgba(0,26,54,0.28);
 }
 .chat-toggle.active { background: var(--danger); }
 
@@ -729,7 +736,7 @@ fieldset legend {
     max-height: calc(100vh - 2rem);
     background: var(--bg);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: -4px 0 40px rgba(12,30,53,0.15);
+    box-shadow: -4px 0 40px rgba(0,26,54,0.15);
     display: flex;
     flex-direction: column;
     z-index: 1001;
@@ -756,14 +763,14 @@ fieldset legend {
     color: white;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     flex-shrink: 0;
-    border-top: 2px solid var(--gold);
+    border-top: 2px solid var(--accent);
 }
 @media (max-width: 480px) { .chat-header { border-radius: 0; } }
 
 .chat-header-info { display: flex; align-items: center; gap: 0.75rem; }
 .chat-avatar {
     width: 34px; height: 34px;
-    background: var(--gold);
+    background: var(--accent);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-weight: 700;
@@ -857,7 +864,7 @@ fieldset legend {
     transition: border-color 0.18s;
     background: var(--bg-page);
 }
-.chat-input-area textarea:focus { border-color: var(--gold); }
+.chat-input-area textarea:focus { border-color: var(--accent); }
 
 .chat-send {
     background: var(--navy);
@@ -868,7 +875,7 @@ fieldset legend {
     cursor: pointer; flex-shrink: 0;
     transition: background 0.18s, opacity 0.18s;
 }
-.chat-send:hover { background: var(--gold-hover); }
+.chat-send:hover { background: var(--accent-hover); }
 .chat-send:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .chat-error {
@@ -880,8 +887,8 @@ fieldset legend {
    UPLOAD DOC — extracción automática
    ══════════════════════════════════════════════════════════════ */
 .upload-doc-section {
-    background: var(--gold-light);
-    border: 1.5px dashed var(--gold-border);
+    background: var(--accent-light);
+    border: 1.5px dashed var(--accent-border);
     border-radius: var(--radius-lg);
     padding: 1rem 1.125rem;
     margin-bottom: 1.25rem;
@@ -891,7 +898,7 @@ fieldset legend {
     flex-wrap: wrap;
     transition: border-color 0.18s;
 }
-.upload-doc-section:hover { border-color: var(--gold); }
+.upload-doc-section:hover { border-color: var(--accent); }
 
 .upload-doc-info { flex: 1; min-width: 200px; }
 .upload-doc-info strong {
@@ -919,7 +926,7 @@ fieldset legend {
     white-space: nowrap;
 }
 .upload-doc-btn:hover {
-    background: var(--gold);
+    background: var(--accent);
     transform: translateY(-1px);
 }
 .upload-doc-btn input[type="file"] { display: none; }
@@ -930,7 +937,7 @@ fieldset legend {
     margin-top: 0.35rem;
     flex-basis: 100%;
 }
-.upload-status.processing { color: var(--gold-hover); }
+.upload-status.processing { color: var(--accent-hover); }
 .upload-status.success    { color: var(--success); }
 .upload-status.error      { color: var(--danger); }
 
@@ -995,11 +1002,11 @@ fieldset legend {
     margin-bottom: 0.65rem;
 }
 .plan-badge-basic       { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
-.plan-badge-standard    { background: rgba(184,146,10,0.2);  color: var(--gold-border); }
+.plan-badge-standard    { background: rgba(0,93,184,0.2);  color: var(--accent-border); }
 .plan-badge-abogado     { background: rgba(30,122,74,0.2);   color: #5DD98C; }
-.plan-badge-premium     { background: rgba(184,146,10,0.35); color: var(--gold-border); }
+.plan-badge-premium     { background: rgba(0,93,184,0.35); color: var(--accent-border); }
 .plan-badge-corporativo { background: rgba(100,120,200,0.2); color: #8B9FE8; }
-.plan-badge-admin       { background: rgba(184,146,10,0.5);  color: #fff; }
+.plan-badge-admin       { background: rgba(0,93,184,0.5);  color: #fff; }
 
 .sidebar-user-link {
     display: block;
@@ -1009,13 +1016,13 @@ fieldset legend {
     margin-top: 0.3rem;
     transition: color 0.15s;
 }
-.sidebar-user-link:hover { color: var(--gold-border); }
+.sidebar-user-link:hover { color: var(--accent-border); }
 .sidebar-logout { color: rgba(255,100,100,0.6); }
 .sidebar-logout:hover { color: #ff8080; }
 
 /* ══════════════════════════════════════════════════════════════
    LANDING PAGE — Lex Aurum design system (Stitch project)
-   Navy-Deep #0C1E35 · Gold-Leaf #B8920A · Parchment #F7F5F2
+   Azul Quarta #001A36 · Acento #005DB8 · Fondo #F5F7FA
    ══════════════════════════════════════════════════════════════ */
 .landing-body {
     font-family: var(--font-body);
@@ -1029,7 +1036,7 @@ fieldset legend {
 
 /* Lex Aurum scale */
 .lex-label-caps {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1045,7 +1052,7 @@ fieldset legend {
     background: rgba(247,245,242,0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(12,30,53,0.08);
+    border-bottom: 1px solid rgba(0,26,54,0.08);
 }
 .l-nav-inner {
     max-width: 1200px;
@@ -1062,7 +1069,7 @@ fieldset legend {
     align-items: center;
 }
 .l-nav-link {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1073,8 +1080,8 @@ fieldset legend {
     border-bottom: 2px solid transparent;
     transition: border-color 0.15s;
 }
-.l-nav-link:hover { border-bottom-color: var(--gold); }
-.l-nav-link.active { border-bottom-color: var(--gold); }
+.l-nav-link:hover { border-bottom-color: var(--accent); }
+.l-nav-link.active { border-bottom-color: var(--accent); }
 @media (max-width: 900px) {
     .l-nav-inner { padding: 0 20px; }
     .l-nav-menu  { display: none; }
@@ -1088,7 +1095,7 @@ fieldset legend {
     letter-spacing: 0.3px;
 }
 .l-nav-by {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     font-weight: 600;
     color: var(--text-muted);
@@ -1097,7 +1104,7 @@ fieldset legend {
 }
 .l-nav-actions { display: flex; align-items: center; gap: 1rem; }
 .l-nav-login {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1108,11 +1115,11 @@ fieldset legend {
     border-bottom: 2px solid transparent;
     transition: border-color 0.15s;
 }
-.l-nav-login:hover { border-bottom-color: var(--gold); }
+.l-nav-login:hover { border-bottom-color: var(--accent); }
 .l-btn-cta {
     background: var(--navy);
     color: #fff !important;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -1124,7 +1131,7 @@ fieldset legend {
     display: inline-flex;
     align-items: center;
 }
-.l-btn-cta:hover { background: #1A2D44; }
+.l-btn-cta:hover { background: #00305C; }
 
 /* Container — Lex Aurum 1200px max, 64px desktop margin */
 .l-container {
@@ -1136,7 +1143,7 @@ fieldset legend {
     .l-container { padding: 0 20px; }
 }
 
-/* Hero — Lex Aurum: parchment bg, editorial Playfair, navy text */
+/* Hero — fondo claro, tipografía Open Sans, texto en azul Quarta */
 .l-hero {
     background: var(--bg-page);
     padding: 120px 0 96px;
@@ -1159,19 +1166,19 @@ fieldset legend {
 .l-hero-content { text-align: left; }
 .l-hero-badge {
     display: inline-block;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     padding: 0 0 0 0.875rem;
     margin-bottom: 1.5rem;
-    border-left: 2px solid var(--gold);
+    border-left: 2px solid var(--accent);
     line-height: 1;
 }
 .l-hero-title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(36px, 5vw, 56px);
     font-weight: 700;
     color: var(--navy);
@@ -1181,11 +1188,11 @@ fieldset legend {
 }
 .l-hero-title em {
     font-style: italic;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     font-weight: 700;
 }
 .l-hero-sub {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 18px;
     font-weight: 400;
     color: var(--text-secondary);
@@ -1202,7 +1209,7 @@ fieldset legend {
 .l-btn-primary {
     background: var(--navy);
     color: #fff !important;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -1216,13 +1223,13 @@ fieldset legend {
     border: none;
 }
 .l-btn-primary:hover {
-    background: #1A2D44;
-    box-shadow: 0 4px 16px rgba(184,146,10,0.15);
+    background: #00305C;
+    box-shadow: 0 4px 16px rgba(0,93,184,0.15);
 }
 .l-btn-ghost {
     background: transparent;
     color: var(--navy) !important;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -1241,7 +1248,7 @@ fieldset legend {
     position: absolute;
     bottom: 12px; left: 32px; right: 32px;
     height: 2px;
-    background: var(--gold);
+    background: var(--accent);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.2s;
@@ -1250,13 +1257,13 @@ fieldset legend {
 .l-btn-outline {
     background: transparent;
     color: var(--navy) !important;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
     padding: 0 24px !important;
     border-radius: 0.25rem;
-    border: 2px solid var(--gold);
+    border: 2px solid var(--accent);
     text-decoration: none;
     transition: background 0.15s, color 0.15s;
     display: inline-flex;
@@ -1266,7 +1273,7 @@ fieldset legend {
     width: 100%;
     box-sizing: border-box;
 }
-.l-btn-outline:hover { background: var(--gold); color: #fff !important; }
+.l-btn-outline:hover { background: var(--accent); color: #fff !important; }
 
 /* Hero visual — editorial composition */
 .l-hero-visual {
@@ -1275,30 +1282,30 @@ fieldset legend {
     background: var(--navy);
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 24px 48px -16px rgba(12,30,53,0.18);
+    box-shadow: 0 24px 48px -16px rgba(0,26,54,0.18);
 }
 .l-hero-visual::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, var(--navy) 0%, #1A2D44 100%);
+    background: linear-gradient(135deg, var(--navy) 0%, #00305C 100%);
 }
 .l-hero-visual::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 30% 20%, rgba(184,146,10,0.2) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(184,146,10,0.15) 0%, transparent 50%);
+    background: radial-gradient(circle at 30% 20%, rgba(0,93,184,0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(0,93,184,0.15) 0%, transparent 50%);
 }
 .l-hero-visual-mark {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-style: italic;
     font-size: clamp(120px, 14vw, 180px);
     font-weight: 700;
-    color: var(--gold);
+    color: var(--accent);
     line-height: 1;
     opacity: 0.85;
     text-align: center;
@@ -1320,17 +1327,17 @@ fieldset legend {
 .l-hero-note {
     font-size: 13px;
     color: var(--text-muted);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
 }
 
 /* Section eyebrow + title — Lex Aurum editorial */
 .l-section-eyebrow {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     text-align: center;
     margin: 0 0 1rem;
 }
@@ -1339,11 +1346,11 @@ fieldset legend {
 .l-how {
     padding: 96px 0;
     background: #fff;
-    border-top: 1px solid rgba(12,30,53,0.06);
-    border-bottom: 1px solid rgba(12,30,53,0.06);
+    border-top: 1px solid rgba(0,26,54,0.06);
+    border-bottom: 1px solid rgba(0,26,54,0.06);
 }
 .l-section-title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(28px, 3.5vw, 40px);
     font-weight: 600;
     color: var(--navy);
@@ -1355,7 +1362,7 @@ fieldset legend {
 .l-section-sub {
     text-align: center;
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 17px;
     line-height: 1.6;
     max-width: 640px;
@@ -1372,16 +1379,16 @@ fieldset legend {
     padding: 2.5rem 2rem;
     text-align: left;
     background: var(--bg-page);
-    border: 1px solid rgba(12,30,53,0.06);
+    border: 1px solid rgba(0,26,54,0.06);
     border-radius: 0.5rem;
     position: relative;
 }
 .l-step-arrow { display: none; }
 .l-step-num {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 14px;
     font-weight: 600;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     line-height: 1;
@@ -1395,11 +1402,11 @@ fieldset legend {
     left: 0; top: 50%;
     width: 1.5rem;
     height: 1px;
-    background: var(--gold);
+    background: var(--accent);
     transform: translateY(-50%);
 }
 .l-step h3 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 22px;
     font-weight: 600;
     color: var(--navy);
@@ -1407,7 +1414,7 @@ fieldset legend {
     margin: 0 0 0.75rem;
 }
 .l-step p {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
     color: var(--text-secondary);
     line-height: 1.6;
@@ -1427,9 +1434,9 @@ fieldset legend {
     margin: 0 auto 4rem;
     padding: 4px;
     background: #fff;
-    border: 1px solid rgba(12,30,53,0.08);
+    border: 1px solid rgba(0,26,54,0.08);
     border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(12,30,53,0.04);
+    box-shadow: 0 1px 3px rgba(0,26,54,0.04);
     width: max-content;
     justify-self: center;
 }
@@ -1441,7 +1448,7 @@ fieldset legend {
     padding: 0.75rem 1.75rem;
     border: none;
     border-radius: 0.375rem;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1455,7 +1462,7 @@ fieldset legend {
 .l-plans-tab:hover { color: var(--navy); }
 .l-plans-tab.active {
     background: var(--navy);
-    color: var(--gold);
+    color: var(--accent);
 }
 .l-plans-grid {
     display: grid;
@@ -1475,7 +1482,7 @@ fieldset legend {
 .l-plans-panel { display: none; }
 .l-plans-panel.active { display: block; }
 .l-plan-card {
-    border: 1px solid rgba(12,30,53,0.10);
+    border: 1px solid rgba(0,26,54,0.10);
     border-radius: 0.5rem;
     padding: 40px 32px 32px;
     background: #fff;
@@ -1490,19 +1497,19 @@ fieldset legend {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4px;
-    background: var(--gold);
+    background: var(--accent);
     border-radius: 0.5rem 0.5rem 0 0;
     opacity: 0.4;
     transition: opacity 0.25s;
 }
 .l-plan-card:hover {
-    box-shadow: 0 12px 32px -8px rgba(184,146,10,0.15), 0 4px 12px rgba(12,30,53,0.06);
+    box-shadow: 0 12px 32px -8px rgba(0,93,184,0.15), 0 4px 12px rgba(0,26,54,0.06);
     transform: translateY(-4px);
 }
 .l-plan-card:hover::before { opacity: 1; }
 .l-plan-featured {
-    border-color: rgba(184,146,10,0.4);
-    box-shadow: 0 8px 24px -4px rgba(184,146,10,0.18);
+    border-color: rgba(0,93,184,0.4);
+    box-shadow: 0 8px 24px -4px rgba(0,93,184,0.18);
 }
 .l-plan-featured::before { opacity: 1; height: 6px; }
 .l-plan-pop {
@@ -1511,8 +1518,8 @@ fieldset legend {
     left: 50%;
     transform: translateX(-50%);
     background: var(--navy);
-    color: var(--gold) !important;
-    font-family: 'Inter', sans-serif;
+    color: var(--accent) !important;
+    font-family: var(--font-body);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -1523,19 +1530,19 @@ fieldset legend {
     z-index: 2;
 }
 .l-plan-eyebrow {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     margin-bottom: 0.5rem;
 }
 .l-plan-icon {
     display: none;
 }
 .l-plan-name {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 28px;
     font-weight: 600;
     color: var(--navy);
@@ -1543,14 +1550,14 @@ fieldset legend {
     margin-bottom: 0.75rem;
 }
 .l-plan-desc {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     color: var(--text-secondary);
     line-height: 1.55;
     margin-bottom: 1.5rem;
 }
 .l-plan-price {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 40px;
     font-weight: 700;
     color: var(--navy);
@@ -1559,14 +1566,14 @@ fieldset legend {
     margin-bottom: 0.35rem;
 }
 .l-plan-note {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 500;
     color: var(--text-muted);
     letter-spacing: 0.02em;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(12,30,53,0.08);
+    border-bottom: 1px solid rgba(0,26,54,0.08);
 }
 .l-plan-features {
     list-style: none;
@@ -1578,7 +1585,7 @@ fieldset legend {
     gap: 0.875rem;
 }
 .l-plan-features li {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     color: var(--navy);
     line-height: 1.5;
@@ -1590,7 +1597,7 @@ fieldset legend {
     position: absolute;
     left: 0; top: 0.3rem;
     width: 18px; height: 18px;
-    background: var(--gold);
+    background: var(--accent);
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
 }
@@ -1614,14 +1621,14 @@ fieldset legend {
     left: 0; top: 0.3rem;
     width: 18px; height: 18px;
     border-radius: 50%;
-    border: 1.5px solid rgba(12,30,53,0.15);
+    border: 1.5px solid rgba(0,26,54,0.15);
 }
 
 /* Why Quarta — Lex Aurum editorial split */
 .l-why {
     padding: 120px 0;
     background: #fff;
-    border-top: 1px solid rgba(12,30,53,0.06);
+    border-top: 1px solid rgba(0,26,54,0.06);
 }
 .l-why-grid {
     display: grid;
@@ -1631,7 +1638,7 @@ fieldset legend {
 }
 .l-why-text .l-section-eyebrow { text-align: left; }
 .l-why-text h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(28px, 3vw, 36px);
     font-weight: 600;
     color: var(--navy);
@@ -1640,7 +1647,7 @@ fieldset legend {
     letter-spacing: -0.01em;
 }
 .l-why-text p {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 16px;
     color: var(--text-secondary);
     line-height: 1.7;
@@ -1650,7 +1657,7 @@ fieldset legend {
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-top: 1px solid rgba(12,30,53,0.08);
+    border-top: 1px solid rgba(0,26,54,0.08);
 }
 .l-why-item {
     display: grid;
@@ -1658,12 +1665,12 @@ fieldset legend {
     gap: 1.5rem;
     align-items: start;
     padding: 1.75rem 0;
-    border-bottom: 1px solid rgba(12,30,53,0.08);
+    border-bottom: 1px solid rgba(0,26,54,0.08);
 }
 .l-why-icon {
     width: 48px; height: 48px;
     background: var(--bg-page);
-    border: 1px solid rgba(184,146,10,0.2);
+    border: 1px solid rgba(0,93,184,0.2);
     border-radius: 0.25rem;
     display: flex;
     align-items: center;
@@ -1673,7 +1680,7 @@ fieldset legend {
 }
 .l-why-item strong {
     display: block;
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 18px;
     font-weight: 600;
     color: var(--navy);
@@ -1681,7 +1688,7 @@ fieldset legend {
     line-height: 1.3;
 }
 .l-why-item p {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     color: var(--text-secondary);
     margin: 0;
@@ -1700,19 +1707,19 @@ fieldset legend {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4px;
-    background: var(--gold);
+    background: var(--accent);
 }
 .l-footer-brand {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--accent);
     margin-bottom: 0.5rem;
     font-style: italic;
     letter-spacing: -0.01em;
 }
 .l-footer-by {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     color: rgba(255,255,255,0.5);
     margin-bottom: 2.5rem;
@@ -1731,7 +1738,7 @@ fieldset legend {
     border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 .l-footer-links a {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1740,9 +1747,9 @@ fieldset legend {
     text-decoration: none;
     transition: color 0.15s;
 }
-.l-footer-links a:hover { color: var(--gold); }
+.l-footer-links a:hover { color: var(--accent); }
 .l-footer-legal {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     color: rgba(255,255,255,0.3);
     letter-spacing: 0.02em;
@@ -1775,14 +1782,14 @@ fieldset legend {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
     padding-right: 2rem;
-    border-right: 1px solid rgba(12,30,53,0.1);
+    border-right: 1px solid rgba(0,26,54,0.1);
 }
 .l-trust-item:last-child { border-right: none; padding-right: 0; }
 .l-trust-icon {
@@ -1790,7 +1797,7 @@ fieldset legend {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--gold-hover);
+    color: var(--accent-hover);
     font-size: 14px;
 }
 
@@ -1806,21 +1813,21 @@ fieldset legend {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 50% 100%, rgba(184,146,10,0.18) 0%, transparent 65%);
+    background: radial-gradient(ellipse at 50% 100%, rgba(0,93,184,0.18) 0%, transparent 65%);
     pointer-events: none;
 }
 .l-cta-banner-eyebrow {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--accent);
     margin: 0 0 1.25rem;
     position: relative;
 }
 .l-cta-banner h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(28px, 3vw, 40px);
     font-weight: 600;
     color: #fff;
@@ -1830,7 +1837,7 @@ fieldset legend {
     position: relative;
 }
 .l-cta-banner p {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 17px;
     color: rgba(255,255,255,0.7);
     line-height: 1.6;
@@ -1839,12 +1846,12 @@ fieldset legend {
     position: relative;
 }
 .l-cta-banner .l-btn-primary {
-    background: var(--gold);
+    background: var(--accent);
     position: relative;
 }
 .l-cta-banner .l-btn-primary:hover {
-    background: var(--gold-hover);
-    box-shadow: 0 8px 24px rgba(184,146,10,0.3);
+    background: var(--accent-hover);
+    box-shadow: 0 8px 24px rgba(0,93,184,0.3);
 }
 
 /* Stats row — Lex Aurum: editorial numbers */
@@ -1856,19 +1863,19 @@ fieldset legend {
     margin: 0 auto;
     padding: 64px 64px;
     background: #fff;
-    border: 1px solid rgba(12,30,53,0.06);
+    border: 1px solid rgba(0,26,54,0.06);
     border-radius: 0.5rem;
     transform: translateY(-48px);
-    box-shadow: 0 16px 40px -16px rgba(12,30,53,0.12);
+    box-shadow: 0 16px 40px -16px rgba(0,26,54,0.12);
 }
 .l-stat {
     text-align: center;
     padding: 0 2rem;
-    border-right: 1px solid rgba(12,30,53,0.08);
+    border-right: 1px solid rgba(0,26,54,0.08);
 }
 .l-stat:last-child { border-right: none; }
 .l-stat-num {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 48px;
     font-weight: 700;
     color: var(--navy);
@@ -1876,11 +1883,11 @@ fieldset legend {
     letter-spacing: -0.02em;
 }
 .l-stat-num em {
-    color: var(--gold);
+    color: var(--accent);
     font-style: italic;
 }
 .l-stat-label {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1890,7 +1897,7 @@ fieldset legend {
 }
 @media (max-width: 700px) {
     .l-stats { grid-template-columns: 1fr; gap: 2rem; padding: 32px; transform: none; }
-    .l-stat { border-right: none; border-bottom: 1px solid rgba(12,30,53,0.08); padding-bottom: 2rem; }
+    .l-stat { border-right: none; border-bottom: 1px solid rgba(0,26,54,0.08); padding-bottom: 2rem; }
     .l-stat:last-child { border-bottom: none; padding-bottom: 0; }
     .l-stat-num { font-size: 36px; }
 }
@@ -1928,7 +1935,7 @@ fieldset legend {
     display: block;
     margin-bottom: 0.3rem;
 }
-.auth-logo:hover { color: var(--gold-hover); }
+.auth-logo:hover { color: var(--accent-hover); }
 .auth-logo-by {
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -1953,7 +1960,7 @@ fieldset legend {
     transition: color 0.15s, border-color 0.15s;
 }
 .auth-tab:hover     { color: var(--navy); }
-.auth-tab.active    { color: var(--gold-hover); border-bottom-color: var(--gold); font-weight: 600; }
+.auth-tab.active    { color: var(--accent-hover); border-bottom-color: var(--accent); font-weight: 600; }
 .auth-error {
     background: rgba(192,57,43,0.08);
     border: 1px solid rgba(192,57,43,0.25);
@@ -1992,15 +1999,15 @@ fieldset legend {
     outline: none;
 }
 .auth-form input:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(184,146,10,0.12);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,93,184,0.12);
     background: #fff;
 }
 .auth-btn-submit {
     display: block;
     width: 100%;
     box-sizing: border-box;
-    background: var(--gold);
+    background: var(--accent);
     color: #fff;
     border: none;
     border-radius: var(--radius);
@@ -2013,14 +2020,14 @@ fieldset legend {
     transition: background 0.15s;
     text-align: center;
 }
-.auth-btn-submit:hover { background: var(--gold-hover); }
+.auth-btn-submit:hover { background: var(--accent-hover); }
 .auth-switch {
     text-align: center;
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin: 1rem 0 0;
 }
-.auth-switch a { color: var(--gold-hover); text-decoration: none; font-weight: 600; }
+.auth-switch a { color: var(--accent-hover); text-decoration: none; font-weight: 600; }
 .auth-switch a:hover { text-decoration: underline; }
 .auth-back {
     text-align: center;
@@ -2058,7 +2065,7 @@ fieldset legend {
     display: flex;
     flex-direction: column;
     border-right: 1px solid rgba(255,255,255,0.05);
-    border-top: 3px solid var(--gold);
+    border-top: 3px solid var(--accent);
 }
 .adm-brand {
     padding: 1.75rem 1.25rem 1.25rem;
@@ -2094,7 +2101,7 @@ fieldset legend {
     border-left: 3px solid transparent;
 }
 .adm-nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
-.adm-nav-item.active { color: #fff; border-left-color: var(--gold); background: rgba(184,146,10,0.08); }
+.adm-nav-item.active { color: #fff; border-left-color: var(--accent); background: rgba(0,93,184,0.08); }
 .adm-nav-icon { font-size: 1rem; }
 .adm-nav-footer {
     padding: 1rem 1.25rem 1.5rem;
@@ -2173,7 +2180,7 @@ fieldset legend {
     color: var(--text);
     cursor: pointer;
 }
-.adm-plan-select:focus { outline: none; border-color: var(--gold); }
+.adm-plan-select:focus { outline: none; border-color: var(--accent); }
 
 .adm-status {
     display: inline-block;
@@ -2210,8 +2217,8 @@ fieldset legend {
 }
 
 .adm-info-box {
-    background: var(--gold-light);
-    border: 1px solid var(--gold-border);
+    background: var(--accent-light);
+    border: 1px solid var(--accent-border);
     border-radius: var(--radius);
     padding: 1rem 1.25rem;
     font-size: 0.85rem;
@@ -2221,7 +2228,7 @@ fieldset legend {
 .adm-info-box ul { margin: 0.5rem 0 0; padding-left: 1.25rem; }
 .adm-info-box li { margin-bottom: 0.25rem; }
 .adm-info-box code {
-    background: rgba(184,146,10,0.12);
+    background: rgba(0,93,184,0.12);
     padding: 0.1rem 0.4rem;
     border-radius: 3px;
     font-size: 0.82rem;
@@ -2241,9 +2248,9 @@ fieldset legend {
     margin-bottom: 1.25rem;
     padding: 0.75rem 1rem;
     background: var(--bg-page);
-    border-left: 2px solid var(--gold);
+    border-left: 2px solid var(--accent);
     border-radius: 0 0.25rem 0.25rem 0;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     color: var(--text-secondary);
     line-height: 1.5;
@@ -2254,13 +2261,13 @@ fieldset legend {
 .adm-add-btn {
     display: inline-flex; align-items: center; gap: 0.35rem;
     padding: 0.55rem 1.25rem;
-    background: var(--gold); color: #fff;
+    background: var(--accent); color: #fff;
     border: none; border-radius: var(--radius);
     font-family: var(--font-body); font-size: 0.875rem; font-weight: 500;
     cursor: pointer; white-space: nowrap;
     transition: background 0.15s;
 }
-.adm-add-btn:hover { background: var(--gold-hover); }
+.adm-add-btn:hover { background: var(--accent-hover); }
 
 /* ─── Admin: generaciones cell ─── */
 .adm-gen-form { display: flex; align-items: center; gap: 0.3rem; }
@@ -2272,13 +2279,13 @@ fieldset legend {
     border: 1px solid var(--border); border-radius: var(--radius);
     font-size: 0.78rem; color: var(--text); text-align: center;
 }
-.adm-gen-input:focus { outline: none; border-color: var(--gold); }
+.adm-gen-input:focus { outline: none; border-color: var(--accent); }
 .adm-gen-btn {
-    background: var(--gold); color: #fff; border: none;
+    background: var(--accent); color: #fff; border: none;
     border-radius: var(--radius); padding: 0.2rem 0.45rem;
     font-size: 0.78rem; cursor: pointer; line-height: 1;
 }
-.adm-gen-btn:hover { background: var(--gold-hover); }
+.adm-gen-btn:hover { background: var(--accent-hover); }
 
 /* ─── Admin: flash messages ─── */
 .adm-flash-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
@@ -2292,7 +2299,7 @@ fieldset legend {
 /* ─── Admin: modal ─── */
 .adm-modal-overlay {
     position: fixed; inset: 0; z-index: 1000;
-    background: rgba(12,30,53,0.55);
+    background: rgba(0,26,54,0.55);
     display: flex; align-items: center; justify-content: center;
     padding: 1rem;
 }
@@ -2327,7 +2334,7 @@ fieldset legend {
     font-family: var(--font-body); font-size: 0.875rem; color: var(--text);
     background: var(--bg); transition: border-color 0.15s;
 }
-.adm-input:focus { outline: none; border-color: var(--gold); }
+.adm-input:focus { outline: none; border-color: var(--accent); }
 .adm-input::placeholder { color: var(--text-muted); }
 .adm-modal-actions {
     display: flex; gap: 0.75rem; justify-content: flex-end;
@@ -2356,7 +2363,7 @@ fieldset legend {
 
 .homo-termino {
     display: inline-block;
-    background: #fff; border: 1px dashed var(--gold-border, #E8D48A);
+    background: #fff; border: 1px dashed var(--accent-border);
     border-radius: var(--radius);
     padding: 0.35rem 0.7rem; margin-top: 0.4rem;
     font-family: var(--font-body); font-weight: 600; letter-spacing: 0.02em;
@@ -2399,10 +2406,10 @@ fieldset legend {
 .homo-veredicto.ok .homo-veredicto-titulo { color: var(--success); }
 
 .homo-veredicto.aviso {
-    background: rgba(184,134,11,0.09); border-color: rgba(184,134,11,0.5);
+    background: rgba(0,93,184,0.09); border-color: rgba(0,93,184,0.5);
 }
 .homo-veredicto.aviso .homo-veredicto-icono { background: #B8860B; }
-.homo-veredicto.aviso .homo-veredicto-titulo { color: #8A6508; }
+.homo-veredicto.aviso .homo-veredicto-titulo { color: #00477F; }
 
 .homo-veredicto.alto {
     background: rgba(192,57,43,0.08); border-color: rgba(192,57,43,0.55);
@@ -2491,7 +2498,7 @@ fieldset legend {
     background: rgba(30,122,74,0.12); color: var(--success);
 }
 .rues-opcion[data-nivel="aviso"] .rues-chip {
-    background: rgba(184,134,11,0.15); color: #8A6508;
+    background: rgba(0,93,184,0.15); color: #00477F;
 }
 .rues-opcion[data-nivel="alto"] .rues-chip {
     background: rgba(192,57,43,0.12); color: var(--danger);
@@ -2554,7 +2561,7 @@ fieldset legend {
     border-color: var(--success); color: var(--success);
 }
 .rues-opcion[data-nivel="aviso"].elegida {
-    border-color: rgba(184,134,11,0.55); background: rgba(184,134,11,0.05);
+    border-color: rgba(0,93,184,0.55); background: rgba(0,93,184,0.05);
 }
 .rues-opcion[data-nivel="aviso"].elegida .rues-marca {
     border-color: #B8860B; color: #B8860B;
@@ -2567,7 +2574,7 @@ fieldset legend {
 }
 
 .rues-opcion input:focus-visible ~ .rues-marca {
-    outline: 2px solid var(--gold); outline-offset: 2px;
+    outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
 @media (max-width: 680px) {
@@ -2598,9 +2605,9 @@ fieldset legend {
     vertical-align: middle;
 }
 .ciiu-marca.bloqueado    { background: rgba(192,57,43,0.12); color: var(--danger); }
-.ciiu-marca.autorizacion { background: rgba(184,134,11,0.15); color: #8A6508; }
+.ciiu-marca.autorizacion { background: rgba(0,93,184,0.15); color: #00477F; }
 .ciiu-marca.preguntas    { background: rgba(30,58,95,0.10); color: var(--navy-mid); }
-.ciiu-marca.aviso        { background: rgba(184,134,11,0.12); color: #8A6508; }
+.ciiu-marca.aviso        { background: rgba(0,93,184,0.12); color: #00477F; }
 
 /* Panel de consecuencia */
 .ciiu-panel {
@@ -2614,7 +2621,7 @@ fieldset legend {
 .ciiu-panel.bloqueado { border-left-color: var(--danger); background: rgba(192,57,43,0.04); }
 .ciiu-panel.autorizacion,
 .ciiu-panel.preguntas,
-.ciiu-panel.aviso     { border-left-color: #B8860B; background: rgba(184,134,11,0.05); }
+.ciiu-panel.aviso     { border-left-color: #B8860B; background: rgba(0,93,184,0.05); }
 .ciiu-panel.ok        { border-left-color: var(--success); background: rgba(30,122,74,0.05); }
 
 .ciiu-panel-titulo {
@@ -2667,7 +2674,7 @@ fieldset legend {
     border: 1px solid var(--border); background: var(--bg-card);
     font-size: 0.8rem; margin: 0;
 }
-.ciiu-pregunta-ops label:hover { border-color: var(--gold); }
+.ciiu-pregunta-ops label:hover { border-color: var(--accent); }
 .ciiu-pregunta-ops input { margin: 0; }
 .ciiu-pregunta-ops label.elegida {
     border-color: var(--navy); background: var(--navy); color: #fff;
@@ -2691,8 +2698,8 @@ fieldset legend {
    ══════════════════════════════════════════════════════════════ */
 
 .resp-fijas {
-    background: var(--gold-light);
-    border-left: 3px solid var(--gold);
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
     border-radius: 0 var(--radius) var(--radius) 0;
     padding: 0.85rem 1rem;
     margin-bottom: 1.1rem;
@@ -2709,14 +2716,14 @@ fieldset legend {
 
 .resp-chip {
     display: inline-block;
-    background: #fff; border: 1px solid var(--gold-border);
+    background: #fff; border: 1px solid var(--accent-border);
     border-radius: 100px;
     padding: 0.22rem 0.7rem; margin: 0 0.35rem 0.35rem 0;
     font-size: 0.78rem; color: var(--navy);
 }
 .resp-cod {
     display: inline-block;
-    font-weight: 700; color: var(--gold-hover);
+    font-weight: 700; color: var(--accent-hover);
     margin-right: 0.3rem;
 }
 
@@ -2727,9 +2734,9 @@ fieldset legend {
     cursor: pointer; background: var(--bg-card);
     transition: border-color .15s ease, background .15s ease;
 }
-.resp-opcion:hover { border-color: var(--gold); }
+.resp-opcion:hover { border-color: var(--accent); }
 .resp-opcion:has(input:checked) {
-    border-color: var(--gold); background: var(--gold-light);
+    border-color: var(--accent); background: var(--accent-light);
 }
 .resp-opcion input { margin-top: 0.2rem; flex: 0 0 auto; }
 .resp-opcion-cuerpo { flex: 1; min-width: 0; }
@@ -2761,18 +2768,18 @@ fieldset legend {
 .resp-opcion.deshabilitada:hover { border-color: var(--border); }
 
 /* Sugeridas por la actividad declarada */
-.resp-opcion.sugerida { border-color: var(--gold-border); }
+.resp-opcion.sugerida { border-color: var(--accent-border); }
 .resp-sugerida-marca {
     display: inline-block; margin-left: 0.45rem;
     font-size: 0.62rem; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.07em;
     padding: 0.1rem 0.45rem; border-radius: 100px;
-    background: rgba(184,134,11,0.15); color: #8A6508;
+    background: rgba(0,93,184,0.15); color: #00477F;
     vertical-align: middle;
 }
 .resp-opcion-nota {
     display: block; margin-top: 0.25rem;
-    font-size: 0.75rem; color: var(--gold-hover);
+    font-size: 0.75rem; color: var(--accent-hover);
 }
 
 /* ─── Calidad ante la DIAN: importador / exportador / usuario aduanero ─── */
@@ -2809,7 +2816,7 @@ fieldset legend {
     font-size: 0.85rem; cursor: pointer; margin: 0;
     transition: border-color .15s ease, background .15s ease;
 }
-.ce-opcion:hover { border-color: var(--gold); }
+.ce-opcion:hover { border-color: var(--accent); }
 .ce-opcion.elegida {
     border-color: var(--navy); background: var(--navy); color: #fff;
 }

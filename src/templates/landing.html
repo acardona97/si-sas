@@ -6,7 +6,7 @@
 <title>SÍ S.A.S. by Quarta | Constitución Legal Experta</title>
 <meta name="description" content="Constituye tu Sociedad por Acciones Simplificada con respaldo legal experto. Quarta Acompañamiento Legal S.A.S. — Medellín, Colombia.">
 <!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <!-- Tailwind CSS -->
@@ -17,13 +17,13 @@
     theme: {
       extend: {
         colors: {
-          "navy-deep": "#0C1E35",
+          "quarta-navy": "#001A36",
           "inverse-on-surface": "#f3f0ef",
           "primary-fixed-dim": "#b6c7e6",
           "surface-container": "#f0eded",
           "outline": "#75777e",
           "on-background": "#1c1b1b",
-          "primary-container": "#0c1e35",
+          "primary-container": "#001A36",
           "on-secondary-container": "#735a00",
           "surface-variant": "#e5e2e1",
           "surface-dim": "#dcd9d9",
@@ -32,12 +32,12 @@
           "tertiary-fixed": "#e4e2df",
           "surface-bright": "#fcf9f8",
           "surface-container-highest": "#e5e2e1",
-          "parchment": "#F7F5F2",
+          "quarta-bg": "#F5F7FA",
           "secondary-container": "#fed251",
           "outline-variant": "#c4c6ce",
           "secondary-fixed-dim": "#ecc241",
           "silver-slate": "#64748B",
-          "gold-leaf": "#B8920A",
+          "quarta-blue": "#005DB8",
           "on-primary": "#ffffff",
           "primary": "#00040e",
           "primary-fixed": "#d4e3ff",
@@ -70,14 +70,14 @@
           "container-max": "1200px"
         },
         fontFamily: {
-          "display-lg": ["Playfair Display"],
-          "display-lg-mobile": ["Playfair Display"],
-          "body-lg": ["Inter"],
-          "headline-sm": ["Playfair Display"],
-          "headline-md": ["Playfair Display"],
-          "body-sm": ["Inter"],
-          "body-md": ["Inter"],
-          "label-caps": ["Inter"]
+          "display-lg": ["Open Sans"],
+          "display-lg-mobile": ["Open Sans"],
+          "body-lg": ["Open Sans"],
+          "headline-sm": ["Open Sans"],
+          "headline-md": ["Open Sans"],
+          "body-sm": ["Open Sans"],
+          "body-md": ["Open Sans"],
+          "label-caps": ["Open Sans"]
         },
         fontSize: {
           "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
@@ -94,39 +94,41 @@
   }
 </script>
 <style>
-  body { font-family: 'Inter', sans-serif; }
-  .font-display-lg, .font-headline-md, .font-headline-sm { font-family: 'Playfair Display', serif; }
-  .font-body-lg, .font-body-md, .font-body-sm, .font-label-caps { font-family: 'Inter', sans-serif; }
+  body { font-family: 'Open Sans', sans-serif; }
+  .font-display-lg, .font-headline-md, .font-headline-sm { font-family: 'Open Sans', sans-serif; }
+  .font-body-lg, .font-body-md, .font-body-sm, .font-label-caps { font-family: 'Open Sans', sans-serif; }
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
   }
-  .premium-card-border { border-top: 4px solid #B8920A; }
+  .premium-card-border { border-top: 4px solid #005DB8; }
   .glass-header { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .plan-tab-active { background: #0C1E35; color: #B8920A; }
+  .plan-tab-active { background: #001A36; color: #005DB8; }
   .plans-panel { display: none; }
   .plans-panel.active { display: grid; }
 </style>
 </head>
-<body class="bg-parchment text-navy-deep font-body-md overflow-x-hidden">
+<body class="bg-quarta-bg text-quarta-navy font-body-md overflow-x-hidden">
 
 <!-- ════ TopNavBar ════ -->
 <header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 glass-header border-b border-outline-variant">
   <div class="flex justify-between items-center px-margin-desktop py-unit max-w-container-max mx-auto">
     <div class="flex items-center gap-3">
-      <a href="/" class="font-display-lg text-headline-sm font-bold text-navy-deep no-underline">
-        SÍ S.A.S.
-        <span class="font-body-sm text-silver-slate font-normal italic ml-1">by Quarta</span>
+      <a href="/" class="flex items-center gap-3 no-underline">
+        <span class="font-display-lg text-headline-sm font-bold text-quarta-navy">SÍ S.A.S.</span>
+        <span class="h-6 w-px bg-outline-variant" aria-hidden="true"></span>
+        <img src="/static/img/logo_quarta.svg" alt="Quarta — acompañamiento de negocios"
+             class="h-7 w-auto" width="172" height="49">
       </a>
     </div>
     <nav class="hidden md:flex space-x-gutter">
-      <a class="font-label-caps text-label-caps text-gold-leaf border-b-2 border-gold-leaf pb-1 no-underline" href="#servicios">Servicios</a>
-      <a class="font-label-caps text-label-caps text-navy-deep hover:text-gold-leaf transition-colors no-underline" href="#planes">Planes</a>
-      <a class="font-label-caps text-label-caps text-navy-deep hover:text-gold-leaf transition-colors no-underline" href="#documentos">Documentos</a>
-      <a class="font-label-caps text-label-caps text-navy-deep hover:text-gold-leaf transition-colors no-underline" href="#nosotros">Nosotros</a>
+      <a class="font-label-caps text-label-caps text-quarta-blue border-b-2 border-quarta-blue pb-1 no-underline" href="#servicios">Servicios</a>
+      <a class="font-label-caps text-label-caps text-quarta-navy hover:text-quarta-blue transition-colors no-underline" href="#planes">Planes</a>
+      <a class="font-label-caps text-label-caps text-quarta-navy hover:text-quarta-blue transition-colors no-underline" href="#documentos">Documentos</a>
+      <a class="font-label-caps text-label-caps text-quarta-navy hover:text-quarta-blue transition-colors no-underline" href="#nosotros">Nosotros</a>
     </nav>
     <div class="flex items-center space-x-gutter">
-      <a href="/login" class="font-label-caps text-label-caps text-navy-deep hover:text-gold-leaf transition-all duration-300 no-underline">Iniciar Sesión</a>
-      <a href="/register" class="bg-navy-deep text-on-primary px-6 py-2 font-label-caps text-label-caps rounded-lg hover:opacity-90 active:scale-95 transition-all no-underline">Registrarse</a>
+      <a href="/login" class="font-label-caps text-label-caps text-quarta-navy hover:text-quarta-blue transition-all duration-300 no-underline">Iniciar Sesión</a>
+      <a href="/register" class="bg-quarta-navy text-on-primary px-6 py-2 font-label-caps text-label-caps rounded-lg hover:opacity-90 active:scale-95 transition-all no-underline">Registrarse</a>
     </div>
   </div>
 </header>
@@ -137,24 +139,24 @@
 <section class="relative min-h-[80vh] flex items-center px-margin-desktop max-w-container-max mx-auto mb-20">
   <div class="grid md:grid-cols-2 gap-gutter items-center w-full">
     <div class="z-10">
-      <span class="font-label-caps text-label-caps text-gold-leaf mb-4 block">PRESTIGIO LEGAL DIGITAL</span>
-      <h1 class="font-display-lg text-display-lg text-navy-deep mb-6 leading-tight">Constituye tu SÍ S.A.S. con respaldo legal experto</h1>
+      <span class="font-label-caps text-label-caps text-quarta-blue mb-4 block">PRESTIGIO LEGAL DIGITAL</span>
+      <h1 class="font-display-lg text-display-lg text-quarta-navy mb-6 leading-tight">Constituye tu SÍ S.A.S. con respaldo legal experto</h1>
       <p class="font-body-lg text-body-lg text-silver-slate mb-8 max-w-lg">Transformamos la complejidad legal en un proceso fluido de 7 pasos. Genera tu paquete corporativo completo en formato ZIP, listo para Cámara de Comercio, con la precisión de expertos en derecho corporativo.</p>
       <div class="flex flex-wrap gap-4">
-        <a href="/register" class="bg-navy-deep text-on-primary px-8 py-4 rounded-lg font-label-caps text-label-caps hover:bg-opacity-90 transition-all flex items-center gap-2 no-underline">
+        <a href="/register" class="bg-quarta-navy text-on-primary px-8 py-4 rounded-lg font-label-caps text-label-caps hover:bg-opacity-90 transition-all flex items-center gap-2 no-underline">
           Comenzar ahora <span class="material-symbols-outlined text-sm">arrow_forward</span>
         </a>
-        <a href="#planes" class="border-2 border-gold-leaf text-gold-leaf px-8 py-4 rounded-lg font-label-caps text-label-caps hover:bg-gold-leaf hover:text-white transition-all no-underline">
+        <a href="#planes" class="border-2 border-quarta-blue text-quarta-blue px-8 py-4 rounded-lg font-label-caps text-label-caps hover:bg-quarta-blue hover:text-white transition-all no-underline">
           Ver Planes
         </a>
       </div>
     </div>
     <div class="relative hidden md:block">
-      <div class="absolute -inset-4 bg-gold-leaf/5 rounded-full blur-3xl"></div>
-      <img alt="Legal Professionalism" class="rounded-lg shadow-2xl relative z-10 border border-navy-deep/10 w-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpPHXmvweJEfnjaGKvyCiLBrrkSKG1atJIsBETfmkMnX_csGcINZ_hxeSybrvnsRPzinItpBnbSUsgykr6AMt9-OI4b8rnUm-w9L5nUs8MNy4zEkUhmLOeJfjkk3NW6EVcZqnt2mOxvboSiUSYVPJiyQX0ZDIFHIGvXlb_oACc5x__GPlbB7ktA_UONFUrW3i6xRhEdIjVC8AWG4_O3l8mAtuGcZFXF8Bxchkv2JWS8StzswKfv-b9Y9oC4DO7LtmzavRQ2kuR7EOL">
-      <div class="absolute -bottom-6 -left-6 bg-white p-6 shadow-xl rounded-lg z-20 border-l-4 border-gold-leaf max-w-[200px]">
+      <div class="absolute -inset-4 bg-quarta-blue/5 rounded-full blur-3xl"></div>
+      <img alt="Legal Professionalism" class="rounded-lg shadow-2xl relative z-10 border border-quarta-navy/10 w-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpPHXmvweJEfnjaGKvyCiLBrrkSKG1atJIsBETfmkMnX_csGcINZ_hxeSybrvnsRPzinItpBnbSUsgykr6AMt9-OI4b8rnUm-w9L5nUs8MNy4zEkUhmLOeJfjkk3NW6EVcZqnt2mOxvboSiUSYVPJiyQX0ZDIFHIGvXlb_oACc5x__GPlbB7ktA_UONFUrW3i6xRhEdIjVC8AWG4_O3l8mAtuGcZFXF8Bxchkv2JWS8StzswKfv-b9Y9oC4DO7LtmzavRQ2kuR7EOL">
+      <div class="absolute -bottom-6 -left-6 bg-white p-6 shadow-xl rounded-lg z-20 border-l-4 border-quarta-blue max-w-[200px]">
         <p class="font-label-caps text-[10px] text-silver-slate uppercase mb-1">Estatus del Proceso</p>
-        <p class="font-headline-sm text-navy-deep leading-none text-3xl font-bold">98%</p>
+        <p class="font-headline-sm text-quarta-navy leading-none text-3xl font-bold">98%</p>
         <p class="font-body-sm text-[12px] mt-2 text-silver-slate">Documentación verificada por IA</p>
       </div>
     </div>
@@ -165,30 +167,30 @@
 <section id="servicios" class="bg-white py-24 px-margin-desktop border-y border-outline-variant">
   <div class="max-w-container-max mx-auto">
     <div class="text-center mb-16">
-      <h2 class="font-display-lg text-headline-md text-navy-deep mb-4">Innovación Legal en cada Detalle</h2>
+      <h2 class="font-display-lg text-headline-md text-quarta-navy mb-4">Innovación Legal en cada Detalle</h2>
       <p class="font-body-md text-silver-slate max-w-2xl mx-auto">Tecnología de vanguardia diseñada para garantizar que tu empresa nazca con bases sólidas y cumplimiento normativo total.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
 
       <!-- Feature 1: OCR -->
-      <div class="bg-parchment p-8 rounded-lg flex flex-col justify-between hover:-translate-y-1 transition-transform">
+      <div class="bg-quarta-bg p-8 rounded-lg flex flex-col justify-between hover:-translate-y-1 transition-transform">
         <div>
-          <span class="material-symbols-outlined text-gold-leaf text-4xl mb-6 block">document_scanner</span>
-          <h3 class="font-headline-sm text-navy-deep mb-4 text-2xl">OCR Inteligente</h3>
+          <span class="material-symbols-outlined text-quarta-blue text-4xl mb-6 block">document_scanner</span>
+          <h3 class="font-headline-sm text-quarta-navy mb-4 text-2xl">OCR Inteligente</h3>
           <p class="font-body-sm text-silver-slate">Escanea identificaciones y documentos instantáneamente. Nuestra tecnología extrae datos con precisión milimétrica, eliminando errores manuales en actas y formularios.</p>
         </div>
         <div class="mt-8 border-t border-outline-variant pt-4">
-          <span class="text-label-caps font-label-caps text-navy-deep">Precisión del 99.9%</span>
+          <span class="text-label-caps font-label-caps text-quarta-navy">Precisión del 99.9%</span>
         </div>
       </div>
 
       <!-- Feature 2: AI Social Object (Large 2-col) -->
-      <div class="bg-navy-deep p-8 rounded-lg text-white md:col-span-2 flex flex-col md:flex-row gap-8 items-center">
+      <div class="bg-quarta-navy p-8 rounded-lg text-white md:col-span-2 flex flex-col md:flex-row gap-8 items-center">
         <div class="flex-1">
-          <span class="material-symbols-outlined text-gold-leaf text-4xl mb-6 block">psychology</span>
+          <span class="material-symbols-outlined text-quarta-blue text-4xl mb-6 block">psychology</span>
           <h3 class="font-headline-sm text-white mb-4 text-2xl">Objeto Social con IA</h3>
           <p class="font-body-sm text-primary-fixed-dim">Describe tu negocio en lenguaje natural y nuestra IA generará un objeto social amplio, robusto y legalmente blindado, adaptado a las normativas vigentes de la Superintendencia.</p>
-          <a href="/register" class="mt-6 text-gold-leaf font-label-caps text-label-caps inline-flex items-center gap-2 hover:gap-3 transition-all no-underline">
+          <a href="/register" class="mt-6 text-quarta-blue font-label-caps text-label-caps inline-flex items-center gap-2 hover:gap-3 transition-all no-underline">
             PROBAR GENERADOR <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
         </div>
@@ -196,7 +198,7 @@
           <div class="space-y-3 opacity-60">
             <div class="h-2 w-3/4 bg-white/20 rounded"></div>
             <div class="h-2 w-full bg-white/20 rounded"></div>
-            <div class="h-2 w-5/6 bg-gold-leaf/40 rounded"></div>
+            <div class="h-2 w-5/6 bg-quarta-blue/40 rounded"></div>
             <div class="h-2 w-2/3 bg-white/20 rounded"></div>
           </div>
         </div>
@@ -206,15 +208,15 @@
       <div class="md:col-span-2 bg-surface-container p-8 rounded-lg border border-outline-variant flex flex-col md:flex-row gap-8 items-center">
         <img alt="Legal Assistant" class="w-full md:w-1/3 h-48 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRrTS2pggRP-DFKhm8e20M6lg0gSIGQecOU6robgN16JaracA19lnC39xxPkZp6MPd8X_2JMkBzmLmCmBxfK5Fo9A4tBSBhZq14IRv6luXgODRr6-tRb_vgy1lSjbglJrNc2-sXcqIBP2Co6BGdgHVW0swfRzja3QwwZn0x6jYBEX4_EByCQqKZR4Kn-YyAzuMXoLeAOf_bg1g7zUznWe6IUavx4zvDP8AQCRdsjGgFxWQf5kpEqaXrRFWX8iyvuraYNw1ndqzkAv_">
         <div class="flex-1">
-          <h3 class="font-headline-sm text-navy-deep mb-4 text-2xl">Chat Legal Integrado</h3>
+          <h3 class="font-headline-sm text-quarta-navy mb-4 text-2xl">Chat Legal Integrado</h3>
           <p class="font-body-sm text-silver-slate">¿Dudas sobre el capital suscrito o pagado? Nuestro equipo de abogados está a un clic de distancia para asesorarte en tiempo real durante el proceso de creación.</p>
         </div>
       </div>
 
       <!-- Feature 4: ZIP Delivery -->
-      <div class="bg-gold-leaf p-8 rounded-lg text-white flex flex-col justify-between">
+      <div class="bg-quarta-blue p-8 rounded-lg text-white flex flex-col justify-between">
         <div>
-          <span class="material-symbols-outlined text-navy-deep text-4xl mb-6 block">folder_zip</span>
+          <span class="material-symbols-outlined text-quarta-navy text-4xl mb-6 block">folder_zip</span>
           <h3 class="font-headline-sm mb-4 text-2xl text-white">Entrega Inmediata</h3>
           <p class="font-body-sm">Al finalizar los 7 pasos, descarga un paquete ZIP organizado con estatutos, acta de constitución y formularios oficiales listos para firma.</p>
         </div>
@@ -227,8 +229,8 @@
 <!-- ════ Pricing Section ════ -->
 <section id="planes" class="py-24 px-margin-desktop max-w-container-max mx-auto">
   <div class="text-center mb-16">
-    <span class="font-label-caps text-label-caps text-gold-leaf mb-2 block">INVERSIÓN EN SEGURIDAD</span>
-    <h2 class="font-display-lg text-headline-md text-navy-deep">Planes de Constitución</h2>
+    <span class="font-label-caps text-label-caps text-quarta-blue mb-2 block">INVERSIÓN EN SEGURIDAD</span>
+    <h2 class="font-display-lg text-headline-md text-quarta-navy">Planes de Constitución</h2>
     <p class="font-body-md text-silver-slate max-w-2xl mx-auto mt-4">Elija el nivel de acompañamiento. Particulares para emprendedores individuales; Profesionales para abogados y grupos corporativos.</p>
   </div>
 
@@ -236,7 +238,7 @@
   <div class="flex justify-center mb-12">
     <div class="inline-flex bg-white border border-outline-variant rounded-lg p-1 shadow-sm">
       <button id="tab-btn-particulares" class="plan-tab plan-tab-active px-6 py-3 font-label-caps text-label-caps rounded transition-all" data-target="particulares">PARTICULARES</button>
-      <button id="tab-btn-profesionales" class="plan-tab px-6 py-3 font-label-caps text-label-caps rounded transition-all text-silver-slate hover:text-navy-deep" data-target="profesionales">PROFESIONALES</button>
+      <button id="tab-btn-profesionales" class="plan-tab px-6 py-3 font-label-caps text-label-caps rounded transition-all text-silver-slate hover:text-quarta-navy" data-target="profesionales">PROFESIONALES</button>
     </div>
   </div>
 
@@ -246,49 +248,49 @@
     <!-- Básico -->
     <div class="bg-white p-10 rounded-lg border border-outline-variant flex flex-col h-full hover:shadow-lg transition-all">
       <div class="mb-8">
-        <h3 class="font-headline-sm text-navy-deep mb-2 text-2xl">Básico</h3>
-        <div class="font-headline-md text-3xl font-bold text-navy-deep">$350.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
+        <h3 class="font-headline-sm text-quarta-navy mb-2 text-2xl">Básico</h3>
+        <div class="font-headline-md text-3xl font-bold text-quarta-navy">$350.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
         <p class="font-body-sm text-silver-slate mt-2">Pago único · 1 constitución</p>
       </div>
       <ul class="space-y-4 mb-10 flex-grow">
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Generación automática de documentos</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Estatutos, acta de constitución y formularios completos</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Asistente legal IA integrado</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Extracción de datos con IA</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Generación automática de documentos</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Estatutos, acta de constitución y formularios completos</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Asistente legal IA integrado</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Extracción de datos con IA</span></li>
       </ul>
-      <a href="/register" class="text-center w-full border border-navy-deep py-3 font-label-caps text-label-caps text-navy-deep hover:bg-navy-deep hover:text-white transition-all rounded no-underline">Seleccionar</a>
+      <a href="/register" class="text-center w-full border border-quarta-navy py-3 font-label-caps text-label-caps text-quarta-navy hover:bg-quarta-navy hover:text-white transition-all rounded no-underline">Seleccionar</a>
     </div>
 
     <!-- Estándar (Featured) -->
-    <div class="bg-white p-10 rounded-lg border border-navy-deep premium-card-border flex flex-col h-full shadow-xl md:scale-105 z-10">
+    <div class="bg-white p-10 rounded-lg border border-quarta-navy premium-card-border flex flex-col h-full shadow-xl md:scale-105 z-10">
       <div class="mb-8">
-        <div class="inline-block bg-gold-leaf text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4">RECOMENDADO</div>
-        <h3 class="font-headline-sm text-navy-deep mb-2 text-2xl">Estándar</h3>
-        <div class="font-headline-md text-3xl font-bold text-navy-deep">$750.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
+        <div class="inline-block bg-quarta-blue text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4">RECOMENDADO</div>
+        <h3 class="font-headline-sm text-quarta-navy mb-2 text-2xl">Estándar</h3>
+        <div class="font-headline-md text-3xl font-bold text-quarta-navy">$750.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
         <p class="font-body-sm text-silver-slate mt-2">Pago único · 1 constitución</p>
       </div>
       <ul class="space-y-4 mb-10 flex-grow">
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Todo lo del plan Básico</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Reunión de revisión de documentos con abogado</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Garantía de reingreso ante devoluciones de la Cámara de Comercio</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-navy-deep font-semibold">Soporte prioritario en días hábiles</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Todo lo del plan Básico</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Reunión de revisión de documentos con abogado</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Garantía de reingreso ante devoluciones de la Cámara de Comercio</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-quarta-navy font-semibold">Soporte prioritario en días hábiles</span></li>
       </ul>
-      <a href="/register" class="text-center w-full bg-navy-deep py-4 font-label-caps text-label-caps text-white hover:opacity-90 transition-all rounded shadow-md no-underline">Adquirir Ahora</a>
+      <a href="/register" class="text-center w-full bg-quarta-navy py-4 font-label-caps text-label-caps text-white hover:opacity-90 transition-all rounded shadow-md no-underline">Adquirir Ahora</a>
     </div>
 
     <!-- Premium -->
     <div class="bg-white p-10 rounded-lg border border-outline-variant flex flex-col h-full hover:shadow-lg transition-all">
       <div class="mb-8">
-        <h3 class="font-headline-sm text-navy-deep mb-2 text-2xl">Premium</h3>
-        <div class="font-headline-md text-3xl font-bold text-navy-deep">$1.600.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
+        <h3 class="font-headline-sm text-quarta-navy mb-2 text-2xl">Premium</h3>
+        <div class="font-headline-md text-3xl font-bold text-quarta-navy">$1.600.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
         <p class="font-body-sm text-silver-slate mt-2">Pago único · 1 constitución</p>
       </div>
       <ul class="space-y-4 mb-10 flex-grow">
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Todo lo del plan Estándar</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Sesión estratégica con abogado experto para adaptación corporativa</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Acompañamiento en radicación ante Cámara de Comercio</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Todo lo del plan Estándar</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Sesión estratégica con abogado experto para adaptación corporativa</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Acompañamiento en radicación ante Cámara de Comercio</span></li>
       </ul>
-      <a href="/register" class="text-center w-full border border-gold-leaf py-3 font-label-caps text-label-caps text-gold-leaf hover:bg-gold-leaf hover:text-white transition-all rounded no-underline">Consultar Experto</a>
+      <a href="/register" class="text-center w-full border border-quarta-blue py-3 font-label-caps text-label-caps text-quarta-blue hover:bg-quarta-blue hover:text-white transition-all rounded no-underline">Consultar Experto</a>
     </div>
 
   </div>
@@ -300,67 +302,69 @@
     <div class="bg-white p-10 rounded-lg border border-outline-variant flex flex-col h-full hover:shadow-lg transition-all">
       <div class="mb-8">
         <div class="inline-block bg-success-emerald text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4">VOLUMEN PROFESIONAL</div>
-        <h3 class="font-headline-sm text-navy-deep mb-2 text-2xl">Plan Abogado</h3>
-        <div class="font-headline-md text-3xl font-bold text-navy-deep">$1.000.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
+        <h3 class="font-headline-sm text-quarta-navy mb-2 text-2xl">Plan Abogado</h3>
+        <div class="font-headline-md text-3xl font-bold text-quarta-navy">$1.000.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
         <p class="font-body-sm text-silver-slate mt-2">Pago único · 6 constituciones · $166.667 c/u</p>
       </div>
       <ul class="space-y-4 mb-10 flex-grow">
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">6 constituciones incluidas</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Generación automática de documentos</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Asistente legal con IA</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Extracción de datos desde cédula</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">6 constituciones incluidas</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Generación automática de documentos</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Asistente legal con IA</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Extracción de datos desde cédula</span></li>
         <li class="flex items-start gap-3"><span class="material-symbols-outlined text-silver-slate text-xl">cancel</span><span class="font-body-sm text-silver-slate line-through opacity-70">Sin revisión por abogado</span></li>
         <li class="flex items-start gap-3"><span class="material-symbols-outlined text-silver-slate text-xl">cancel</span><span class="font-body-sm text-silver-slate line-through opacity-70">Sin garantía de reingreso</span></li>
       </ul>
-      <div class="mb-4 p-3 bg-parchment border-l-2 border-gold-leaf rounded-r text-[11px] text-silver-slate italic">En fase próxima se requerirá autenticación con tarjeta profesional.</div>
-      <a href="/register" class="text-center w-full border border-navy-deep py-3 font-label-caps text-label-caps text-navy-deep hover:bg-navy-deep hover:text-white transition-all rounded no-underline">Seleccionar Abogado</a>
+      <div class="mb-4 p-3 bg-quarta-bg border-l-2 border-quarta-blue rounded-r text-[11px] text-silver-slate italic">En fase próxima se requerirá autenticación con tarjeta profesional.</div>
+      <a href="/register" class="text-center w-full border border-quarta-navy py-3 font-label-caps text-label-caps text-quarta-navy hover:bg-quarta-navy hover:text-white transition-all rounded no-underline">Seleccionar Abogado</a>
     </div>
 
     <!-- Corporativo (Featured) -->
-    <div class="bg-white p-10 rounded-lg border border-navy-deep premium-card-border flex flex-col h-full shadow-xl md:scale-105 z-10">
+    <div class="bg-white p-10 rounded-lg border border-quarta-navy premium-card-border flex flex-col h-full shadow-xl md:scale-105 z-10">
       <div class="mb-8">
-        <div class="inline-block bg-gold-leaf text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4">EMPRESAS</div>
-        <h3 class="font-headline-sm text-navy-deep mb-2 text-2xl">Plan Corporativo</h3>
-        <div class="font-headline-md text-3xl font-bold text-navy-deep">$1.800.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
+        <div class="inline-block bg-quarta-blue text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4">EMPRESAS</div>
+        <h3 class="font-headline-sm text-quarta-navy mb-2 text-2xl">Plan Corporativo</h3>
+        <div class="font-headline-md text-3xl font-bold text-quarta-navy">$1.800.000 <span class="text-body-sm font-normal text-silver-slate">COP</span></div>
         <p class="font-body-sm text-silver-slate mt-2">Pago único · 3 constituciones · $600.000 c/u</p>
       </div>
       <ul class="space-y-4 mb-10 flex-grow">
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">3 constituciones incluidas</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Generación automática de documentos</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Revisión completa por abogado</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-navy-deep font-semibold">Garantía de reingreso ante DIAN y CC</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Reunión estratégica con socio</span></li>
-        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-gold-leaf text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Asistencia virtual durante el proceso</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">3 constituciones incluidas</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Generación automática de documentos</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Revisión completa por abogado</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-quarta-navy font-semibold">Garantía de reingreso ante DIAN y CC</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Reunión estratégica con socio</span></li>
+        <li class="flex items-start gap-3"><span class="material-symbols-outlined text-quarta-blue text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span><span class="font-body-sm text-silver-slate">Asistencia virtual durante el proceso</span></li>
       </ul>
-      <div class="mb-4 p-3 bg-parchment border-l-2 border-gold-leaf rounded-r text-[11px] text-silver-slate italic">La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</div>
-      <a href="/register" class="text-center w-full bg-navy-deep py-4 font-label-caps text-label-caps text-white hover:opacity-90 transition-all rounded shadow-md no-underline">Adquirir Ahora</a>
+      <div class="mb-4 p-3 bg-quarta-bg border-l-2 border-quarta-blue rounded-r text-[11px] text-silver-slate italic">La garantía cubre reingreso acompañado por abogado, no devolución de dinero.</div>
+      <a href="/register" class="text-center w-full bg-quarta-navy py-4 font-label-caps text-label-caps text-white hover:opacity-90 transition-all rounded shadow-md no-underline">Adquirir Ahora</a>
     </div>
 
   </div>
 </section>
 
 <!-- ════ CTA Section ════ -->
-<section id="documentos" class="bg-navy-deep py-20 px-margin-desktop overflow-hidden relative">
+<section id="documentos" class="bg-quarta-navy py-20 px-margin-desktop overflow-hidden relative">
   <div class="max-w-container-max mx-auto text-center relative z-10">
     <h2 class="font-display-lg text-headline-md text-white mb-6">¿Listo para dar el primer paso legal para la creación de tu empresa?</h2>
     <p class="font-body-lg text-primary-fixed-dim mb-10 max-w-xl mx-auto">Únete a cientos de emprendedores que han formalizado sus sueños con el respaldo de Quarta.</p>
     <div class="flex justify-center gap-gutter">
-      <a href="/register" class="bg-gold-leaf text-white px-10 py-4 rounded font-label-caps text-label-caps hover:bg-opacity-90 transition-all shadow-lg no-underline">Empezar Formulario</a>
+      <a href="/register" class="bg-quarta-blue text-white px-10 py-4 rounded font-label-caps text-label-caps hover:bg-opacity-90 transition-all shadow-lg no-underline">Empezar Formulario</a>
     </div>
   </div>
   <!-- Decorative Elements -->
   <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-  <div class="absolute bottom-0 left-0 w-96 h-96 bg-gold-leaf/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+  <div class="absolute bottom-0 left-0 w-96 h-96 bg-quarta-blue/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
 </section>
 
 </main>
 
 <!-- ════ Footer ════ -->
-<footer id="nosotros" class="w-full py-16 px-margin-desktop bg-parchment border-t border-outline-variant">
+<footer id="nosotros" class="w-full py-16 px-margin-desktop bg-quarta-bg border-t border-outline-variant">
   <div class="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-gutter">
     <div class="flex flex-col">
       <div class="mb-8">
-        <div class="font-display-lg text-2xl font-bold text-navy-deep">SÍ S.A.S. <span class="font-body-sm text-silver-slate font-normal italic">by Quarta</span></div>
+        <div class="font-display-lg text-2xl font-bold text-quarta-navy mb-4">SÍ S.A.S.</div>
+        <img src="/static/img/logo_quarta.svg" alt="Quarta — acompañamiento de negocios"
+             class="h-7 w-auto" width="172" height="49">
       </div>
       <p class="font-body-sm text-silver-slate mb-6">Soluciones legales digitales de alta gama para el ecosistema corporativo colombiano.</p>
       <div class="space-y-2 font-body-sm text-silver-slate">
@@ -370,27 +374,27 @@
       </div>
     </div>
     <div class="flex flex-col space-y-4">
-      <h4 class="font-label-caps text-label-caps text-navy-deep font-bold mb-2">Enlaces Rápidos</h4>
-      <a class="font-body-sm text-silver-slate hover:text-gold-leaf transition-colors no-underline" href="#">Términos y Condiciones</a>
-      <a class="font-body-sm text-silver-slate hover:text-gold-leaf transition-colors no-underline" href="#">Política de Privacidad</a>
-      <a class="font-body-sm text-silver-slate hover:text-gold-leaf transition-colors no-underline" href="#">Preguntas Frecuentes</a>
-      <a class="font-body-sm text-silver-slate hover:text-gold-leaf transition-colors no-underline" href="#">Contacto</a>
+      <h4 class="font-label-caps text-label-caps text-quarta-navy font-bold mb-2">Enlaces Rápidos</h4>
+      <a class="font-body-sm text-silver-slate hover:text-quarta-blue transition-colors no-underline" href="#">Términos y Condiciones</a>
+      <a class="font-body-sm text-silver-slate hover:text-quarta-blue transition-colors no-underline" href="#">Política de Privacidad</a>
+      <a class="font-body-sm text-silver-slate hover:text-quarta-blue transition-colors no-underline" href="#">Preguntas Frecuentes</a>
+      <a class="font-body-sm text-silver-slate hover:text-quarta-blue transition-colors no-underline" href="#">Contacto</a>
     </div>
     <div class="flex flex-col space-y-4">
-      <h4 class="font-label-caps text-label-caps text-navy-deep font-bold mb-2">Newsletter</h4>
+      <h4 class="font-label-caps text-label-caps text-quarta-navy font-bold mb-2">Newsletter</h4>
       <p class="font-body-sm text-silver-slate mb-4">Recibe actualizaciones sobre normatividad corporativa.</p>
       <div class="flex">
-        <input class="bg-white border border-outline-variant px-4 py-2 w-full focus:border-gold-leaf focus:ring-0 rounded-l outline-none text-body-sm" placeholder="Tu email" type="email">
-        <button class="bg-navy-deep text-white px-4 py-2 rounded-r hover:bg-gold-leaf transition-colors font-label-caps text-[10px]">Enviar</button>
+        <input class="bg-white border border-outline-variant px-4 py-2 w-full focus:border-quarta-blue focus:ring-0 rounded-l outline-none text-body-sm" placeholder="Tu email" type="email">
+        <button class="bg-quarta-navy text-white px-4 py-2 rounded-r hover:bg-quarta-blue transition-colors font-label-caps text-[10px]">Enviar</button>
       </div>
     </div>
   </div>
   <div class="max-w-container-max mx-auto mt-16 pt-8 border-t border-outline-variant/30 flex flex-col md:flex-row justify-between items-center gap-4">
     <p class="font-body-sm text-body-sm text-silver-slate">© 2026 SÍ S.A.S. by Quarta. Todos los derechos reservados.</p>
     <div class="flex gap-6">
-      <span class="material-symbols-outlined text-silver-slate hover:text-navy-deep cursor-pointer transition-colors">social_leaderboard</span>
-      <span class="material-symbols-outlined text-silver-slate hover:text-navy-deep cursor-pointer transition-colors">brand_awareness</span>
-      <span class="material-symbols-outlined text-silver-slate hover:text-navy-deep cursor-pointer transition-colors">public</span>
+      <span class="material-symbols-outlined text-silver-slate hover:text-quarta-navy cursor-pointer transition-colors">social_leaderboard</span>
+      <span class="material-symbols-outlined text-silver-slate hover:text-quarta-navy cursor-pointer transition-colors">brand_awareness</span>
+      <span class="material-symbols-outlined text-silver-slate hover:text-quarta-navy cursor-pointer transition-colors">public</span>
     </div>
   </div>
 </footer>
