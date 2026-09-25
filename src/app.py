@@ -46,6 +46,8 @@ from processors.responsabilidades import (
 )
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
+from processors import familia
+from processors.plantilla_familia import renderizar, PlantillaError
 from processors.modelo_propio import (
     ModeloPropioError, MAX_BYTES as MAX_MODELO_BYTES, validar_docx, ubicar_campos, tokenizar,
 )
@@ -71,6 +73,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "quarta-si-sas-dev-secret-2026")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(BASE_DIR)  # si_sas_proyecto/
 PLANTILLAS_DIR = os.path.join(PROJECT_DIR, "plantillas")
+TEMPLATE_FAMILIA = os.path.join(PLANTILLAS_DIR, "estatutos_familia_template.docx")
 DATA_DIR = os.path.join(PROJECT_DIR, "data")
 # Datos estáticos dentro de src/ — no se ven afectados por el Volume de Railway
 STATIC_DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -548,7 +551,9 @@ def generate():
     }
     # Disposiciones especiales y modelo propio exigen la tarjeta de abogado
     # validada en esta constitución; sin ella se rechaza, no se ignora.
-    if (data.get("disposiciones") or data.get("modelo_propio")) and not tp_abogado_vigente():
+    if (data.get("modulo") != "familia"
+            and (data.get("disposiciones") or data.get("modelo_propio"))
+            and not tp_abogado_vigente()):
         return jsonify({
             "error": "Las disposiciones especiales y el modelo propio de estatutos "
                      "requieren cargar la tarjeta profesional de abogado."
@@ -637,6 +642,19 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
     mismo documento que luego se genera. Los errores de validación se
     devuelven siempre como respuesta JSON.
     """
+    es_familia = data.get("modulo") == "familia"
+    if es_familia:
+        # En la primera versión solo se admiten las alternativas de la plantilla.
+        if "disposiciones" in data:
+            return jsonify({"error": "Las disposiciones especiales no están disponibles "
+                                     "en el módulo sociedad de familia (v1)."}), 400
+        if "modelo_propio" in data:
+            return jsonify({"error": "El modelo propio de estatutos no está disponible "
+                                     "en el módulo sociedad de familia (v1)."}), 400
+        for acc in data.get("accionistas", []):
+            if acc.get("tipo") != "juridica" and not str(acc.get("parentesco") or "").strip():
+                return jsonify({"error": f"Indique el parentesco de {acc.get('nombre') or 'el accionista'} "
+                                         "para el núcleo familiar."}), 400
     modelo = data.get('modelo_propio')
     modelo_path = None
     if modelo is not None and modelo is not False:
@@ -652,6 +670,16 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
     try:
         # ─── EXTRAER Y NORMALIZAR ───
         nombre_sas = data["nombre_sas"].upper().strip()
+        # Sociedad BIC (Ley 1901 de 2018): la palabra "BIC" en la razón social
+        # marca la casilla del RUES. Puede ir antes del indicativo
+        # ("TOLEDALES BIC S.A.S.") o después ("HOLDING S.A.S. BIC"); en este
+        # último caso se aparta para validar el indicativo y luego se repone.
+        es_bic = bool(re.search(r"(^|\s)(BIC|B\.I\.C\.?)(?=\s|$)", nombre_sas))
+        sufijo_bic = ""
+        m_bic = re.search(r"\s+(BIC|B\.I\.C\.?)$", nombre_sas)
+        if m_bic and re.search(r"(S\.A\.S\.?|SAS|S\s*A\s*S)$", nombre_sas[:m_bic.start()].strip()):
+            sufijo_bic = " " + m_bic.group(1)
+            nombre_sas = nombre_sas[:m_bic.start()].strip()
         if not nombre_sas.endswith("S.A.S."):
             # Se admiten las variantes de escritura del indicativo y se llevan
             # todas a la forma canónica "S.A.S.".
@@ -674,6 +702,7 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
                 "error": 'La razón social no puede ser solo el indicativo "S.A.S.": '
                          "falta el nombre que identifica a la sociedad."
             }), 400
+        nombre_sas += sufijo_bic
 
         fecha = date.today()
         municipio = data.get("municipio", "Medellín")
@@ -701,6 +730,11 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
         ciiu_desc = data.get("ciiu_description", "")
         ciiu_code_sec = data.get("ciiu_code_sec", "")
         ciiu_desc_sec = data.get("ciiu_description_sec", "")
+        if es_familia:
+            ciiu_code = familia.CIIU_PRINCIPAL
+            with open(os.path.join(STATIC_DATA_DIR, "listado_ciiu.json"), encoding="utf-8") as f:
+                ciiu_desc = json.load(f)["codigos"][ciiu_code]
+            objeto_social = familia.OBJETO_PRINCIPAL
 
         regimen = data.get("regimen", "ordinario")
         capital_suscrito = parse_money(data.get("capital_suscrito", 1_000_000))
@@ -783,6 +817,15 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
         # ─── Empresa familiar (Ley 2495 de 2025) ───
         es_empresa_familiar = data.get("es_empresa_familiar", False)
         nucleo_familiar = data.get("nucleo_familiar", []) if es_empresa_familiar else []
+        if es_familia:
+            es_empresa_familiar = True
+            # El núcleo se deriva de los accionistas naturales, sin una segunda captura.
+            nucleo_familiar = [
+                {"nombre": acc["nombre"], "tipo_doc": acc.get("tipo_doc") or "C.C.",
+                 "id_num": acc.get("id_num", ""), "parentesco": str(acc["parentesco"]).strip(),
+                 "acciones": f"{round(capital_suscrito * float(acc['porcentaje']) / 100 / valor_nominal):,}".replace(",", ".")}
+                for acc in accionistas if acc.get("tipo") != "juridica"
+            ]
         camara_ciudad = data.get("camara_ciudad") or municipio
 
         # ─── Declaración de situación de control ───
@@ -872,7 +915,7 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
         aplica_1780 = determinar_ley_1780(accionistas)
 
         # Objeto social inteligente
-        objeto_social_final = generar_objeto_social(
+        objeto_social_final = familia.OBJETO_PRINCIPAL if es_familia else generar_objeto_social(
             ciiu_code=ciiu_code, ciiu_desc=ciiu_desc,
             ciiu_code_sec=ciiu_code_sec, ciiu_desc_sec=ciiu_desc_sec,
             texto_usuario=objeto_social,
@@ -908,28 +951,43 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
                 "apoderado": apoderado,
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Estatutos.docx")
-            tmpl = os.path.join(PLANTILLAS_DIR, "estatutos_template.docx")
-            if modelo_path:
-                tmpl = tokenizar(modelo_path, modelo, os.path.join(tmp_dir, 'modelo_tokenizado.docx'))
-                est_data['anclas_modelo_propio'] = modelo.get('anclas', {})
-            if solo_estatutos:
-                generar_estatutos(est_data, tmpl, out)
-                return out
-            disp = data.get("disposiciones")
-            disposiciones = (disp.get("operaciones") or []) if isinstance(disp, dict) else []
-            if disposiciones:
-                # Limpio para radicar, con control de cambios para revisión y
-                # el informe de lo que se integró o ajustó.
-                generar_estatutos(dict(est_data, disposiciones=disposiciones), tmpl, out)
-                out_cambios = out.replace("_Estatutos.docx", "_Estatutos_control_de_cambios.docx")
-                generar_estatutos(dict(est_data, disposiciones=disposiciones,
-                                       disposiciones_con_cambios=True), tmpl, out_cambios)
-                out_informe = out.replace("_Estatutos.docx", "_Informe_disposiciones_especiales.pdf")
-                generar_informe(data["disposiciones"], nombre_sas, out_informe)
-                generated += [out, out_cambios, out_informe]
-            else:
-                generar_estatutos(est_data, tmpl, out)
+            if es_familia:
+                # Conservar las elecciones familiares y compartir los datos normalizados.
+                datos_familia = dict(data, nombre_sas=nombre_sas,
+                                     capital_autorizado=capital_autorizado,
+                                     capital_suscrito=capital_suscrito, valor_nominal=valor_nominal,
+                                     rl_principales=_principales or [rl_principal],
+                                     rl_suplentes=_suplentes or ([rl_suplente] if rl_suplente else []))
+                ctx = familia.construir_contexto(datos_familia)
+                renderizar(TEMPLATE_FAMILIA, ctx, out)
+                if solo_estatutos:
+                    return out
                 generated.append(out)
+            else:
+                tmpl = os.path.join(PLANTILLAS_DIR, "estatutos_template.docx")
+                if modelo_path:
+                    tmpl = tokenizar(modelo_path, modelo, os.path.join(tmp_dir, 'modelo_tokenizado.docx'))
+                    est_data['anclas_modelo_propio'] = modelo.get('anclas', {})
+                if solo_estatutos:
+                    generar_estatutos(est_data, tmpl, out)
+                    return out
+                disp = data.get("disposiciones")
+                disposiciones = (disp.get("operaciones") or []) if isinstance(disp, dict) else []
+                if disposiciones:
+                    # Limpio para radicar, con control de cambios para revisión y
+                    # el informe de lo que se integró o ajustó.
+                    generar_estatutos(dict(est_data, disposiciones=disposiciones), tmpl, out)
+                    out_cambios = out.replace("_Estatutos.docx", "_Estatutos_control_de_cambios.docx")
+                    generar_estatutos(dict(est_data, disposiciones=disposiciones,
+                                           disposiciones_con_cambios=True), tmpl, out_cambios)
+                    out_informe = out.replace("_Estatutos.docx", "_Informe_disposiciones_especiales.pdf")
+                    generar_informe(data["disposiciones"], nombre_sas, out_informe)
+                    generated += [out, out_cambios, out_informe]
+                else:
+                    generar_estatutos(est_data, tmpl, out)
+                    generated.append(out)
+        except (familia.DatosFamiliaError, PlantillaError) as e:
+            return jsonify({"error": str(e)}), 400
         except ModeloPropioError as e:
             return jsonify({'error': str(e)}), 400
         except DisposicionError as e:
@@ -942,7 +1000,7 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
         # ─── 2. RUES (.pdf) ───
         try:
             rues_data = {
-                "nombre_sas": nombre_sas, "fecha": fecha,
+                "nombre_sas": nombre_sas, "fecha": fecha, "es_bic": es_bic,
                 "municipio": municipio, "departamento": departamento,
                 "direccion": direccion, "barrio": barrio,
                 "email": email, "telefono1": telefono1,
@@ -1086,7 +1144,7 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
                 errors.append(f"Ley 1780: {e}")
 
         # ─── 9. EMPRESA FAMILIAR — Ley 2495 de 2025 (condicional) ───
-        if es_empresa_familiar and nucleo_familiar:
+        if es_familia or (es_empresa_familiar and nucleo_familiar):
             try:
                 fam_data = {
                     "nombre_sas": nombre_sas,
@@ -1133,7 +1191,8 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
             errors.append(f"Soportes: {e}")
 
         # ─── ZIP ───
-        zip_name = f"{fecha_pfx}_{nombre_limpio}.zip"
+        sufijo = "_Familia" if es_familia else ""
+        zip_name = f"{fecha_pfx}_{nombre_limpio}{sufijo}.zip"
         zip_path = os.path.join(tmp_dir, zip_name)
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             for fpath in generated:

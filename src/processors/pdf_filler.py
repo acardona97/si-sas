@@ -453,6 +453,10 @@ def generar_rues(data, template_path, output_path):
     fields["Cuadro de texto 2_24"] = "1"
     fields["Cuadro de texto 2_25"] = "6"
 
+    # Condición sociedad BIC (Ley 1901 de 2018): la razón social la declara
+    if data.get("es_bic"):
+        checkboxes["Casilla 2"] = True
+
     # ─── Sección 2: Identificación ───
 
     # Razón Social (Persona Jurídica)
