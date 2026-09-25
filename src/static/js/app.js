@@ -1286,6 +1286,38 @@ async function extractFromCertificado(input, prefix, n) {
     }
 }
 
+// ─── Tarjeta profesional de abogado ───
+// Habilita las funciones que tocan el fondo de los estatutos. El servidor
+// guarda la validación en la sesión; aquí solo se refleja en la interfaz.
+let tpAbogado = null;
+
+async function validarTPAbogado(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('tp_abogado_upload_status');
+    const contenido = document.getElementById('avanzado-contenido');
+    tpAbogado = null;
+    contenido.classList.add('hidden');
+    document.dispatchEvent(new Event('tp-abogado'));
+    _setStatus(statusEl, 'processing', '<span class="spinner"></span> Validando la tarjeta profesional...');
+    try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const resp = await fetch('/api/extract/tp-abogado', { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (!resp.ok || !data.valida) throw new Error(data.motivo || data.error || 'Tarjeta no válida');
+        tpAbogado = data;
+        contenido.classList.remove('hidden');
+        document.dispatchEvent(new Event('tp-abogado'));
+        _setStatus(statusEl, 'success',
+            `✓ Tarjeta de abogado validada (T.P. ${data.numero_tarjeta}${data.nombre_completo ? ' — ' + data.nombre_completo : ''}).`);
+    } catch (e) {
+        _setStatus(statusEl, 'error', `✗ ${e.message}`);
+    } finally {
+        input.value = '';
+    }
+}
+
 // ─── Arrastrar y soltar documentos ───
 // Toda zona de carga acepta el archivo soltado encima: se entrega a su
 // <input type="file"> y se dispara el mismo flujo que al seleccionarlo.

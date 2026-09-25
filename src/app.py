@@ -512,6 +512,13 @@ def generate():
     archivos_soporte = {
         k: (f.read(), f.filename) for k, f in request.files.items() if f and f.filename
     }
+    # Disposiciones especiales y modelo propio exigen la tarjeta de abogado
+    # validada en esta constitución; sin ella se rechaza, no se ignora.
+    if (data.get("disposiciones") or data.get("modelo_propio")) and not tp_abogado_vigente():
+        return jsonify({
+            "error": "Las disposiciones especiales y el modelo propio de estatutos "
+                     "requieren cargar la tarjeta profesional de abogado."
+        }), 403
 
     tmp_dir = tempfile.mkdtemp(prefix="si_sas_")
     errors = []
@@ -987,6 +994,8 @@ def generate():
             app.logger.warning(f"Errores parciales: {errors}")
 
         decrement_generacion(session["user_id"])
+        # La tarjeta de abogado vale para una sola constitución
+        session.pop("tp_abogado", None)
 
         return send_file(
             zip_path,
@@ -1189,6 +1198,75 @@ def extract_tarjeta():
     except Exception as e:
         app.logger.error(f"Error en extract_tarjeta: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+# ─── Tarjeta profesional de abogado: llave de las funciones avanzadas ───
+# Disposiciones especiales y modelo propio de estatutos tocan el fondo del
+# documento; solo se habilitan cuando quien constituye acredita ser abogado.
+# La validación queda en la sesión y se consume al generar el paquete: cada
+# constitución exige cargarla de nuevo.
+
+EXTRACT_TP_ABOGADO_SYSTEM = """Eres un verificador de Tarjetas Profesionales de Abogado expedidas en Colombia por el Consejo Superior de la Judicatura (hoy Comisión Nacional de Disciplina Judicial / Unidad de Registro Nacional de Abogados).
+
+Lee la imagen/PDF y determina si es una tarjeta profesional de ABOGADO. No lo es una cédula, una tarjeta de contador (Junta Central de Contadores), de otra profesión, una licencia temporal, un carné estudiantil ni una simple imagen con texto.
+
+Devuelve EXCLUSIVAMENTE un objeto JSON válido:
+
+{
+  "es_tarjeta_abogado": true | false,
+  "motivo": "string breve: por qué sí o por qué no",
+  "nombre_completo": "string o ''",
+  "numero_documento": "string, solo dígitos, o ''",
+  "numero_tarjeta": "string tal como aparece, o ''"
+}
+
+Reglas estrictas:
+1. NO inventes datos. Usa "" si no puedes leer un campo con certeza.
+2. es_tarjeta_abogado solo es true si el documento es claramente una tarjeta profesional de abogado y el número de tarjeta es legible.
+3. Responde SOLO con el JSON, sin marcadores de código ni texto adicional."""
+
+
+def tp_abogado_vigente():
+    """La tarjeta de abogado validada para la constitución en curso, o None."""
+    return session.get("tp_abogado")
+
+
+@app.route("/api/extract/tp-abogado", methods=["POST"])
+@login_required
+def extract_tp_abogado():
+    """Valida con IA la tarjeta profesional de abogado y habilita en la
+    sesión las disposiciones especiales y el modelo propio de estatutos."""
+    session.pop("tp_abogado", None)
+    if "file" not in request.files or not request.files["file"].filename:
+        return jsonify({"error": "No se recibió archivo"}), 400
+    file = request.files["file"]
+    file_data = file.read()
+    if len(file_data) > 10 * 1024 * 1024:
+        return jsonify({"error": "Archivo muy grande (máx 10MB)"}), 400
+
+    try:
+        result = _extract_with_claude(
+            file_data, file.mimetype or "image/jpeg", EXTRACT_TP_ABOGADO_SYSTEM,
+            "Verifica si esta es una tarjeta profesional de abogado. Responde solo con el JSON.",
+        )
+    except Exception as e:
+        app.logger.error(f"Error en extract_tp_abogado: {e}")
+        return jsonify({"error": "No se pudo leer la tarjeta. Intente con una imagen más nítida."}), 500
+
+    numero = str(result.get("numero_tarjeta") or "").strip()
+    if result.get("es_tarjeta_abogado") is not True or not numero:
+        return jsonify({
+            "valida": False,
+            "motivo": result.get("motivo") or "El documento no es una tarjeta profesional de abogado legible.",
+        }), 422
+
+    session["tp_abogado"] = {
+        "numero": numero,
+        "nombre": str(result.get("nombre_completo") or "").strip(),
+        "validada": datetime.now().isoformat(timespec="seconds"),
+    }
+    return jsonify({"valida": True, "numero_tarjeta": numero,
+                    "nombre_completo": session["tp_abogado"]["nombre"]})
 
 
 @app.route("/api/extract/certificado", methods=["POST"])

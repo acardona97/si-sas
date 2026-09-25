@@ -1146,6 +1146,28 @@
                     </div>
                 </fieldset>
 
+                <!-- Funciones avanzadas: requieren tarjeta profesional de abogado -->
+                <fieldset id="avanzado-block">
+                    <legend>Disposiciones especiales (solo abogados)</legend>
+                    <div class="info-box">
+                        Para redactar disposiciones especiales en los estatutos debe acreditar que
+                        quien constituye es abogado. La tarjeta se valida para esta constitución y no
+                        se incluye en el paquete.
+                    </div>
+                    <div class="upload-doc-section">
+                        <div class="upload-doc-info">
+                            <strong>⚖️ Tarjeta profesional de abogado</strong>
+                            <span class="upload-hint">Suba la tarjeta profesional vigente (foto o PDF).</span>
+                        </div>
+                        <label class="upload-doc-btn">
+                            Cargar tarjeta profesional
+                            <input type="file" accept="image/*,application/pdf" onchange="validarTPAbogado(this)">
+                        </label>
+                        <span class="upload-status" id="tp_abogado_upload_status"></span>
+                    </div>
+                    <div id="avanzado-contenido" class="hidden"></div>
+                </fieldset>
+
                 <div class="step-actions">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(6)">← Anterior</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(6)">Siguiente →</button>
