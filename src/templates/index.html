@@ -6,21 +6,21 @@
     <title>Sí S.A.S. — Constitución de Sociedad</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css?v=20260823r">
+    <link rel="icon" type="image/svg+xml" href="/static/img/si/si-favicon.svg">
 </head>
 <body>
+{% from "_marca.html" import si_logo %}
 
 <div class="app-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand">
-            <span class="brand-producto">SÍ S.A.S.</span>
-            <a href="/" class="brand-quarta">
-                <img src="/static/img/logo_quarta_white.svg"
-                     alt="Quarta — acompañamiento de negocios" class="sidebar-logo-img"
-                     width="140" height="40">
+            <a href="/" class="brand-marca" aria-label="Sí S.A.S.">
+                {{ si_logo(variant='full', tone='dark', size=30, animate=True) }}
             </a>
+            <span class="brand-by">by Quarta — acompañamiento de negocios</span>
         </div>
         <div class="brand-avance">
             <div class="brand-avance-texto">

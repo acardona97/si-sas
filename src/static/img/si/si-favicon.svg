@@ -1,0 +1,10 @@
+<!-- Favicon: isotipo (tilde + cola de la Í) sobre fondo sólido, trazo más
+     grueso para que se mantenga legible a 16-32px. Color fijo: los
+     favicons no heredan currentColor de la página. -->
+<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="100" height="120" rx="24" fill="#004571"/>
+  <path d="M42,26 L42,88 C42,98 58,98 68,80"
+        fill="none" stroke="#FFFFFF" stroke-width="15"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30,18 L50,6" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,19 @@
+<!-- Wordmark núcleo "SÍ". Construido en trazos propios (no depende de
+     ninguna fuente en tiempo de ejecución). La S termina su trazo inferior
+     en una curva que asciende hacia la izquierda; la Í termina el suyo en
+     una curva que asciende hacia la derecha: dos letras, un mismo gesto
+     (terminal curvo ascendente) en espejo — ver docs/MARCA_SI.md. -->
+<svg viewBox="-10 -25 230 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí">
+  <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+           C74,140 44,148 30,142 C20,138 16,132 20,126"
+        fill="none" stroke="currentColor" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(108,0)">
+    <path class="si-tail" d="M14,18 L14,138 C14,150 40,150 54,120"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="si-accent" d="M0,6 L26,-10"
+          fill="none" stroke="currentColor" stroke-width="16"
+          stroke-linecap="round"/>
+  </g>
+</svg>

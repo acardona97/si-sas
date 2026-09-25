@@ -1,0 +1,12 @@
+<!-- Isotipo SÍ — la Í con su remate propio: tilde (acento agudo) siempre
+     presente + asta que, en la base, se curva en un gancho que asciende a
+     la derecha (gesto de "i" cursiva escolar, geométrico y controlado, sin
+     script). Es el activo distintivo del sistema — ver docs/MARCA_SI.md. -->
+<svg viewBox="-10 -22 100 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí">
+  <path class="si-tail" d="M14,18 L14,138 C14,150 40,150 54,120"
+        fill="none" stroke="currentColor" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="si-accent" d="M0,6 L26,-10"
+        fill="none" stroke="currentColor" stroke-width="16"
+        stroke-linecap="round"/>
+</svg>

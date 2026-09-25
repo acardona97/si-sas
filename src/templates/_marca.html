@@ -1,0 +1,106 @@
+{# ══════════════════════════════════════════════════════════════════
+   Sistema de marca SÍ S.A.S.
+   Macros que inlinean el SVG de la marca (para heredar color por
+   currentColor y permitir la micro-animación de asentado). No usar
+   <img src="..."> para la marca: siempre estos macros.
+
+   si_logo(variant, tone, size, animate, cls)
+     variant: 'full'    -> "SÍ S.A.S." completo, una sola pieza tipográfica
+               'core'    -> "SÍ" (núcleo, sin descriptor)
+               'mark'    -> isotipo (tilde + cola de la Í), para espacios muy
+                            reducidos o como marca de agua
+               'app'     -> isotipo sobre contenedor sólido (ícono de app/perfil)
+     tone:    'currentColor' (por defecto, hereda del CSS) | 'light' (fuerza
+               navy, para fondos claros) | 'dark' (fuerza blanco, para fondos
+               oscuros/navy)
+     size:    alto en px (ancho se ajusta solo, según relación del viewBox)
+     animate: si es true, agrega la clase que dispara el asentado de la
+               tilde/cola en el primer render (respeta prefers-reduced-motion,
+               ver style.css)
+   ══════════════════════════════════════════════════════════════════ #}
+
+{% macro si_logo(variant='full', tone='currentColor', size=None, animate=False, cls='') %}
+{%- set color = '#004571' if tone == 'light' else ('#FFFFFF' if tone == 'dark' else 'currentColor') -%}
+{%- set wrapper_cls = 'si-logo si-logo--' ~ variant ~ (' si-logo--animate' if animate else '') ~ (' ' ~ cls if cls else '') -%}
+{%- set style = 'color:' ~ color ~ (';height:' ~ size ~ 'px' if size else '') -%}
+
+{% if variant == 'core' %}
+<span class="{{ wrapper_cls }}" style="{{ style }}">
+  <svg viewBox="-10 -25 230 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí" focusable="false">
+    <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+             C74,140 44,148 30,142 C20,138 16,132 20,126"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(108,0)">
+      <path class="si-tail" d="M14,18 L14,138 C14,150 40,150 54,120"
+            fill="none" stroke="currentColor" stroke-width="20"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="si-accent" d="M0,6 L26,-10"
+            fill="none" stroke="currentColor" stroke-width="16"
+            stroke-linecap="round"/>
+    </g>
+  </svg>
+</span>
+
+{% elif variant == 'mark' %}
+<span class="{{ wrapper_cls }}" style="{{ style }}">
+  <svg viewBox="-10 -22 100 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí" focusable="false">
+    <path class="si-tail" d="M14,18 L14,138 C14,150 40,150 54,120"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="si-accent" d="M0,6 L26,-10"
+          fill="none" stroke="currentColor" stroke-width="16"
+          stroke-linecap="round"/>
+  </svg>
+</span>
+
+{% elif variant == 'app' %}
+<span class="{{ wrapper_cls }}" style="{{ 'height:' ~ size ~ 'px' if size else '' }}">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí" focusable="false">
+    <rect x="0" y="0" width="100" height="100" rx="24" fill="#004571"/>
+    <path class="si-tail" d="M38,22 L38,76 C38,85 53,85 62,69"
+          fill="none" stroke="#FFFFFF" stroke-width="12"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="si-accent" d="M27,15 L45,4" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+  </svg>
+</span>
+
+{% else %}
+<span class="{{ wrapper_cls }}" style="{{ style }}">
+  <svg viewBox="-10 -25 700 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí S.A.S." focusable="false">
+    <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+             C74,140 44,148 30,142 C20,138 16,132 20,126"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(108,0)">
+      <path class="si-tail" d="M14,18 L14,138 C14,150 40,150 54,120"
+            fill="none" stroke="currentColor" stroke-width="20"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="si-accent" d="M0,6 L26,-10"
+            fill="none" stroke="currentColor" stroke-width="16"
+            stroke-linecap="round"/>
+    </g>
+    <g transform="translate(248,0)">
+      <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+               C74,140 44,148 30,142 C20,138 16,132 20,126"
+            fill="none" stroke="currentColor" stroke-width="20"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <circle cx="360" cy="140" r="10" fill="currentColor"/>
+    <g transform="translate(394,0)">
+      <path d="M8,146 L44,18 L80,146 M22,100 L66,100"
+            fill="none" stroke="currentColor" stroke-width="20"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <circle cx="506" cy="140" r="10" fill="currentColor"/>
+    <g transform="translate(546,0)">
+      <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+               C74,140 44,148 30,142 C20,138 16,132 20,126"
+            fill="none" stroke="currentColor" stroke-width="20"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <circle cx="658" cy="140" r="10" fill="currentColor"/>
+  </svg>
+</span>
+{% endif %}
+{% endmacro %}

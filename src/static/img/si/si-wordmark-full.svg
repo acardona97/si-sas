@@ -1,0 +1,43 @@
+<!-- Wordmark completo "SÍ S.A.S." como una sola pieza tipográfica: todas las
+     letras a la misma altura y el mismo peso (sin jerarquía de tamaño entre
+     "SÍ" y "S.A.S." — es un todo homogéneo, no marca + descriptor). Todas
+     las letras están construidas en trazos propios. -->
+<svg viewBox="-10 -25 700 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sí S.A.S.">
+  <!-- S -->
+  <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+           C74,140 44,148 30,142 C20,138 16,132 20,126"
+        fill="none" stroke="currentColor" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Í -->
+  <g transform="translate(108,0)">
+    <path class="si-tail" d="M14,18 L14,138 C14,150 40,150 54,120"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="si-accent" d="M0,6 L26,-10"
+          fill="none" stroke="currentColor" stroke-width="16"
+          stroke-linecap="round"/>
+  </g>
+  <!-- S -->
+  <g transform="translate(248,0)">
+    <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+             C74,140 44,148 30,142 C20,138 16,132 20,126"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <circle cx="360" cy="140" r="10" fill="currentColor"/>
+  <!-- A -->
+  <g transform="translate(394,0)">
+    <path d="M8,146 L44,18 L80,146 M22,100 L66,100"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <circle cx="506" cy="140" r="10" fill="currentColor"/>
+  <!-- S -->
+  <g transform="translate(546,0)">
+    <path d="M66,42 C66,20 16,18 16,46 C16,66 38,70 46,74 C74,86 74,104 74,116
+             C74,140 44,148 30,142 C20,138 16,132 20,126"
+          fill="none" stroke="currentColor" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <circle cx="658" cy="140" r="10" fill="currentColor"/>
+</svg>

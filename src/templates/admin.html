@@ -6,18 +6,20 @@
     <title>Panel de Administración — Sí S.A.S.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css?v=20260823r">
+    <link rel="icon" type="image/svg+xml" href="/static/img/si/si-favicon.svg">
 </head>
 <body class="admin-body">
+{% from "_marca.html" import si_logo %}
 
 <div class="adm-layout">
 
     <!-- Sidebar -->
     <aside class="adm-sidebar">
         <div class="adm-brand">
-            <a href="/admin"><img src="/static/img/logo_quarta_white.svg" alt="Quarta" class="sidebar-logo-img"></a>
-            <p class="adm-brand-sub">Panel Admin</p>
+            <a href="/admin" aria-label="Sí S.A.S.">{{ si_logo(variant='core', tone='dark', size=30, animate=True) }}</a>
+            <p class="adm-brand-sub">Panel Admin — by Quarta</p>
         </div>
         <nav class="adm-nav">
             <a href="/admin" class="adm-nav-item active">
