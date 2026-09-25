@@ -513,7 +513,7 @@ def _fill_accionistas_table(doc, accionistas, capital_suscrito, capital_pagado,
         if t.rows and "accionista" in t.rows[0].cells[0].text.strip().lower():
             table = t
             break
-    if table is None:
+    if table is None or len(table.rows) < 4 or any(len(r.cells) < 6 for r in table.rows):
         return
 
     tbl = table._tbl
@@ -2272,7 +2272,8 @@ def generar_estatutos(data, template_path, output_path):
     doc = Document(template_path)
 
     # ── Habilitar silabeo automático para mejorar espaciado en texto justificado ──
-    _enable_auto_hyphenation(doc)
+    if 'anclas_modelo_propio' not in data:
+        _enable_auto_hyphenation(doc)
 
     nombre_sas = data["nombre_sas"].upper()
     fecha = data["fecha"]
@@ -2367,6 +2368,16 @@ def generar_estatutos(data, template_path, output_path):
         "{{BLOQUE_FIRMAS_FINALES}}": "",  # Se maneja con párrafos propios
     }
 
+    if 'anclas_modelo_propio' in data:
+        _generar_modelo_propio(doc, data, replacements, accionistas,
+                              rl_principales, rl_suplentes, nombre_sas)
+        if data.get('disposiciones'):
+            from processors.disposiciones import aplicar
+            aplicar(doc, data['disposiciones'],
+                    con_cambios=data.get('disposiciones_con_cambios', False))
+        doc.save(output_path)
+        return
+
     # Concordancia cuando hay más de un representante legal: la etiqueta del
     # nombramiento y la frase del artículo 44 pasan a plural.
     if len(rl_principales) > 1:
@@ -2449,6 +2460,187 @@ def generar_estatutos(data, template_path, output_path):
         aplicar(doc, data["disposiciones"], con_cambios=data.get("disposiciones_con_cambios", False))
 
     doc.save(output_path)
+
+
+def _generar_modelo_propio(doc, data, replacements, accionistas, principales, suplentes, nombre):
+    """Conserva los párrafos del abogado e inserta bloques copiando su formato."""
+    from processors.modelo_propio import sustituir_fragmento, ModeloPropioError
+    from processors.disposiciones import indexar, _norm
+
+    entradas = indexar(doc)
+    anclas = {}
+    # Resolver antes de sustituir o insertar: los índices posteriores ya no son estables.
+    for clave, valor in data['anclas_modelo_propio'].items():
+        if valor is None:
+            continue
+        if type(valor) is int and 0 <= valor < len(entradas):
+            anclas[clave] = entradas[valor]['elem']
+        elif isinstance(valor, str):
+            coincidencias = [e['elem'] for e in entradas if e['texto'] == _norm(valor)]
+            if len(coincidencias) != 1:
+                raise ModeloPropioError(f'Ancla ambigua o inexistente: {clave}.')
+            anclas[clave] = coincidencias[0]
+        else:
+            raise ModeloPropioError(f'Ancla inválida: {clave}.')
+    for e in entradas:
+        if '{{BLOQUE_FIRMAS_FINALES}}' in e['texto']:
+            anclas.setdefault('ancla_firmas', e['elem'])
+        if e['texto'].startswith(('Representante legal suplente:', 'Representantes legales suplentes:')):
+            anclas.setdefault('ancla_nombramientos', e['elem'])
+        if e['texto'].startswith('Parágrafo Primero: El representante legal'):
+            anclas.setdefault('ancla_limitaciones_rl', e['elem'])
+
+    def clonar(ref, texto):
+        p = deepcopy(ref)
+        for hijo in list(p):
+            if hijo.tag != qn('w:pPr'):
+                p.remove(hijo)
+        r = OxmlElement('w:r')
+        original = next(ref.iter(qn('w:rPr')), None)
+        if original is not None:
+            r.append(deepcopy(original))
+        for i, linea in enumerate(str(texto).split('\n')):
+            if i:
+                r.append(OxmlElement('w:br'))
+            t = OxmlElement('w:t')
+            t.text = linea
+            t.set(qn('xml:space'), 'preserve')
+            r.append(t)
+        p.append(r)
+        return p
+
+    def insertar(clave, lineas):
+        ref = anclas.get(clave)
+        if ref is None:
+            return
+        ultimo = ref
+        for texto in lineas:
+            nuevo = clonar(ref, texto)
+            ultimo.addnext(nuevo)
+            ultimo = nuevo
+
+    # Poder: reutilizar el texto del generador sin adoptar su formato de párrafo.
+    replacements = dict(replacements)
+    poder = data.get('apoderado')
+    replacements['{{BLOQUE_PODER_APODERADA}}'] = ''
+    if poder and poder.get('nombre'):
+        auxiliar = Document()
+        auxiliar.add_paragraph('{{BLOQUE_PODER_APODERADA}}')
+        _fill_apoderado_section(list(auxiliar.element.body.findall(qn('w:p'))),
+                                poder, principales[0] if principales else {}, nombre, 'M')
+        replacements['{{BLOQUE_PODER_APODERADA}}'] = '\n'.join(p.text for p in auxiliar.paragraphs)
+    partes = [doc.part]
+    partes.extend(rel.target_part for rel in doc.part.rels.values()
+                  if not rel.is_external and rel.reltype.endswith(('/header', '/footer')))
+    for parte in partes:
+        for p in parte.element.iter(qn('w:p')):
+            for token, valor in replacements.items():
+                if '{{' in token:
+                    sustituir_fragmento(p, token, valor)
+            # Word requiere saltos explícitos, no caracteres LF en w:t.
+            for t in list(p.iter(qn('w:t'))):
+                if '\n' in (t.text or ''):
+                    lineas = t.text.split('\n')
+                    t.text = lineas[0]
+                    ultimo = t
+                    for linea in lineas[1:]:
+                        br = OxmlElement('w:br')
+                        ultimo.addnext(br)
+                        nuevo = OxmlElement('w:t')
+                        nuevo.text = linea
+                        nuevo.set(qn('xml:space'), 'preserve')
+                        br.addnext(nuevo)
+                        ultimo = nuevo
+
+    nombramientos = []
+    junta = data.get('junta_directiva') or {}
+    for clave, etiqueta in [('principales', 'Miembro principal de junta directiva'),
+                             ('suplentes', 'Miembro suplente de junta directiva')]:
+        for persona in junta.get(clave, []):
+            nombramientos.append(etiqueta + ': ' + _segmentos_a_texto(_persona_nombramiento(persona)))
+    revisor = data.get('revisor_fiscal')
+    if revisor:
+        nombramientos.append('Revisor fiscal: ' + _segmentos_a_texto(_texto_revisor(revisor)))
+        if revisor.get('suplente'):
+            nombramientos.append('Revisor fiscal suplente: ' +
+                                  _segmentos_a_texto(_texto_revisor(revisor['suplente'])))
+    insertar('ancla_nombramientos', nombramientos)
+    limitaciones = _texto_limitaciones(data.get('limitaciones_rl'))
+    if limitaciones:
+        insertar('ancla_limitaciones_rl', [_segmentos_a_texto(limitaciones)])
+    firmas = []
+    for f in _build_firmantes_list(accionistas, principales[0] if principales else {},
+                                   suplentes[0] if suplentes else None, nombre, principales, suplentes):
+        firmas.extend(['', '', f['nombre'], f['documento'], f['calidad']])
+        if f.get('es_rl') or f.get('es_rl_suplente'):
+            firmas.append('Acepto el cargo de representante legal ' +
+                          ('principal.' if f.get('es_rl') else 'suplente.'))
+    insertar('ancla_firmas', firmas)
+
+    ref = anclas.get('ancla_tabla_accionistas')
+    if ref is not None:
+        # Si ya existe una tabla inmediata, conservar sus propiedades y filas modelo.
+        siguiente = ref.getnext()
+        while siguiente is not None and siguiente.tag == qn('w:p') and not _get_para_text(siguiente).strip():
+            siguiente = siguiente.getnext()
+        from docx.table import Table
+        if siguiente is not None and siguiente.tag == qn('w:tbl'):
+            tabla = Table(siguiente, doc._body)
+            if len(tabla.rows) < 2:
+                raise ModeloPropioError('La tabla de accionistas requiere una fila de datos como modelo.')
+            columnas = []
+            for celda in tabla.rows[0].cells:
+                titulo = _strip_acentos(celda.text).lower()
+                if 'accionista' in titulo or 'nombre' in titulo:
+                    columnas.append(0)
+                elif any(t in titulo for t in ('identific', 'documento', 'cedula', 'nit')):
+                    columnas.append(1)
+                elif '%' in titulo or 'porcentaje' in titulo or 'participacion' in titulo:
+                    columnas.append(2)
+                elif 'acciones' in titulo:
+                    columnas.append(3)
+                elif 'pagado' in titulo:
+                    columnas.append(5)
+                elif any(t in titulo for t in ('suscrito', 'capital', 'aporte')):
+                    columnas.append(4)
+                else:
+                    raise ModeloPropioError(f'Columna de accionistas no reconocida: {celda.text}.')
+            fila = deepcopy(tabla.rows[1]._tr)
+            fila_total = deepcopy(tabla.rows[-1]._tr) if 'total' in tabla.rows[-1].cells[0].text.lower() else deepcopy(fila)
+            for row in list(tabla.rows)[1:]:
+                tabla._tbl.remove(row._tr)
+        else:
+            tabla = doc.add_table(rows=1, cols=6)
+            ref.addnext(tabla._tbl)
+            for celda, titulo in zip(tabla.rows[0].cells,
+                    ['Accionista', 'Identificación', '%', 'No. Acciones', 'Capital suscrito', 'Capital pagado']):
+                celda._tc.replace(celda.paragraphs[0]._p, clonar(ref, titulo))
+            fila = deepcopy(tabla.rows[0]._tr)
+            fila_total = deepcopy(fila)
+            columnas = list(range(6))
+        totales = [0, 0, 0]
+        valores = []
+        for acc in accionistas:
+            porcentaje = float(acc.get('porcentaje', 0))
+            suscrito = int(data.get('capital_suscrito', 1000000) * porcentaje / 100)
+            pagado = acc.get('capital_pagado_num', int(data.get('capital_pagado', data.get('capital_suscrito', 1000000)) * porcentaje / 100))
+            acciones = suscrito // max(1, int(data.get('valor_nominal', 1) or 1))
+            totales = [a + b for a, b in zip(totales, [acciones, suscrito, pagado])]
+            valores.append([acc.get('nombre', '').upper(),
+                            f"{acc.get('id_tipo', 'C.C.')} {acc.get('id_num', '')}",
+                            f'{porcentaje:g}%', _fmt_num_table(acciones),
+                            _fmt_money_table(suscrito), _fmt_money_table(pagado)])
+        valores.append(['TOTAL', '', '100%', _fmt_num_table(totales[0]),
+                        _fmt_money_table(totales[1]), _fmt_money_table(totales[2])])
+        for i, datos in enumerate(valores):
+            tabla._tbl.append(deepcopy(fila_total if i == len(valores) - 1 else fila))
+            for celda, columna in zip(tabla.rows[-1].cells, columnas):
+                texto = datos[columna]
+                modelo = celda.paragraphs[0]._p
+                nuevo = clonar(modelo, texto)
+                for p in list(celda.paragraphs):
+                    celda._tc.remove(p._p)
+                celda._tc.append(nuevo)
 
 
 def _replace_in_doc(doc, replacements):

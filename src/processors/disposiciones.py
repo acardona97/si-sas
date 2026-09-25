@@ -91,6 +91,10 @@ def indexar(doc):
             n_art += 1
             art_actual = f"Artículo {n_art}"
             tipo = "articulo"
+        elif not num_articulos and re.match(r'^Art[íi]culo\s+\S+', texto, re.I):
+            # Los modelos del abogado pueden numerar los artículos como texto.
+            art_actual = texto.split('.', 1)[0]
+            tipo = 'articulo'
         elif RE_PARAGRAFO.match(texto):
             tipo = "paragrafo"
         elif _num_id(p):
@@ -411,9 +415,36 @@ def _referencias(entradas):
                 and e["i"] == paragrafo["i"] + 1):
             blanco = e
     if not (paragrafo and inciso):
-        raise DisposicionError("La plantilla no tiene párrafos de referencia para integrar disposiciones.")
+        # Modelo externo: preparar referencias a partir de un párrafo real,
+        # conservando sus propiedades en lugar de imponer las de la casa.
+        referencia = next((e['elem'] for e in entradas if e['tipo'] == 'texto' and _runs(e['elem'])), None)
+        if referencia is None:
+            referencia = next((e['elem'] for e in entradas if _runs(e['elem'])), None)
+        if referencia is None:
+            raise DisposicionError('El modelo no tiene párrafos de referencia.')
+
+        def preparar(textos):
+            p = deepcopy(referencia)
+            run = _runs(referencia)[0]
+            for hijo in list(p):
+                if hijo.tag != qn('w:pPr'):
+                    p.remove(hijo)
+            for texto in textos:
+                nuevo = OxmlElement('w:r')
+                rpr = run.find(qn('w:rPr'))
+                if rpr is not None:
+                    nuevo.append(deepcopy(rpr))
+                t = OxmlElement('w:t')
+                t.text = texto
+                nuevo.append(t)
+                p.append(nuevo)
+            return p
+
+        return preparar(['Parágrafo. ', 'Texto']), preparar(['Texto']), preparar([''])
     if blanco is None:
-        blanco = next(e for e in entradas if not e["texto"] and e["i"] > inciso["i"])
+        blanco = next((e for e in entradas if not e["texto"] and e["i"] > inciso["i"]), None)
+        if blanco is None:
+            return paragrafo['elem'], inciso['elem'], _nuevo_parrafo(inciso['elem'], [''])
     return paragrafo["elem"], inciso["elem"], blanco["elem"]
 
 
