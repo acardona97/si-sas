@@ -1056,6 +1056,11 @@ fieldset legend {
     transition: border-color 0.18s;
 }
 .upload-doc-section:hover { border-color: var(--accent); }
+.upload-doc-section.drag-over { border-color: var(--accent); border-style: solid; }
+.upload-doc-section .upload-doc-btn::after {
+    content: " o arrastre aquí";
+    font-weight: 400;
+}
 
 .upload-doc-info { flex: 1; min-width: 200px; }
 .upload-doc-info strong {

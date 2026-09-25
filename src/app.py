@@ -43,6 +43,7 @@ from processors.responsabilidades import (
 )
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
+from processors.soportes import armar_soportes
 from processors.pdf_filler import (
     generar_emprendimientos,
     generar_situacion_control,
@@ -501,9 +502,16 @@ def generate():
             "error": "Sin generaciones disponibles. Adquiera un plan para generar sus documentos."
         }), 403
 
-    data = request.get_json()
+    # El cuestionario llega como JSON o, cuando trae soportes adjuntos
+    # (cédulas, certificados, tarjetas), como multipart con el JSON en "payload".
+    data = request.get_json(silent=True)
+    if data is None and request.form.get("payload"):
+        data = json.loads(request.form["payload"])
     if not data:
         return jsonify({"error": "No se recibieron datos"}), 400
+    archivos_soporte = {
+        k: (f.read(), f.filename) for k, f in request.files.items() if f and f.filename
+    }
 
     tmp_dir = tempfile.mkdtemp(prefix="si_sas_")
     errors = []
@@ -958,12 +966,22 @@ def generate():
             anexos.append(destino)
         generated.extend(anexos)
 
+        # ─── 11. SOPORTES: cédulas, certificados y tarjetas (o pendientes) ───
+        soportes = []
+        try:
+            soportes = armar_soportes(
+                data, archivos_soporte, os.path.join(tmp_dir, "soportes"))
+        except Exception as e:
+            errors.append(f"Soportes: {e}")
+
         # ─── ZIP ───
         zip_name = f"{fecha_pfx}_{nombre_limpio}.zip"
         zip_path = os.path.join(tmp_dir, zip_name)
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             for fpath in generated:
                 zf.write(fpath, os.path.basename(fpath))
+            for fpath, arcname in soportes:
+                zf.write(fpath, arcname)
 
         if errors:
             app.logger.warning(f"Errores parciales: {errors}")

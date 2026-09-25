@@ -380,6 +380,17 @@ function addAccionista() {
                 <input type="text" name="acc${n}_domicilio_pj" placeholder="Ej: Medellín">
             </div>
             <p class="hint" style="margin-top:8px"><strong>Representante Legal de esta persona jurídica:</strong></p>
+            <div class="upload-doc-section">
+                <div class="upload-doc-info">
+                    <strong>📷 Cédula del representante legal</strong>
+                    <span class="upload-hint">Suba la cédula del RL de esta persona jurídica. Se autocompletan sus datos y se incluye en el paquete.</span>
+                </div>
+                <label class="upload-doc-btn">
+                    Cargar documento
+                    <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'acc${n}_rl', ${n})">
+                </label>
+                <span class="upload-status" id="acc${n}_rl_upload_status"></span>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Nombre completo del RL</label>
@@ -580,6 +591,7 @@ function _leerRL(prefijo) {
         tipo_doc: document.getElementById(prefijo + '_tipo_doc')?.value || 'CC',
         expedicion: v('expedicion'),
         genero: document.getElementById(prefijo + '_genero')?.value || 'M',
+        doc_key: prefijo,
     };
 }
 
@@ -1081,6 +1093,10 @@ function toggleApoderado(show) {
 
 // ─── EXTRACCIÓN AUTOMÁTICA DE DATOS (Claude Vision) ───
 
+// Documentos cargados, por llave "<tipo>:<prefijo>" (ej. "cedula:acc1").
+// Viajan con el cuestionario al generar y van a la carpeta Soportes del ZIP.
+const soportes = {};
+
 /**
  * Extrae datos de cédula/pasaporte y autocompleta los campos del accionista.
  * Funciona para tarjetas de accionista (prefix = "accN") y bloques de RL
@@ -1089,6 +1105,9 @@ function toggleApoderado(show) {
 async function extractFromCedula(input, prefix, n) {
     const file = input.files[0];
     if (!file) return;
+    // El documento se guarda para incluirlo en el paquete aunque la
+    // extracción falle: lo que importa es tener el soporte.
+    soportes[`cedula:${prefix}`] = file;
 
     const statusId = (prefix.startsWith('rl_'))
         ? `${prefix}_upload_status`
@@ -1125,6 +1144,12 @@ async function extractFromCedula(input, prefix, n) {
             _fillIfPresent(`${prefix}_cedula`, data.numero_documento, filled, 'Cédula');
             _fillIfPresent(`${prefix}_expedicion`, data.ciudad_expedicion, filled, 'Ciudad expedición');
             _fillSelectIfPresent(`${prefix}_genero`, data.genero, filled, 'Género');
+        } else if (/^acc\d+_rl$/.test(prefix)) {
+            // Representante legal de un accionista persona jurídica
+            _fillByNameIfPresent(`${prefix}_nombre`, data.nombre_completo, filled, 'Nombre');
+            _fillByNameIfPresent(`${prefix}_cc`, data.numero_documento, filled, 'Cédula');
+            _fillByNameIfPresent(`${prefix}_expedicion`, data.ciudad_expedicion, filled, 'Ciudad expedición');
+            _fillByNameIfPresent(`${prefix}_genero`, data.genero, filled, 'Género');
         } else if (prefix === 'revisor' || prefix === 'revisor_contador') {
             // Revisor fiscal persona natural, o contador designado por la
             // persona jurídica. Estos campos van por id=, no por name=.
@@ -1164,6 +1189,7 @@ async function extractFromCedula(input, prefix, n) {
 async function extractFromTarjeta(input, prefix) {
     const file = input.files[0];
     if (!file) return;
+    soportes[`tarjeta:${prefix}`] = file;
 
     const statusEl = document.getElementById(`${prefix}_tarjeta_upload_status`);
     _setStatus(statusEl, 'processing', '<span class="spinner"></span> Leyendo la tarjeta profesional...');
@@ -1212,6 +1238,7 @@ async function extractFromTarjeta(input, prefix) {
 async function extractFromCertificado(input, prefix, n) {
     const file = input.files[0];
     if (!file) return;
+    soportes[`certificado:${prefix}`] = file;
 
     const statusEl = document.getElementById(`${prefix}_upload_status_jur`);
     _setStatus(statusEl, 'processing', '<span class="spinner"></span> Procesando certificado...');
@@ -1258,6 +1285,37 @@ async function extractFromCertificado(input, prefix, n) {
         input.value = '';
     }
 }
+
+// ─── Arrastrar y soltar documentos ───
+// Toda zona de carga acepta el archivo soltado encima: se entrega a su
+// <input type="file"> y se dispara el mismo flujo que al seleccionarlo.
+function _zonaCarga(e) {
+    const zona = e.target.closest?.('.upload-doc-section');
+    return zona && zona.querySelector('input[type="file"]') ? zona : null;
+}
+['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => {
+    const zona = _zonaCarga(e);
+    if (!zona) return;
+    e.preventDefault();
+    zona.classList.add('drag-over');
+}));
+document.addEventListener('dragleave', e => {
+    const zona = _zonaCarga(e);
+    if (zona && !zona.contains(e.relatedTarget)) zona.classList.remove('drag-over');
+});
+document.addEventListener('drop', e => {
+    const zona = _zonaCarga(e);
+    if (!zona) return;
+    e.preventDefault();
+    zona.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const input = zona.querySelector('input[type="file"]');
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+});
 
 // ─── Helpers de extracción ───
 function _setStatus(el, klass, html) {
@@ -1800,11 +1858,13 @@ function _setByName(name, value) {
 function getJuntaPersonas(containerId, incluirVacios) {
     const personas = [];
     document.querySelectorAll(`#${containerId} [data-junta-row]`).forEach(row => {
-        const nombre = (row.querySelector('[name$="_nombre"]')?.value || '').trim();
+        const campoNombre = row.querySelector('[name$="_nombre"]');
+        const nombre = (campoNombre?.value || '').trim();
         const idNum = (row.querySelector('[name$="_id_num"]')?.value || '').trim();
         const tipoDoc = row.querySelector('[name$="_tipo_doc"]')?.value || 'CC';
         if (incluirVacios || (nombre && idNum)) {
-            personas.push({ nombre: nombre, tipo_doc: tipoDoc, id_num: idNum });
+            personas.push({ nombre: nombre, tipo_doc: tipoDoc, id_num: idNum,
+                            doc_key: (campoNombre?.name || '').replace(/_nombre$/, '') });
         }
     });
     return personas;
@@ -2022,6 +2082,8 @@ function getAccionistasData() {
         });
         const tipo = raw.tipo_persona || 'natural';
         const acc = { tipo: tipo, porcentaje: parseFloat(raw.porcentaje) || 0 };
+        // Prefijo de sus campos; identifica sus soportes cargados
+        acc.doc_key = card.id.replace('_', '');
 
         if (tipo === 'juridica') {
             acc.nombre = raw.razon_social || '';
@@ -2283,11 +2345,12 @@ async function generateDocuments() {
     status.classList.remove('hidden');
 
     try {
-        const resp = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
+        // Multipart: el cuestionario va en "payload" y cada soporte cargado
+        // como archivo con su llave, para incluirlo en el ZIP.
+        const body = new FormData();
+        body.append('payload', JSON.stringify(data));
+        Object.entries(soportes).forEach(([llave, file]) => body.append(llave, file, file.name));
+        const resp = await fetch('/api/generate', { method: 'POST', body: body });
 
         if (!resp.ok) {
             const err = await resp.json();

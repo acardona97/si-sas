@@ -13,6 +13,7 @@ Escenarios:
 Ejecutar:  python test_paquete.py
 """
 import io
+import json
 import os
 import sys
 import zipfile
@@ -59,6 +60,7 @@ def _generar(client, payload, carpeta):
     with zipfile.ZipFile(io.BytesIO(resp.data)) as zf:
         for nombre in zf.namelist():
             ruta = os.path.join(destino, nombre)
+            os.makedirs(os.path.dirname(ruta), exist_ok=True)  # Soportes/
             with open(ruta, "wb") as f:
                 f.write(zf.read(nombre))
             archivos[nombre] = ruta
@@ -198,6 +200,9 @@ def test_escenario_a(client):
     assert _buscar(archivos, "Carta_No_Situacion_Control"), "falta la carta de no control"
     assert not _buscar(archivos, "Formato_Situacion_Control"), \
         "no debía generarse el formato de situación de control"
+    # Sin documentos cargados, cada soporte sale como pendiente
+    soportes = [n for n in archivos if n.startswith("Soportes/")]
+    assert soportes and all("/PENDIENTE_" in n for n in soportes), soportes
 
     # ── Estatutos ──
     est = _docx_txt(_buscar(archivos, "Estatutos.docx"))
@@ -299,6 +304,21 @@ def test_escenario_b(client):
     assert "Revisor fiscal:" not in est
     assert "identificada con C.C. No. 43000111" in est   # concordancia femenina
     print("  OK  escenario B")
+
+    # Como lo envía el navegador: multipart con la cédula cargada adjunta.
+    # Accionista y RL son la misma persona → un solo soporte, el cargado.
+    payload = _payload("payload_b.json", PAYLOAD_B)
+    payload["accionistas"][0]["doc_key"] = "acc1"
+    resp = client.post("/api/generate", content_type="multipart/form-data", data={
+        "payload": json.dumps(payload),
+        "cedula:acc1": (io.BytesIO(b"%PDF-cedula"), "cedula.pdf"),
+    })
+    assert resp.status_code == 200, resp.get_data(as_text=True)[:400]
+    with zipfile.ZipFile(io.BytesIO(resp.data)) as zf:
+        sop = [n for n in zf.namelist() if n.startswith("Soportes/")]
+        assert len(sop) == 1 and "PENDIENTE" not in sop[0], sop
+        assert zf.read(sop[0]) == b"%PDF-cedula"
+    print("  OK  soportes cargados viajan al ZIP")
 
 
 # ════════════════════════════════════════════════════════════════

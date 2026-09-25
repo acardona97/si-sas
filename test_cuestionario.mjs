@@ -975,4 +975,31 @@ console.log('\n─── Comercio exterior: importador / exportador / usuario ad
     console.log('  OK  la pregunta aparece, es obligatoria y se limpia al quitar el disparador');
 }
 
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Soportes: cédulas cargadas viajan al paquete');
+{
+    const w = nuevaApp();
+    w.addAccionista();
+    const n = parseInt([...w.document.querySelectorAll('[id^="acc_"]')].pop().id.slice(4));
+    llenarAccionista(w, n, { nombre: 'Persona Test', id: '99999999', pct: 100 });
+    // Cada persona lleva el prefijo que identifica sus documentos
+    assert.equal(w.getAccionistasData()[0].doc_key, `acc${n}`);
+
+    // La cédula queda guardada aunque la extracción no devuelva datos, y al
+    // generar viaja como archivo junto al cuestionario
+    const file = new w.File(['x'], 'cedula.pdf', { type: 'application/pdf' });
+    await w.extractFromCedula({ files: [file], value: '' }, `acc${n}`, n);
+    let enviado = null;
+    w.fetch = async (url, opts) => { enviado = opts.body; throw new Error('fin'); };
+    await w.generateDocuments();
+    assert.equal(enviado.get(`cedula:acc${n}`).name, 'cedula.pdf');
+    assert.equal(JSON.parse(enviado.get('payload')).accionistas[0].doc_key, `acc${n}`);
+
+    // El accionista PJ tiene carga para la cédula de su representante legal
+    w.toggleAccType(n, 'juridica');
+    assert.ok(w.document.getElementById(`acc${n}_rl_upload_status`),
+        'falta la carga de cédula del RL de la persona jurídica');
+    console.log('  OK  doc_key por persona, archivo guardado y carga del RL de la PJ');
+}
+
 console.log('\nCuestionario verificado.\n');
