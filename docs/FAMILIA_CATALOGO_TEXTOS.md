@@ -173,7 +173,7 @@ Se agrupan por artículo/cláusula porque casi todos comparten una sola frase-pl
 | **Poder** | `poder.apoderado_nombre`, `.apoderado_documento` | texto |
 | **Firmantes** (colección `firmantes`) | `firmante.nombre`, `.tipo_documento`, `.numero_documento`, `.calidad`, `.representado` | texto |
 
-**Nota sobre CIIU:** el diccionario de 213 campos **no incluye** ningún campo `ciiu.*`. Dado que la decisión del proyecto fija el CIIU principal en 7010 (actividades inmobiliarias por cuenta propia) con un secundario opcional, es necesario **agregar** dos campos nuevos al diccionario para el módulo de familia: `sociedad.ciiu_principal` (fijo = "7010", no editable) y `sociedad.ciiu_secundario` (texto/selección, opcional). Esto es un hallazgo de este análisis, no un campo preexistente.
+**Nota sobre CIIU:** el diccionario de 213 campos **no incluye** ningún campo `ciiu.*`. Dado que la decisión del proyecto fija el CIIU principal en 7010 (actividades de administración empresarial, según src/data/listado_ciiu.json) con un secundario opcional, es necesario **agregar** dos campos nuevos al diccionario para el módulo de familia: `sociedad.ciiu_principal` (fijo = "7010", no editable) y `sociedad.ciiu_secundario` (texto/selección, opcional). Esto es un hallazgo de este análisis, no un campo preexistente.
 
 ---
 
