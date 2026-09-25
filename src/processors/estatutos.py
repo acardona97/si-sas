@@ -5,6 +5,7 @@ Generador de Estatutos de Constitución S.A.S. (.docx)
 Usa python-docx para editar la plantilla estatutos_template.docx
 reemplazando los tokens {{TOKEN}} con los datos del formulario.
 """
+import re
 from copy import deepcopy
 from datetime import date
 from docx import Document
@@ -1461,13 +1462,38 @@ def _make_labeled_paragraph(ref_p_elem, label, content):
                     for el in rPr.findall(qn(tag)):
                         rPr.remove(el)
             p.append(new_pPr)
-    p.append(_make_run(label, bold=True))
+
+    # Los runs heredan el formato de carácter de la plantilla (fuente,
+    # fuente compleja, negrilla) tomando como modelo un run en negrilla y uno
+    # normal del párrafo de referencia; sin modelo se usa el run genérico.
+    modelos = {}
+    if ref_p_elem is not None:
+        for r in ref_p_elem.findall(qn("w:r")):
+            rpr = r.find(qn("w:rPr"))
+            if rpr is None or not (r.findtext(qn("w:t")) or "").strip():
+                continue
+            b = rpr.find(qn("w:b"))
+            negrilla = b is not None and b.get(qn("w:val")) not in ("0", "false")
+            modelos.setdefault(negrilla, rpr)
+
+    def run(texto, negrilla):
+        if negrilla not in modelos:
+            return _make_run(texto, bold=negrilla)
+        r = OxmlElement("w:r")
+        r.append(deepcopy(modelos[negrilla]))
+        t = OxmlElement("w:t")
+        t.text = texto
+        t.set(qn("xml:space"), "preserve")
+        r.append(t)
+        return r
+
+    p.append(run(label, True))
     if isinstance(content, str):
-        p.append(_make_run(content, bold=False))
+        p.append(run(content, False))
     else:
         for texto, negrilla in content:
             if texto:
-                p.append(_make_run(texto, bold=negrilla))
+                p.append(run(texto, negrilla))
     return p
 
 
@@ -1555,6 +1581,7 @@ def _nombres_propios(accionistas, rl_principales, rl_suplentes, junta, revisor,
     if revisor:
         nombres.append((revisor.get("nombre") or "").upper())
         nombres.append((revisor.get("contador_nombre") or "").upper())
+        nombres.append(((revisor.get("suplente") or {}).get("nombre") or "").upper())
 
     if apoderado:
         nombres.append((apoderado.get("nombre") or "").upper())
@@ -1802,8 +1829,7 @@ def _insert_nombramientos_organos(doc, junta, revisor):
             n_sup = len(suplentes)
             intro += (
                 f" y {_numero_a_letras(n_sup)} ({n_sup}) "
-                f"{'miembro suplente' if n_sup == 1 else 'miembros suplentes'} "
-                f"de carácter nominal"
+                f"{'miembro suplente personal' if n_sup == 1 else 'miembros suplentes personales'}"
             )
         intro += ", designados así:"
 
@@ -1832,6 +1858,16 @@ def _insert_nombramientos_organos(doc, junta, revisor):
         _insert(_make_labeled_paragraph(
             anchor, "Revisor fiscal: ", _texto_revisor(revisor)
         ))
+        suplente = revisor.get("suplente")
+        if suplente and (suplente.get("nombre") or "").strip():
+            # Si el revisor es una firma, su suplente es el contador que ella
+            # designa como tal (artículo 215 del Código de Comercio).
+            etiqueta = ("Contador suplente designado: "
+                        if (revisor.get("tipo") or "natural") == "juridica"
+                        else "Revisor fiscal suplente: ")
+            _insert(_make_labeled_paragraph(
+                anchor, etiqueta, _texto_revisor(dict(suplente, tipo="natural"))
+            ))
 
 
 def _texto_limitaciones(lim):
@@ -2020,6 +2056,193 @@ def _make_paragraph(text, bold=False, left=True, font_name="Cambria", size=None,
 
 
 # ════════════════════════════════════════════════════════════════
+# NÚMERO DE ÓRGANOS EN EL ARTICULADO
+# ════════════════════════════════════════════════════════════════
+# Lo que el usuario pone en el cuestionario —cuántos miembros de junta,
+# cuántos suplentes del representante legal, si hay revisor suplente— se
+# refleja en los artículos permanentes, no solo en el nombramiento
+# transitorio. Todo párrafo nuevo es copia de uno de la plantilla con el
+# texto cambiado: hereda formato de párrafo y de runs, y los artículos
+# conservan la numeración automática de Word.
+
+ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+           "XI", "XII", "XIII", "XIV", "XV"]
+
+
+def _cantidad(n, singular, plural):
+    """'un (1) suplente' / 'dos (2) suplentes'."""
+    return f"{_numero_a_letras(n)} ({n}) {singular if n == 1 else plural}"
+
+
+def _clonar_parrafo(ref, textos):
+    """Copia `ref` y reparte `textos` en sus primeros runs (uno por run);
+    los runs sobrantes se eliminan."""
+    p = deepcopy(ref)
+    runs = p.findall(qn("w:r"))
+    for i, run in enumerate(runs):
+        if i >= len(textos):
+            p.remove(run)
+            continue
+        ts = run.findall(qn("w:t"))
+        for t in ts[1:]:
+            run.remove(t)
+        ts[0].text = textos[i]
+        ts[0].set(qn("xml:space"), "preserve")
+    return p
+
+
+def _buscar_parrafo(doc, inicio):
+    for p_elem in doc._element.body.findall(qn("w:p")):
+        if _get_para_text(p_elem).strip().startswith(inicio):
+            return p_elem
+    return None
+
+
+def _texto_articulos_junta(junta):
+    """(título, cuerpo) de cada artículo del capítulo de junta directiva.
+
+    Texto base propuesto por la firma; los suplentes son personales: cada uno
+    reemplaza al principal frente al cual fue designado.
+    """
+    n_pri = len(junta.get("principales") or [])
+    n_sup = len(junta.get("suplentes") or [])
+    if n_sup == 0:
+        suplencia = ""
+        reemplazo = ""
+    elif n_sup >= n_pri:
+        suplencia = (", cada uno con su respectivo suplente personal"
+                     if n_pri > 1 else ", con su respectivo suplente personal")
+        reemplazo = (" Los suplentes personales reemplazarán al principal "
+                     "respectivo en sus faltas absolutas, temporales o accidentales.")
+    else:
+        suplencia = f" y {_cantidad(n_sup, 'suplente personal', 'suplentes personales')}"
+        reemplazo = (" Cada suplente personal reemplazará, en sus faltas absolutas, "
+                     "temporales o accidentales, al principal frente al cual fue designado.")
+
+    composicion = (
+        f"La sociedad tendrá una junta directiva integrada por "
+        f"{_cantidad(n_pri, 'miembro principal', 'miembros principales')}{suplencia}, "
+        f"elegidos por la asamblea general de accionistas para períodos de un (1) "
+        f"año, quienes podrán ser reelegidos indefinidamente o removidos libremente "
+        f"en cualquier tiempo.{reemplazo} Los miembros de la junta directiva podrán "
+        f"ser o no accionistas de la sociedad."
+    )
+    reuniones = (
+        "La junta directiva se reunirá ordinariamente por lo menos una (1) vez cada "
+        "tres (3) meses y, de manera extraordinaria, cuando la convoquen el "
+        "representante legal, el revisor fiscal, si lo hubiere, o cualquiera de sus "
+        "miembros principales. La convocatoria se hará por escrito, incluido el "
+        "correo electrónico, con una antelación mínima de cinco (5) días comunes. "
+        "La junta directiva deliberará válidamente con la presencia de la mayoría "
+        "de sus miembros y decidirá con el voto favorable de la mayoría de los "
+        "miembros presentes. Serán válidas las reuniones no presenciales y las "
+        "decisiones adoptadas por escrito en los términos de los artículos 19 y 20 "
+        "de la Ley 222 de 1995. De cada reunión se levantará un acta, firmada por "
+        "el presidente y el secretario de la respectiva sesión."
+    )
+    funciones = (
+        "Corresponde a la junta directiva: a) darse su propio reglamento; b) "
+        "autorizar al representante legal para celebrar los actos y contratos que "
+        "conforme a estos estatutos requieran su autorización previa; c) convocar a "
+        "la asamblea general de accionistas cuando lo estime conveniente; d) "
+        "presentar a la asamblea general de accionistas, junto con el representante "
+        "legal, el informe de gestión, los estados financieros de fin de ejercicio y "
+        "el proyecto de distribución de utilidades; y e) ejercer las demás "
+        "funciones que le delegue la asamblea general de accionistas o le asignen la "
+        "ley y estos estatutos."
+    )
+    return [
+        ("Composición y período de la junta directiva. ", composicion),
+        ("Reuniones, quórum y mayorías de la junta directiva. ", reuniones),
+        ("Funciones de la junta directiva. ", funciones),
+    ]
+
+
+def _insertar_capitulo_junta(doc, junta):
+    """
+    Con junta directiva: la agrega a los órganos del capítulo de dirección y
+    administración e inserta su capítulo antes del de representación legal,
+    renumerando los capítulos siguientes.
+    """
+    if not junta or not junta.get("principales"):
+        return False
+    body = doc._element.body
+
+    # Lista de órganos: "La asamblea...; y" / "El representante legal."
+    asamblea = _buscar_parrafo(doc, "La asamblea general de accionistas; y")
+    if asamblea is not None:
+        item = _clonar_parrafo(asamblea, ["La junta directiva; y"])
+        _reemplazar_frase(doc, "La asamblea general de accionistas; y",
+                          "La asamblea general de accionistas;")
+        asamblea.addnext(item)
+    _reemplazar_frase(
+        doc,
+        "La dirección de la sociedad le corresponde a la asamblea general de accionistas,",
+        "La dirección de la sociedad le corresponde a la asamblea general de "
+        "accionistas y a la junta directiva,",
+    )
+
+    cap_rl = _buscar_parrafo(doc, "CAPÍTULO V - Representación legal")
+    art_ref = _buscar_parrafo(doc, "Nombramiento y período del representante legal.")
+    if cap_rl is None or art_ref is None:
+        return False
+
+    # Renumerar desde el capítulo de representación legal en adelante
+    capitulos = [p for p in body.findall(qn("w:p"))
+                 if re.match(r"CAPÍTULO [IVX]+\b", _get_para_text(p).strip())]
+    posteriores = capitulos[capitulos.index(cap_rl):]
+    for p_elem in posteriores:
+        for t in p_elem.iter(qn("w:t")):
+            m = re.match(r"(CAPÍTULO )([IVX]+)\b", t.text or "")
+            if m and m.group(2) in ROMANOS:
+                sig = ROMANOS[ROMANOS.index(m.group(2)) + 1]
+                t.text = m.group(1) + sig + t.text[m.end():]
+                break
+
+    # Separador: la línea en blanco que sigue al título de capítulo
+    blanco = cap_rl.getnext()
+    if blanco is None or blanco.tag != qn("w:p") or _get_para_text(blanco).strip():
+        blanco = _make_paragraph("", font_name="Cambria")
+
+    # Mismos runs que el título de referencia: "CAPÍTULO V" + " - Título" (versalitas)
+    nuevo_cap = _clonar_parrafo(cap_rl, ["CAPÍTULO V", " - Junta directiva"])
+
+    bloque = [nuevo_cap, deepcopy(blanco)]
+    for titulo, cuerpo in _texto_articulos_junta(junta):
+        bloque += [_clonar_parrafo(art_ref, [titulo, cuerpo]), deepcopy(blanco)]
+    for el in bloque:
+        cap_rl.addprevious(el)
+    return True
+
+
+def _ajustar_suplentes_rl(doc, n_suplentes):
+    """Con suplentes designados, el artículo dice cuántos; sin ellos conserva
+    la facultad de designarlos a futuro."""
+    if n_suplentes < 1:
+        return False
+    return _reemplazar_frase(
+        doc,
+        "El representante legal podrá tener uno o varios suplentes, designados "
+        "por la asamblea general de accionistas, los cuales tendrán",
+        f"El representante legal tendrá {_cantidad(n_suplentes, 'suplente', 'suplentes')}, "
+        + ("designado por la asamblea general de accionistas, el cual tendrá"
+           if n_suplentes == 1 else
+           "designados por la asamblea general de accionistas, los cuales tendrán"),
+    )
+
+
+def _ajustar_suplente_revisor(doc, revisor):
+    """Revisor designado sin suplente: el suplente pasa a ser facultativo."""
+    if not revisor or revisor.get("suplente"):
+        return False
+    ok = _reemplazar_frase(doc, "un revisor fiscal, con su respectivo suplente,",
+                           "un revisor fiscal, quien podrá tener un suplente,")
+    _reemplazar_frase(doc, "El suplente reemplazará al principal",
+                      "El suplente, cuando sea designado, reemplazará al principal")
+    return ok
+
+
+# ════════════════════════════════════════════════════════════════
 # GENERADOR PRINCIPAL
 # ════════════════════════════════════════════════════════════════
 
@@ -2165,6 +2388,11 @@ def generar_estatutos(data, template_path, output_path):
 
     # Limitaciones del representante legal, en el artículo de sus funciones
     _insertar_limitaciones(doc, None, data.get("limitaciones_rl"))
+
+    # Número de órganos reflejado en el articulado permanente
+    _insertar_capitulo_junta(doc, data.get("junta_directiva"))
+    _ajustar_suplentes_rl(doc, len(rl_suplentes))
+    _ajustar_suplente_revisor(doc, data.get("revisor_fiscal"))
 
     # Nombramientos de junta directiva y revisor fiscal en el Artículo
     # Primero Transitorio (van después del representante legal suplente)

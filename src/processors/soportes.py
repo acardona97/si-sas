@@ -92,6 +92,11 @@ def requerimientos(data):
         else:
             add("cedula", "revisor", "revisor fiscal designado", rf.get("nombre"), rf.get("id_num"))
             add("tarjeta", "revisor", "revisor fiscal designado", rf.get("nombre"))
+        sup = rf.get("suplente") or {}
+        if sup.get("nombre"):
+            add("cedula", "revisor_suplente", "revisor fiscal suplente",
+                sup.get("nombre"), sup.get("id_num"))
+            add("tarjeta", "revisor_suplente", "revisor fiscal suplente", sup.get("nombre"))
 
     ap = data.get("apoderado")
     if ap and ap.get("nombre"):
