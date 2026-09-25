@@ -1165,7 +1165,28 @@
                         </label>
                         <span class="upload-status" id="tp_abogado_upload_status"></span>
                     </div>
-                    <div id="avanzado-contenido" class="hidden"></div>
+                    <div id="avanzado-contenido" class="hidden">
+                        <div class="form-group solo-junta">
+                            <label for="disp_junta">Disposiciones especiales sobre la junta directiva</label>
+                            <textarea id="disp_junta" rows="3" data-disposicion="junta"
+                                      placeholder="Ej: Las reuniones de junta podrán ser virtuales y el presidente tendrá voto de desempate."></textarea>
+                            <span class="hint">Se incorporan como parágrafos o incisos de los artículos de junta directiva.</span>
+                        </div>
+                        <div class="form-group solo-revisor">
+                            <label for="disp_revisor">Disposiciones especiales sobre la revisoría fiscal</label>
+                            <textarea id="disp_revisor" rows="3" data-disposicion="revisor"
+                                      placeholder="Ej: El revisor fiscal presentará informes trimestrales a la junta directiva."></textarea>
+                            <span class="hint">Se incorporan en el artículo de revisoría fiscal.</span>
+                        </div>
+                        <p class="hint"><strong>Disposiciones adicionales</strong> — se ubican en el artículo con el que se relacionen, como parágrafo o inciso.</p>
+                        <div id="disp-adicionales"></div>
+                        <button type="button" class="btn btn-outline" onclick="addDisposicionAdicional()">+ Agregar disposición adicional</button>
+                        <div class="step-actions" style="justify-content:flex-start">
+                            <button type="button" class="btn btn-primary" id="btn-disp-preview"
+                                    onclick="previewDisposiciones()">Redactar e integrar con IA</button>
+                        </div>
+                        <div id="disp-preview"></div>
+                    </div>
                 </fieldset>
 
                 <div class="step-actions">

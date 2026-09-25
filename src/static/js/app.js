@@ -1318,6 +1318,135 @@ async function validarTPAbogado(input) {
     }
 }
 
+// ─── Disposiciones especiales (requieren tarjeta de abogado) ───
+// Sonnet propone dónde y cómo integrar cada disposición; el abogado revisa
+// la propuesta como control de cambios, puede editar cada texto y aceptar o
+// descartar cada cambio. Solo lo aceptado viaja al generar.
+let dispPreview = null;
+let dispAdicionalCount = 0;
+
+function _refrescarBloquesAbogado() {
+    const junta = document.querySelector('input[name="junta"]:checked')?.value === 'si';
+    const revisor = document.querySelector('input[name="revisor"]:checked')?.value === 'si';
+    document.querySelectorAll('.solo-junta').forEach(el => el.classList.toggle('hidden', !junta));
+    document.querySelectorAll('.solo-revisor').forEach(el => el.classList.toggle('hidden', !revisor));
+}
+document.addEventListener('tp-abogado', () => { _invalidarPreview(); _refrescarBloquesAbogado(); });
+document.addEventListener('change', e => {
+    if (e.target.name === 'junta' || e.target.name === 'revisor') _refrescarBloquesAbogado();
+});
+// Cambiar una disposición después de la vista previa obliga a repetirla
+document.addEventListener('input', e => {
+    if (e.target.matches?.('[data-disposicion]')) _invalidarPreview();
+});
+
+function _invalidarPreview() {
+    if (!dispPreview) return;
+    dispPreview = null;
+    const cont = document.getElementById('disp-preview');
+    if (cont) cont.innerHTML = '<p class="hint">Las disposiciones cambiaron: vuelva a redactar e integrar con IA.</p>';
+}
+
+function addDisposicionAdicional() {
+    dispAdicionalCount++;
+    const div = document.createElement('div');
+    div.className = 'form-group';
+    div.dataset.dispAdicional = dispAdicionalCount;
+    div.innerHTML = `
+        <label>Disposición adicional
+            <button type="button" class="btn btn-danger" style="margin-left:.75rem"
+                    onclick="this.closest('[data-disp-adicional]').remove(); _invalidarPreview()">Eliminar</button>
+        </label>
+        <textarea rows="3" data-disposicion="adicional"
+                  placeholder="Ej: Las acciones no podrán darse en garantía sin autorización de la asamblea."></textarea>`;
+    document.getElementById('disp-adicionales').appendChild(div);
+}
+
+function getDisposicionesPedidas() {
+    const lista = [];
+    document.querySelectorAll('#avanzado-contenido [data-disposicion]').forEach(t => {
+        if (t.closest('.hidden')) return;   // junta o revisor sin ese órgano
+        const texto = t.value.trim();
+        if (texto) lista.push({ tema: t.dataset.disposicion, texto: texto });
+    });
+    return lista;
+}
+
+const _esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function previewDisposiciones() {
+    const pedidas = getDisposicionesPedidas();
+    const cont = document.getElementById('disp-preview');
+    const btn = document.getElementById('btn-disp-preview');
+    if (!pedidas.length) { alert('Escriba al menos una disposición.'); return; }
+    btn.disabled = true;
+    cont.innerHTML = '<p class="hint"><span class="spinner"></span> Redactando, integrando y validando los estatutos completos. Puede tardar un par de minutos...</p>';
+    try {
+        const data = collectAllData();
+        delete data.disposiciones;
+        const resp = await fetch('/api/disposiciones/preview', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...data, disposiciones_pedidas: pedidas }),
+        });
+        const r = await resp.json();
+        if (!resp.ok) throw new Error(r.error || 'Error integrando las disposiciones');
+        dispPreview = r;
+        _renderPreview();
+    } catch (e) {
+        dispPreview = null;
+        cont.innerHTML = `<p class="upload-status error">✗ ${_esc(e.message)}</p>`;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function _renderPreview() {
+    const cont = document.getElementById('disp-preview');
+    const r = dispPreview;
+    const accion = { insertar: 'Se incorpora', reemplazar: 'Se reemplaza', eliminar: 'Se elimina' };
+    let h = '<h4>Cambios propuestos (control de cambios)</h4>';
+    if (!r.operaciones.length) h += '<p class="hint">No se propusieron cambios.</p>';
+    r.operaciones.forEach((op, k) => {
+        const forma = op.tipo === 'insertar' ? ` como ${op.forma === 'paragrafo' ? 'parágrafo' : 'inciso'}` : '';
+        h += `<div class="cambio-card" data-op="${k}">
+            <label class="cambio-head">
+                <input type="checkbox" data-op-acepta checked>
+                <strong>${_esc(op.articulo || 'Estatutos')}</strong> — ${accion[op.tipo]}${forma}
+                <span class="hint">(disposición ${_esc(op.disposicion)})</span>
+            </label>
+            ${op.texto_original ? `<p class="cambio-del">${_esc(op.texto_original)}</p>` : ''}
+            ${op.tipo !== 'eliminar' ? `<textarea class="cambio-ins" rows="3" data-op-texto>${_esc(op.texto)}</textarea>` : ''}
+            <p class="hint">Motivo: ${_esc(op.motivo)}</p>
+        </div>`;
+    });
+    if (r.ajustes?.length) {
+        h += '<h4>Ajustes por validez y coherencia</h4><ul>'
+            + r.ajustes.map(a => `<li><strong>Disposición ${_esc(a.disposicion)}:</strong> ${_esc(a.explicacion)}</li>`).join('')
+            + '</ul>';
+    }
+    if (r.hallazgos?.length) {
+        h += '<h4>Observaciones de la revisión final</h4><ul>'
+            + r.hallazgos.map(x => `<li>${_esc(x)}</li>`).join('') + '</ul>';
+    }
+    cont.innerHTML = h;
+}
+
+/** Disposiciones aprobadas tal como quedaron en la vista previa. */
+function getDisposicionesAprobadas() {
+    if (!tpAbogado || !dispPreview) return null;
+    const operaciones = [];
+    document.querySelectorAll('#disp-preview .cambio-card').forEach(card => {
+        if (!card.querySelector('[data-op-acepta]').checked) return;
+        const op = { ...dispPreview.operaciones[parseInt(card.dataset.op)] };
+        const t = card.querySelector('[data-op-texto]');
+        if (t) op.texto = t.value.trim();
+        if (op.tipo === 'eliminar' || op.texto) operaciones.push(op);
+    });
+    if (!operaciones.length) return null;
+    return { operaciones, ajustes: dispPreview.ajustes || [], hallazgos: dispPreview.hallazgos || [],
+             textos_usuario: dispPreview.textos_usuario || [] };
+}
+
 // ─── Arrastrar y soltar documentos ───
 // Toda zona de carga acepta el archivo soltado encima: se entrega a su
 // <input type="file"> y se dispara el mismo flujo que al seleccionarlo.
@@ -2246,6 +2375,7 @@ function collectAllData() {
         es_empresa_familiar: document.querySelector('input[name="empresa_familiar"]:checked')?.value === 'si',
         nucleo_familiar: getNucleoFamiliarData(),
         apoderado: apoderado,
+        disposiciones: getDisposicionesAprobadas(),
     };
 }
 
@@ -2328,6 +2458,9 @@ function buildSummary() {
 
     h += '<h3>Documentos a Generar</h3><div class="docs-list">';
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Estatutos</div>';
+    if (d.disposiciones) {
+        h += `<div class="doc-item"><span class="doc-check">&#10003;</span> Estatutos con control de cambios e informe (${d.disposiciones.operaciones.length} disposiciones integradas)</div>`;
+    }
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Formulario RUES</div>';
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Formulario Otras Entidades</div>';
     h += '<div class="doc-item"><span class="doc-check">&#10003;</span> Anexo Responsabilidades Tributarias</div>';

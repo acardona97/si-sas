@@ -44,6 +44,9 @@ from processors.responsabilidades import (
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
 from processors.soportes import armar_soportes
+from processors.disposiciones import (
+    DisposicionError, generar_informe, proponer_disposiciones,
+)
 from processors.pdf_filler import (
     generar_emprendimientos,
     generar_situacion_control,
@@ -519,7 +522,17 @@ def generate():
             "error": "Las disposiciones especiales y el modelo propio de estatutos "
                      "requieren cargar la tarjeta profesional de abogado."
         }), 403
+    return _generar_paquete(data, archivos_soporte)
 
+
+def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
+    """Arma el paquete completo y devuelve la respuesta con el ZIP.
+
+    Con `solo_estatutos` se detiene tras los estatutos y devuelve la ruta del
+    .docx: la vista previa de disposiciones trabaja sobre exactamente el
+    mismo documento que luego se genera. Los errores de validación se
+    devuelven siempre como respuesta JSON.
+    """
     tmp_dir = tempfile.mkdtemp(prefix="si_sas_")
     errors = []
 
@@ -783,9 +796,29 @@ def generate():
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Estatutos.docx")
             tmpl = os.path.join(PLANTILLAS_DIR, "estatutos_template.docx")
-            generar_estatutos(est_data, tmpl, out)
-            generated.append(out)
+            if solo_estatutos:
+                generar_estatutos(est_data, tmpl, out)
+                return out
+            disp = data.get("disposiciones")
+            disposiciones = (disp.get("operaciones") or []) if isinstance(disp, dict) else []
+            if disposiciones:
+                # Limpio para radicar, con control de cambios para revisión y
+                # el informe de lo que se integró o ajustó.
+                generar_estatutos(dict(est_data, disposiciones=disposiciones), tmpl, out)
+                out_cambios = out.replace("_Estatutos.docx", "_Estatutos_control_de_cambios.docx")
+                generar_estatutos(dict(est_data, disposiciones=disposiciones,
+                                       disposiciones_con_cambios=True), tmpl, out_cambios)
+                out_informe = out.replace("_Estatutos.docx", "_Informe_disposiciones_especiales.pdf")
+                generar_informe(data["disposiciones"], nombre_sas, out_informe)
+                generated += [out, out_cambios, out_informe]
+            else:
+                generar_estatutos(est_data, tmpl, out)
+                generated.append(out)
+        except DisposicionError as e:
+            return jsonify({"error": str(e)}), 409
         except Exception as e:
+            if solo_estatutos:
+                raise
             errors.append(f"Estatutos: {e}")
 
         # ─── 2. RUES (.pdf) ───
@@ -1267,6 +1300,30 @@ def extract_tp_abogado():
     }
     return jsonify({"valida": True, "numero_tarjeta": numero,
                     "nombre_completo": session["tp_abogado"]["nombre"]})
+
+
+@app.route("/api/disposiciones/preview", methods=["POST"])
+@login_required
+def disposiciones_preview():
+    """Vista previa de las disposiciones especiales sobre los estatutos que
+    resultan del cuestionario actual. No consume generaciones."""
+    if not tp_abogado_vigente():
+        return jsonify({"error": "Cargue primero la tarjeta profesional de abogado."}), 403
+    data = request.get_json(silent=True) or {}
+    pedidas = [d for d in (data.pop("disposiciones_pedidas", None) or [])
+               if str((d or {}).get("texto") or "").strip()]
+    if not pedidas:
+        return jsonify({"error": "Escriba al menos una disposición."}), 400
+    data.pop("disposiciones", None)
+
+    base = _generar_paquete(data, {}, solo_estatutos=True)
+    if not isinstance(base, str):
+        return base  # error de validación del cuestionario
+    try:
+        return jsonify(proponer_disposiciones(base, pedidas))
+    except Exception as e:
+        app.logger.error(f"Error en disposiciones_preview: {e}")
+        return jsonify({"error": f"No se pudieron integrar las disposiciones: {e}"}), 502
 
 
 @app.route("/api/extract/certificado", methods=["POST"])

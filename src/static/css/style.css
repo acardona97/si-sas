@@ -1057,6 +1057,31 @@ fieldset legend {
 }
 .upload-doc-section:hover { border-color: var(--accent); }
 .upload-doc-section.drag-over { border-color: var(--accent); border-style: solid; }
+
+/* Vista previa de disposiciones especiales como control de cambios */
+.cambio-card {
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius-lg);
+    padding: .875rem 1rem;
+    margin: .75rem 0;
+}
+.cambio-head { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; cursor: pointer; }
+.cambio-del {
+    text-decoration: line-through;
+    color: var(--danger, #c62828);
+    background: color-mix(in srgb, var(--danger, #c62828) 8%, transparent);
+    padding: .5rem .625rem;
+    border-radius: 6px;
+    margin: .5rem 0;
+}
+textarea.cambio-ins {
+    width: 100%;
+    border: 1.5px solid var(--success, #2e7d32);
+    background: color-mix(in srgb, var(--success, #2e7d32) 6%, transparent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--success, #2e7d32) 50%, transparent);
+    margin: .5rem 0;
+}
 .upload-doc-section .upload-doc-btn::after {
     content: " o arrastre aquí";
     font-weight: 400;

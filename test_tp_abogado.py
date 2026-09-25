@@ -22,7 +22,7 @@ def subir(client):
 
 client = _cliente()
 payload = _payload("payload_b.json", PAYLOAD_B)
-payload["disposiciones"] = [{"tema": "adicional", "texto": "prueba"}]
+payload["disposiciones"] = {"operaciones": [], "ajustes": [], "hallazgos": []}
 
 # Sin tarjeta: pedir disposiciones se rechaza
 r = client.post("/api/generate", json=payload)

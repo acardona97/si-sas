@@ -65,6 +65,11 @@ assert "integrada por tres (3) miembros principales y dos (2) suplentes personal
 assert "El representante legal tendrá dos (2) suplentes, designados" in txt
 assert "un revisor fiscal, quien podrá tener un suplente," in txt
 assert "tres (3) miembros principales y dos (2) miembros suplentes personales" in txt
+# Coherencia del resto del articulado con la junta ya creada
+assert "si se llegare a crear este órgano" not in txt
+assert "Elegir y remover libremente a los miembros de la junta directiva" in txt
+assert "salvo en la elección de la junta directiva o de otros cuerpos colegiados" in txt
+assert "En ningún caso los accionistas podrán fraccionar su voto." not in txt
 
 # Los artículos nuevos copian el formato del artículo de referencia
 ps = doc.paragraphs

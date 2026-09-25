@@ -2181,6 +2181,23 @@ def _insertar_capitulo_junta(doc, junta):
         "La dirección de la sociedad le corresponde a la asamblea general de "
         "accionistas y a la junta directiva,",
     )
+    # Con la junta ya creada, la función de la asamblea no es condicional
+    _reemplazar_frase(
+        doc,
+        "Elegir a los miembros de la junta directiva si se llegare a crear este "
+        "órgano, nombrar libremente a los miembros de éste y fijar su remuneración;",
+        "Elegir y remover libremente a los miembros de la junta directiva y fijar "
+        "su remuneración;",
+    )
+    # El artículo 23 de la Ley 1258 de 2008 permite fraccionar el voto para
+    # elegir juntas directivas: la prohibición absoluta choca con la junta.
+    _reemplazar_frase(
+        doc,
+        "En ningún caso los accionistas podrán fraccionar su voto.",
+        "Los accionistas no podrán fraccionar su voto, salvo en la elección de la "
+        "junta directiva o de otros cuerpos colegiados, en los términos del "
+        "artículo 23 de la Ley 1258 de 2008.",
+    )
 
     cap_rl = _buscar_parrafo(doc, "CAPÍTULO V - Representación legal")
     art_ref = _buscar_parrafo(doc, "Nombramiento y período del representante legal.")
@@ -2424,6 +2441,12 @@ def generar_estatutos(data, template_path, output_path):
     # Último paso: un solo espacio entre palabras en todo el documento. Va al
     # final para que alcance también al texto insertado por los pasos previos.
     _colapsar_espacios_dobles(doc)
+
+    # Disposiciones especiales aprobadas en la vista previa: van al final
+    # porque se anclaron sobre el documento ya terminado.
+    if data.get("disposiciones"):
+        from processors.disposiciones import aplicar
+        aplicar(doc, data["disposiciones"], con_cambios=data.get("disposiciones_con_cambios", False))
 
     doc.save(output_path)
 
