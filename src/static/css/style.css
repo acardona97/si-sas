@@ -1,35 +1,40 @@
 /* ══════════════════════════════════════════════════════════════
-   Sí S.A.S. — Company Maker — Quarta Legal
-   Design system inspired by quarta.co
+   Sí S.A.S. — Company Maker — Anuwa
+   Sistema de diseño alineado con la propuesta de marca final de Anuwa
+   (deck «ANUWA X 301 - Etapa 02»): azul #3641E4, navy #004571,
+   lavanda #E3E3EF, acento morado #82389A, tipografía DIN Pro/Barlow.
    ══════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap');
 
 :root {
     /* ─── Paleta ───
-       Tomada del logotipo vectorial de Quarta y del encabezado de quarta.co:
-       el azul profundo #001A36 es el fondo de la barra del sitio y el punto
-       más oscuro del degradado del ave; #005DB8 y #004483 son los dos azules
-       del ave; #004571 es el del descriptor «acompañamiento de negocios».
+       Tomada de la propuesta final de marca de Anuwa: #3641E4 es el azul
+       primario del wordmark y de los llamados a la acción; #004571 es el
+       navy que antes ocupaba el azul Quarta (barra lateral, encabezados);
+       #E3E3EF es el gris-lavanda claro para fondos y bordes suaves; y
+       #82389A es el acento morado, reservado para detalles puntuales.
        Todos los pares de texto y fondo verifican 4.5:1 o más.            */
     --bg:           #FFFFFF;
-    --bg-page:      #F5F7FA;           /* gris frío, del lado del azul */
+    --bg-page:      #F6F6FB;           /* gris-lavanda muy claro, del lado de #E3E3EF */
     --bg-card:      #FFFFFF;
 
-    --navy:         #001A36;           /* azul Quarta, el de la barra */
-    --navy-light:   #00305C;
-    --navy-mid:     #004571;           /* el del descriptor del logo */
+    --navy:         #004571;           /* navy Anuwa, el de la barra */
+    --navy-light:   #0A5A8F;
+    --navy-mid:     #004571;
 
-    --accent:        #005DB8;          /* azul vivo del ave */
-    --accent-light:  #EAF2FB;
-    --accent-border: #A9C9E8;
-    --accent-hover:  #004483;          /* azul medio del ave */
-    /* Sobre el azul de la barra lateral el acento solo da 2.7:1: para texto
-       e iconos ahí se usa este aclarado, que da 8.4:1.                    */
-    --accent-on-navy: #7FB9F0;
+    --accent:        #3641E4;          /* azul primario Anuwa (el del wordmark) */
+    --accent-light:  #E3E3EF;          /* lavanda clara de la paleta */
+    --accent-border: #C6C9F2;
+    --accent-hover:  #2A32B5;          /* azul primario oscurecido, para hover/texto */
+    /* Sobre el navy de la barra lateral el acento solo da ~1.5:1: para texto
+       e iconos ahí se usa este aclarado, que da 5.1:1.                    */
+    --accent-on-navy: #AEB4F5;
 
-    --border:       #DDE3EA;
-    --border-light: #EDF1F5;
+    --purple-accent: #82389A;          /* acento morado de marca, uso puntual */
+
+    --border:       #D6D8ED;
+    --border-light: #ECEDF6;
 
     --text:         #10171F;
     --text-secondary: #4A5560;
@@ -39,17 +44,19 @@
     --success:      #1E7A4A;
 
     /* ─── Tipografía ───
-       quarta.co usa Open Sans de punta a punta; aquí también, para que la
-       app y el sitio se lean como una sola marca.                        */
-    --font-display: 'Open Sans', -apple-system, 'Segoe UI', Helvetica, sans-serif;
-    --font-body:    'Open Sans', -apple-system, 'Segoe UI', Helvetica, sans-serif;
+       La marca usa DIN Pro (Medium en títulos, Regular en cuerpo); como es
+       comercial, en la web se usa Barlow —inspirada en DIN— y se deja
+       'DIN Pro' primero en la pila para poder soltar la fuente con licencia
+       más adelante sin tocar el resto del CSS.                           */
+    --font-display: 'DIN Pro', 'Barlow', -apple-system, 'Segoe UI', Helvetica, sans-serif;
+    --font-body:    'DIN Pro', 'Barlow', -apple-system, 'Segoe UI', Helvetica, sans-serif;
 
     /* ─── Geometry ─── */
     --radius:       6px;
     --radius-lg:    10px;
-    --shadow-sm:    0 1px 3px rgba(0,26,54,0.06), 0 1px 2px rgba(0,26,54,0.04);
-    --shadow-md:    0 4px 12px rgba(0,26,54,0.08), 0 2px 4px rgba(0,26,54,0.05);
-    --shadow-lg:    0 8px 30px rgba(0,26,54,0.12), 0 3px 8px rgba(0,26,54,0.06);
+    --shadow-sm:    0 1px 3px rgba(0,69,113,0.06), 0 1px 2px rgba(0,69,113,0.04);
+    --shadow-md:    0 4px 12px rgba(0,69,113,0.08), 0 2px 4px rgba(0,69,113,0.05);
+    --shadow-lg:    0 8px 30px rgba(0,69,113,0.12), 0 3px 8px rgba(0,69,113,0.06);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -118,7 +125,7 @@ body {
     /* El azul plano se ve muerto en una columna de 100vh; el resplandor da
        profundidad sin competir con el contenido. */
     background:
-        radial-gradient(120% 55% at 0% 0%, rgba(0,93,184,0.22) 0%, transparent 62%),
+        radial-gradient(120% 55% at 0% 0%, rgba(54,65,228,0.22) 0%, transparent 62%),
         var(--navy);
     color: white;
     padding: 2.25rem 1.5rem;
@@ -140,7 +147,7 @@ body {
     background: linear-gradient(90deg, var(--accent-hover), var(--accent) 55%, var(--accent-on-navy));
 }
 
-/* Bloque de marca: el producto arriba, el logotipo de Quarta debajo,
+/* Bloque de marca: el producto arriba, el logotipo de Anuwa debajo,
    separados por un filete. El logotipo lleva aire propio: la versión anterior
    iba pegada al borde y el descriptor no se alcanzaba a leer. */
 .brand { margin-bottom: 1.5rem; }
@@ -154,13 +161,13 @@ body {
     line-height: 1.1;
 }
 
-.brand-quarta {
+.brand-anuwa {
     display: block;
     margin-top: 0.9rem;
     padding-top: 0.9rem;
     border-top: 1px solid rgba(255,255,255,0.12);
 }
-.brand-quarta:focus-visible { outline-offset: 4px; }
+.brand-anuwa:focus-visible { outline-offset: 4px; }
 
 /* Avance del cuestionario: siete pasos son muchos para no decir dónde va */
 .brand-avance { margin-bottom: 1.75rem; }
@@ -272,7 +279,7 @@ body {
 }
 
 .step-item.active {
-    background: rgba(0,93,184,0.20);
+    background: rgba(54,65,228,0.20);
     color: #FFFFFF;
 }
 
@@ -308,7 +315,7 @@ body {
     border-color: var(--accent);
     color: #FFFFFF;                    /* 6.5:1; el navy solo daba 2.7:1 */
     font-weight: 700;
-    box-shadow: 0 0 0 4px rgba(0,93,184,0.22);
+    box-shadow: 0 0 0 4px rgba(54,65,228,0.22);
 }
 
 /* Cumplido: círculo lleno con visto. El número se oculta pero sigue en el
@@ -413,7 +420,7 @@ body {
     color: var(--navy);
     font-weight: 700;
     line-height: 1.2;
-    /* Open Sans se abre mucho en tamaños grandes */
+    /* Barlow se abre mucho en tamaños grandes */
     letter-spacing: -0.015em;
     text-wrap: balance;
     margin-bottom: 0.45rem;
@@ -484,7 +491,7 @@ body {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,93,184,0.12);
+    box-shadow: 0 0 0 3px rgba(54,65,228,0.12);
 }
 
 .input-disabled {
@@ -559,11 +566,11 @@ fieldset legend {
 .btn-primary {
     background: var(--accent);
     color: #FFF;
-    box-shadow: 0 1px 3px rgba(0,93,184,0.25);
+    box-shadow: 0 1px 3px rgba(54,65,228,0.25);
 }
 .btn-primary:hover {
     background: var(--accent-hover);
-    box-shadow: 0 3px 8px rgba(0,93,184,0.35);
+    box-shadow: 0 3px 8px rgba(54,65,228,0.35);
     transform: translateY(-1px);
 }
 .btn-primary:active { transform: translateY(0); }
@@ -729,7 +736,7 @@ fieldset legend {
 .radio-card.selected {
     border-color: var(--accent);
     background: var(--accent-light);
-    box-shadow: 0 0 0 3px rgba(0,93,184,0.1);
+    box-shadow: 0 0 0 3px rgba(54,65,228,0.1);
 }
 .radio-card input { display: none; }
 .radio-title {
@@ -875,7 +882,7 @@ fieldset legend {
 .chat-toggle:hover {
     background: var(--navy-light);
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0,26,54,0.28);
+    box-shadow: 0 10px 30px rgba(0,69,113,0.28);
 }
 .chat-toggle.active { background: var(--danger); }
 
@@ -893,7 +900,7 @@ fieldset legend {
     max-height: calc(100vh - 2rem);
     background: var(--bg);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: -4px 0 40px rgba(0,26,54,0.15);
+    box-shadow: -4px 0 40px rgba(0,69,113,0.15);
     display: flex;
     flex-direction: column;
     z-index: 1001;
@@ -1159,11 +1166,11 @@ fieldset legend {
     margin-bottom: 0.65rem;
 }
 .plan-badge-basic       { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
-.plan-badge-standard    { background: rgba(0,93,184,0.2);  color: var(--accent-border); }
+.plan-badge-standard    { background: rgba(54,65,228,0.2);  color: var(--accent-border); }
 .plan-badge-abogado     { background: rgba(30,122,74,0.2);   color: #5DD98C; }
-.plan-badge-premium     { background: rgba(0,93,184,0.35); color: var(--accent-border); }
+.plan-badge-premium     { background: rgba(54,65,228,0.35); color: var(--accent-border); }
 .plan-badge-corporativo { background: rgba(100,120,200,0.2); color: #8B9FE8; }
-.plan-badge-admin       { background: rgba(0,93,184,0.5);  color: #fff; }
+.plan-badge-admin       { background: rgba(54,65,228,0.5);  color: #fff; }
 
 .sidebar-user-link {
     display: block;
@@ -1179,7 +1186,7 @@ fieldset legend {
 
 /* ══════════════════════════════════════════════════════════════
    LANDING PAGE — Lex Aurum design system (Stitch project)
-   Azul Quarta #001A36 · Acento #005DB8 · Fondo #F5F7FA
+   Navy Anuwa #004571 · Acento #3641E4 · Fondo #F6F6FB
    ══════════════════════════════════════════════════════════════ */
 .landing-body {
     font-family: var(--font-body);
@@ -1209,7 +1216,7 @@ fieldset legend {
     background: rgba(247,245,242,0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0,26,54,0.08);
+    border-bottom: 1px solid rgba(0,69,113,0.08);
 }
 .l-nav-inner {
     max-width: 1200px;
@@ -1288,7 +1295,7 @@ fieldset legend {
     display: inline-flex;
     align-items: center;
 }
-.l-btn-cta:hover { background: #00305C; }
+.l-btn-cta:hover { background: #0A5A8F; }
 
 /* Container — Lex Aurum 1200px max, 64px desktop margin */
 .l-container {
@@ -1300,7 +1307,7 @@ fieldset legend {
     .l-container { padding: 0 20px; }
 }
 
-/* Hero — fondo claro, tipografía Open Sans, texto en azul Quarta */
+/* Hero — fondo claro, tipografía Barlow, texto en navy Anuwa */
 .l-hero {
     background: var(--bg-page);
     padding: 120px 0 96px;
@@ -1380,8 +1387,8 @@ fieldset legend {
     border: none;
 }
 .l-btn-primary:hover {
-    background: #00305C;
-    box-shadow: 0 4px 16px rgba(0,93,184,0.15);
+    background: #0A5A8F;
+    box-shadow: 0 4px 16px rgba(54,65,228,0.15);
 }
 .l-btn-ghost {
     background: transparent;
@@ -1439,20 +1446,20 @@ fieldset legend {
     background: var(--navy);
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 24px 48px -16px rgba(0,26,54,0.18);
+    box-shadow: 0 24px 48px -16px rgba(0,69,113,0.18);
 }
 .l-hero-visual::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, var(--navy) 0%, #00305C 100%);
+    background: linear-gradient(135deg, var(--navy) 0%, #0A5A8F 100%);
 }
 .l-hero-visual::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 30% 20%, rgba(0,93,184,0.2) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(0,93,184,0.15) 0%, transparent 50%);
+    background: radial-gradient(circle at 30% 20%, rgba(54,65,228,0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(54,65,228,0.15) 0%, transparent 50%);
 }
 .l-hero-visual-mark {
     position: absolute;
@@ -1503,8 +1510,8 @@ fieldset legend {
 .l-how {
     padding: 96px 0;
     background: #fff;
-    border-top: 1px solid rgba(0,26,54,0.06);
-    border-bottom: 1px solid rgba(0,26,54,0.06);
+    border-top: 1px solid rgba(0,69,113,0.06);
+    border-bottom: 1px solid rgba(0,69,113,0.06);
 }
 .l-section-title {
     font-family: var(--font-display);
@@ -1536,7 +1543,7 @@ fieldset legend {
     padding: 2.5rem 2rem;
     text-align: left;
     background: var(--bg-page);
-    border: 1px solid rgba(0,26,54,0.06);
+    border: 1px solid rgba(0,69,113,0.06);
     border-radius: 0.5rem;
     position: relative;
 }
@@ -1591,9 +1598,9 @@ fieldset legend {
     margin: 0 auto 4rem;
     padding: 4px;
     background: #fff;
-    border: 1px solid rgba(0,26,54,0.08);
+    border: 1px solid rgba(0,69,113,0.08);
     border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0,26,54,0.04);
+    box-shadow: 0 1px 3px rgba(0,69,113,0.04);
     width: max-content;
     justify-self: center;
 }
@@ -1639,7 +1646,7 @@ fieldset legend {
 .l-plans-panel { display: none; }
 .l-plans-panel.active { display: block; }
 .l-plan-card {
-    border: 1px solid rgba(0,26,54,0.10);
+    border: 1px solid rgba(0,69,113,0.10);
     border-radius: 0.5rem;
     padding: 40px 32px 32px;
     background: #fff;
@@ -1660,13 +1667,13 @@ fieldset legend {
     transition: opacity 0.25s;
 }
 .l-plan-card:hover {
-    box-shadow: 0 12px 32px -8px rgba(0,93,184,0.15), 0 4px 12px rgba(0,26,54,0.06);
+    box-shadow: 0 12px 32px -8px rgba(54,65,228,0.15), 0 4px 12px rgba(0,69,113,0.06);
     transform: translateY(-4px);
 }
 .l-plan-card:hover::before { opacity: 1; }
 .l-plan-featured {
-    border-color: rgba(0,93,184,0.4);
-    box-shadow: 0 8px 24px -4px rgba(0,93,184,0.18);
+    border-color: rgba(54,65,228,0.4);
+    box-shadow: 0 8px 24px -4px rgba(54,65,228,0.18);
 }
 .l-plan-featured::before { opacity: 1; height: 6px; }
 .l-plan-pop {
@@ -1730,7 +1737,7 @@ fieldset legend {
     letter-spacing: 0.02em;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(0,26,54,0.08);
+    border-bottom: 1px solid rgba(0,69,113,0.08);
 }
 .l-plan-features {
     list-style: none;
@@ -1778,14 +1785,14 @@ fieldset legend {
     left: 0; top: 0.3rem;
     width: 18px; height: 18px;
     border-radius: 50%;
-    border: 1.5px solid rgba(0,26,54,0.15);
+    border: 1.5px solid rgba(0,69,113,0.15);
 }
 
-/* Why Quarta — Lex Aurum editorial split */
+/* Why Anuwa — Lex Aurum editorial split */
 .l-why {
     padding: 120px 0;
     background: #fff;
-    border-top: 1px solid rgba(0,26,54,0.06);
+    border-top: 1px solid rgba(0,69,113,0.06);
 }
 .l-why-grid {
     display: grid;
@@ -1814,7 +1821,7 @@ fieldset legend {
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-top: 1px solid rgba(0,26,54,0.08);
+    border-top: 1px solid rgba(0,69,113,0.08);
 }
 .l-why-item {
     display: grid;
@@ -1822,12 +1829,12 @@ fieldset legend {
     gap: 1.5rem;
     align-items: start;
     padding: 1.75rem 0;
-    border-bottom: 1px solid rgba(0,26,54,0.08);
+    border-bottom: 1px solid rgba(0,69,113,0.08);
 }
 .l-why-icon {
     width: 48px; height: 48px;
     background: var(--bg-page);
-    border: 1px solid rgba(0,93,184,0.2);
+    border: 1px solid rgba(54,65,228,0.2);
     border-radius: 0.25rem;
     display: flex;
     align-items: center;
@@ -1946,7 +1953,7 @@ fieldset legend {
     text-transform: uppercase;
     color: var(--text-muted);
     padding-right: 2rem;
-    border-right: 1px solid rgba(0,26,54,0.1);
+    border-right: 1px solid rgba(0,69,113,0.1);
 }
 .l-trust-item:last-child { border-right: none; padding-right: 0; }
 .l-trust-icon {
@@ -1970,7 +1977,7 @@ fieldset legend {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 50% 100%, rgba(0,93,184,0.18) 0%, transparent 65%);
+    background: radial-gradient(ellipse at 50% 100%, rgba(54,65,228,0.18) 0%, transparent 65%);
     pointer-events: none;
 }
 .l-cta-banner-eyebrow {
@@ -2008,7 +2015,7 @@ fieldset legend {
 }
 .l-cta-banner .l-btn-primary:hover {
     background: var(--accent-hover);
-    box-shadow: 0 8px 24px rgba(0,93,184,0.3);
+    box-shadow: 0 8px 24px rgba(54,65,228,0.3);
 }
 
 /* Stats row — Lex Aurum: editorial numbers */
@@ -2020,15 +2027,15 @@ fieldset legend {
     margin: 0 auto;
     padding: 64px 64px;
     background: #fff;
-    border: 1px solid rgba(0,26,54,0.06);
+    border: 1px solid rgba(0,69,113,0.06);
     border-radius: 0.5rem;
     transform: translateY(-48px);
-    box-shadow: 0 16px 40px -16px rgba(0,26,54,0.12);
+    box-shadow: 0 16px 40px -16px rgba(0,69,113,0.12);
 }
 .l-stat {
     text-align: center;
     padding: 0 2rem;
-    border-right: 1px solid rgba(0,26,54,0.08);
+    border-right: 1px solid rgba(0,69,113,0.08);
 }
 .l-stat:last-child { border-right: none; }
 .l-stat-num {
@@ -2054,7 +2061,7 @@ fieldset legend {
 }
 @media (max-width: 700px) {
     .l-stats { grid-template-columns: 1fr; gap: 2rem; padding: 32px; transform: none; }
-    .l-stat { border-right: none; border-bottom: 1px solid rgba(0,26,54,0.08); padding-bottom: 2rem; }
+    .l-stat { border-right: none; border-bottom: 1px solid rgba(0,69,113,0.08); padding-bottom: 2rem; }
     .l-stat:last-child { border-bottom: none; padding-bottom: 0; }
     .l-stat-num { font-size: 36px; }
 }
@@ -2157,7 +2164,7 @@ fieldset legend {
 }
 .auth-form input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,93,184,0.12);
+    box-shadow: 0 0 0 3px rgba(54,65,228,0.12);
     background: #fff;
 }
 .auth-btn-submit {
@@ -2258,7 +2265,7 @@ fieldset legend {
     border-left: 3px solid transparent;
 }
 .adm-nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
-.adm-nav-item.active { color: #fff; border-left-color: var(--accent); background: rgba(0,93,184,0.08); }
+.adm-nav-item.active { color: #fff; border-left-color: var(--accent); background: rgba(54,65,228,0.08); }
 .adm-nav-icon { font-size: 1rem; }
 .adm-nav-footer {
     padding: 1rem 1.25rem 1.5rem;
@@ -2385,14 +2392,14 @@ fieldset legend {
 .adm-info-box ul { margin: 0.5rem 0 0; padding-left: 1.25rem; }
 .adm-info-box li { margin-bottom: 0.25rem; }
 .adm-info-box code {
-    background: rgba(0,93,184,0.12);
+    background: rgba(54,65,228,0.12);
     padding: 0.1rem 0.4rem;
     border-radius: 3px;
     font-size: 0.82rem;
     font-family: 'Courier New', monospace;
 }
 
-/* ─── Logo Quarta ─── */
+/* ─── Logo Anuwa ─── */
 .l-nav-logo-img        { height: 44px; width: auto; display: block; }
 .l-footer-logo-img     { height: 36px; width: auto; display: block; margin: 0 auto 0.5rem; filter: opacity(0.75); }
 .auth-logo-img         { height: 60px; width: auto; display: block; margin: 0 auto; }
@@ -2456,7 +2463,7 @@ fieldset legend {
 /* ─── Admin: modal ─── */
 .adm-modal-overlay {
     position: fixed; inset: 0; z-index: 1000;
-    background: rgba(0,26,54,0.55);
+    background: rgba(0,69,113,0.55);
     display: flex; align-items: center; justify-content: center;
     padding: 1rem;
 }
@@ -2511,7 +2518,7 @@ fieldset legend {
 .homo-paso-num {
     flex: 0 0 auto;
     width: 1.6rem; height: 1.6rem; border-radius: 50%;
-    background: var(--navy, #1B2A41); color: #fff;
+    background: var(--navy, #004571); color: #fff;
     font-size: 0.8rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
 }
@@ -2563,7 +2570,7 @@ fieldset legend {
 .homo-veredicto.ok .homo-veredicto-titulo { color: var(--success); }
 
 .homo-veredicto.aviso {
-    background: rgba(0,93,184,0.09); border-color: rgba(0,93,184,0.5);
+    background: rgba(54,65,228,0.09); border-color: rgba(54,65,228,0.5);
 }
 .homo-veredicto.aviso .homo-veredicto-icono { background: #B8860B; }
 .homo-veredicto.aviso .homo-veredicto-titulo { color: #00477F; }
@@ -2655,7 +2662,7 @@ fieldset legend {
     background: rgba(30,122,74,0.12); color: var(--success);
 }
 .rues-opcion[data-nivel="aviso"] .rues-chip {
-    background: rgba(0,93,184,0.15); color: #00477F;
+    background: rgba(54,65,228,0.15); color: #00477F;
 }
 .rues-opcion[data-nivel="alto"] .rues-chip {
     background: rgba(192,57,43,0.12); color: var(--danger);
@@ -2718,7 +2725,7 @@ fieldset legend {
     border-color: var(--success); color: var(--success);
 }
 .rues-opcion[data-nivel="aviso"].elegida {
-    border-color: rgba(0,93,184,0.55); background: rgba(0,93,184,0.05);
+    border-color: rgba(54,65,228,0.55); background: rgba(54,65,228,0.05);
 }
 .rues-opcion[data-nivel="aviso"].elegida .rues-marca {
     border-color: #B8860B; color: #B8860B;
@@ -2762,9 +2769,9 @@ fieldset legend {
     vertical-align: middle;
 }
 .ciiu-marca.bloqueado    { background: rgba(192,57,43,0.12); color: var(--danger); }
-.ciiu-marca.autorizacion { background: rgba(0,93,184,0.15); color: #00477F; }
+.ciiu-marca.autorizacion { background: rgba(54,65,228,0.15); color: #00477F; }
 .ciiu-marca.preguntas    { background: rgba(30,58,95,0.10); color: var(--navy-mid); }
-.ciiu-marca.aviso        { background: rgba(0,93,184,0.12); color: #00477F; }
+.ciiu-marca.aviso        { background: rgba(54,65,228,0.12); color: #00477F; }
 
 /* Panel de consecuencia */
 .ciiu-panel {
@@ -2778,7 +2785,7 @@ fieldset legend {
 .ciiu-panel.bloqueado { border-left-color: var(--danger); background: rgba(192,57,43,0.04); }
 .ciiu-panel.autorizacion,
 .ciiu-panel.preguntas,
-.ciiu-panel.aviso     { border-left-color: #B8860B; background: rgba(0,93,184,0.05); }
+.ciiu-panel.aviso     { border-left-color: #B8860B; background: rgba(54,65,228,0.05); }
 .ciiu-panel.ok        { border-left-color: var(--success); background: rgba(30,122,74,0.05); }
 
 .ciiu-panel-titulo {
@@ -2931,7 +2938,7 @@ fieldset legend {
     font-size: 0.62rem; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.07em;
     padding: 0.1rem 0.45rem; border-radius: 100px;
-    background: rgba(0,93,184,0.15); color: #00477F;
+    background: rgba(54,65,228,0.15); color: #00477F;
     vertical-align: middle;
 }
 .resp-opcion-nota {
