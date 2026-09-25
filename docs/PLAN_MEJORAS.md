@@ -50,6 +50,19 @@ de la plantilla (principal/subsidiario); dudas se definen con el usuario.
 Primera versión: núcleo + módulos simples; opción de compra y exclusión en su
 alternativa negativa hasta revisión jurídica.
 
+Decisiones (25-sep-2026), catálogo en docs/FAMILIA_CATALOGO_TEXTOS.md:
+- Grupo familiar: opción del cuestionario; por defecto fundadores + cónyuge o
+  compañero permanente + descendientes y ascendientes en primer grado.
+  Alternativas: fundadores y descendencia; hasta segundo grado; personalizada.
+- Mayoría para transferencias, gravámenes y usufructo: 70 % de los votos.
+- Excepciones al derecho de preferencia: se mantienen solo si el beneficiario
+  final sigue perteneciendo al grupo familiar.
+- Preferencia en suscripción y transferencia: por defecto sociedad y luego
+  accionistas a prorrata; variante escalonada por clase a elección.
+- Junta, consejo de familia, dividendos preferenciales, causales adicionales
+  de disolución, límites del RL, préstamos/garantías y titularidad por clase:
+  opciones del cuestionario con la alternativa recomendada por defecto.
+
 ## 4. Modelo propio de estatutos (requiere TP)
 Solo .docx. Sonnet ubica dónde van los datos, inserta placeholders del
 diccionario y el código los reemplaza sin tocar formato. Inserta

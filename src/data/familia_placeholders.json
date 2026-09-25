@@ -1,0 +1,1284 @@
+{
+  "version": 1,
+  "convencion": "Neutral; requiere adaptación al motor de la plataforma",
+  "campos": [
+    {
+      "campo": "asamblea.dias_convocatoria",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal y los demás legitimados convocarán mediante {{asamblea.medios_convocatoria}}, a los datos registrados por cada accionista. La antelación será de {{asamblea.dias_convocatoria}} días hábiles, sin contar el día de envío ni el de la reunión y respetando los mínimos legales."
+    },
+    {
+      "campo": "asamblea.dias_inspeccion",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas podrán ejercer el derecho de inspección en los términos legales y, para los asuntos previstos en el artículo 20 de la Ley 1258 de 2008, durante {{asamblea.dias_inspeccion}} días hábiles anteriores a la reunión, nunca menos del mínimo legal. Los documentos estarán disponibles en las oficinas de administración y por {{asamblea.medios_inspeccion_adicionales}}."
+    },
+    {
+      "campo": "asamblea.mayoria_porcentaje",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las decisiones ordinarias requerirán votos favorables que {{asamblea.operador_mayoria}} {{asamblea.mayoria_porcentaje}} % de los votos válidamente representados y habilitados para el asunto. Cada acción se computará con el número de votos de su clase. Se respetarán las exclusiones legales del voto y las mayorías o consentimientos imperativos, que no podrán reemplazarse por una suma de votos múltiples."
+    },
+    {
+      "campo": "asamblea.medios_convocatoria",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal y los demás legitimados convocarán mediante {{asamblea.medios_convocatoria}}, a los datos registrados por cada accionista. La antelación será de {{asamblea.dias_convocatoria}} días hábiles, sin contar el día de envío ni el de la reunión y respetando los mínimos legales."
+    },
+    {
+      "campo": "asamblea.medios_inspeccion_adicionales",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas podrán ejercer el derecho de inspección en los términos legales y, para los asuntos previstos en el artículo 20 de la Ley 1258 de 2008, durante {{asamblea.dias_inspeccion}} días hábiles anteriores a la reunión, nunca menos del mínimo legal. Los documentos estarán disponibles en las oficinas de administración y por {{asamblea.medios_inspeccion_adicionales}}."
+    },
+    {
+      "campo": "asamblea.operador_mayoria",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las decisiones ordinarias requerirán votos favorables que {{asamblea.operador_mayoria}} {{asamblea.mayoria_porcentaje}} % de los votos válidamente representados y habilitados para el asunto. Cada acción se computará con el número de votos de su clase. Se respetarán las exclusiones legales del voto y las mayorías o consentimientos imperativos, que no podrán reemplazarse por una suma de votos múltiples."
+    },
+    {
+      "campo": "asamblea.plazo_reunion_ordinaria",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La reunión ordinaria se realizará anualmente dentro de {{asamblea.plazo_reunion_ordinaria}}, para examinar la situación social, las cuentas, la gestión, los estados financieros, las utilidades y los demás asuntos de su competencia."
+    },
+    {
+      "campo": "asamblea.porcentaje_solicitud_convocatoria",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se celebrarán reuniones extraordinarias cuando lo exijan las necesidades sociales, por convocatoria de quienes estén facultados. Se atenderán las solicitudes de convocatoria de accionistas que representen al menos {{asamblea.porcentaje_solicitud_convocatoria}} % del capital, sin limitar el derecho que reconozcan las normas imperativas a un porcentaje menor."
+    },
+    {
+      "campo": "asamblea.quorum_porcentaje",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Salvo reglas legales o estatutarias especiales, la asamblea deliberará con accionistas que representen {{asamblea.quorum_porcentaje}} % de las acciones suscritas computables para la deliberación. Para contar acciones se atenderá al derecho de participación de cada clase y a las suspensiones legales; el voto múltiple no multiplicará el número de acciones. Las actas registrarán separadamente acciones representadas y votos disponibles."
+    },
+    {
+      "campo": "asamblea.regla_fraccionamiento",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Para la elección de juntas directivas y otros cuerpos colegiados se permitirá el fraccionamiento previsto por la ley. En los demás asuntos se aplicará {{asamblea.regla_fraccionamiento}} sin desconocer las reglas de representación y legitimación aplicables."
+    },
+    {
+      "campo": "asignacion.clase",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La clase {{asignacion.clase}} recibirá {{asignacion.porcentaje}} % del monto total de dividendos decretados para este escenario."
+    },
+    {
+      "campo": "asignacion.porcentaje",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La clase {{asignacion.clase}} recibirá {{asignacion.porcentaje}} % del monto total de dividendos decretados para este escenario."
+    },
+    {
+      "campo": "capital.acciones_autorizadas",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital autorizado es de {{capital.autorizado_letras}} pesos colombianos (COP {{capital.autorizado}}), dividido en {{capital.acciones_autorizadas}} acciones nominativas de igual valor nominal de COP {{capital.valor_nominal}} cada una."
+    },
+    {
+      "campo": "capital.acciones_suscritas",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital suscrito es de COP {{capital.suscrito}}, representado en {{capital.acciones_suscritas}} acciones. El capital pagado es de COP {{capital.pagado}}. Las clases, cantidades, aportes y saldos individuales constan en las disposiciones transitorias."
+    },
+    {
+      "campo": "capital.aportes_especie_detalle",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los aportes en especie, su valoración aprobada, identificación y entrega se describen así: {{capital.aportes_especie_detalle}}. Cuando su transferencia requiera escritura pública, la constitución y la transferencia cumplirán esa formalidad y los registros correspondientes."
+    },
+    {
+      "campo": "capital.autorizado",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital autorizado es de {{capital.autorizado_letras}} pesos colombianos (COP {{capital.autorizado}}), dividido en {{capital.acciones_autorizadas}} acciones nominativas de igual valor nominal de COP {{capital.valor_nominal}} cada una."
+    },
+    {
+      "campo": "capital.autorizado_letras",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital autorizado es de {{capital.autorizado_letras}} pesos colombianos (COP {{capital.autorizado}}), dividido en {{capital.acciones_autorizadas}} acciones nominativas de igual valor nominal de COP {{capital.valor_nominal}} cada una."
+    },
+    {
+      "campo": "capital.clases_iniciales",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad tendrá las clases y series descritas en el artículo siguiente. La existencia estatutaria de una clase no implica que tenga acciones suscritas. Al constituirse, las clases efectivamente suscritas serán {{capital.clases_iniciales}}."
+    },
+    {
+      "campo": "capital.pagado",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital suscrito es de COP {{capital.suscrito}}, representado en {{capital.acciones_suscritas}} acciones. El capital pagado es de COP {{capital.pagado}}. Las clases, cantidades, aportes y saldos individuales constan en las disposiciones transitorias."
+    },
+    {
+      "campo": "capital.saldo",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Totales: {{capital.acciones_suscritas}} acciones; capital suscrito COP {{capital.suscrito}}; capital pagado COP {{capital.pagado}}; saldo COP {{capital.saldo}}. Los porcentajes de capital no representan necesariamente los derechos de voto o de dividendos."
+    },
+    {
+      "campo": "capital.suscrito",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital suscrito es de COP {{capital.suscrito}}, representado en {{capital.acciones_suscritas}} acciones. El capital pagado es de COP {{capital.pagado}}. Las clases, cantidades, aportes y saldos individuales constan en las disposiciones transitorias."
+    },
+    {
+      "campo": "capital.valor_nominal",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El capital autorizado es de {{capital.autorizado_letras}} pesos colombianos (COP {{capital.autorizado}}), dividido en {{capital.acciones_autorizadas}} acciones nominativas de igual valor nominal de COP {{capital.valor_nominal}} cada una."
+    },
+    {
+      "campo": "causal.acreditacion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{causal.descripcion}}. Hechos y medios de acreditación exigidos: {{causal.acreditacion}}."
+    },
+    {
+      "campo": "causal.codigo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{causal.codigo}}."
+    },
+    {
+      "campo": "causal.descripcion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{causal.descripcion}}. Hechos y medios de acreditación exigidos: {{causal.acreditacion}}."
+    },
+    {
+      "campo": "clase.aprobacion_modificacion_derechos",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "e) Derechos particulares y protección. {{clase.derechos_especiales}}. Para modificar sus derechos se requerirá, además de las aprobaciones generales aplicables: {{clase.aprobacion_modificacion_derechos}}."
+    },
+    {
+      "campo": "clase.codigo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Clase o serie {{clase.codigo}} — {{clase.denominacion}}. Naturaleza jurídica: {{clase.naturaleza}}."
+    },
+    {
+      "campo": "clase.denominacion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Clase o serie {{clase.codigo}} — {{clase.denominacion}}. Naturaleza jurídica: {{clase.naturaleza}}."
+    },
+    {
+      "campo": "clase.derechos_economicos_adicionales",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "b) Dividendos. Los dividendos se asignarán conforme al régimen económico y a los escenarios previstos en este artículo. Los derechos económicos adicionales de esta clase son: {{clase.derechos_economicos_adicionales}}."
+    },
+    {
+      "campo": "clase.derechos_especiales",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "e) Derechos particulares y protección. {{clase.derechos_especiales}}. Para modificar sus derechos se requerirá, además de las aprobaciones generales aplicables: {{clase.aprobacion_modificacion_derechos}}."
+    },
+    {
+      "campo": "clase.derechos_liquidacion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "c) Liquidación. Su derecho sobre el remanente, una vez pagado el pasivo externo y respetada la prelación legal, será: {{clase.derechos_liquidacion}}."
+    },
+    {
+      "campo": "clase.naturaleza",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Clase o serie {{clase.codigo}} — {{clase.denominacion}}. Naturaleza jurídica: {{clase.naturaleza}}."
+    },
+    {
+      "campo": "clase.regimen_voto_especial",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "a) Voto. Cada acción conferirá {{clase.votos_por_accion}} votos en los asuntos en que tenga derecho de voto. Los asuntos sometidos a reglas especiales y los eventos de adquisición o recuperación del voto son: {{clase.regimen_voto_especial}}."
+    },
+    {
+      "campo": "clase.requisitos_titularidad",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "d) Titularidad. Los requisitos para ser titular de esta clase serán: {{clase.requisitos_titularidad}}."
+    },
+    {
+      "campo": "clase.votos_por_accion",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "a) Voto. Cada acción conferirá {{clase.votos_por_accion}} votos en los asuntos en que tenga derecho de voto. Los asuntos sometidos a reglas especiales y los eventos de adquisición o recuperación del voto son: {{clase.regimen_voto_especial}}."
+    },
+    {
+      "campo": "constitucion.fecha",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "En {{constitucion.lugar}}, el {{constitucion.fecha}}, comparecen las siguientes personas:"
+    },
+    {
+      "campo": "constitucion.instrumento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los comparecientes manifiestan su voluntad de constituir una sociedad por acciones simplificada mediante {{constitucion.instrumento}}, aprueban los aportes y los siguientes estatutos. El carácter familiar corresponde a su organización accionaria y de gobierno; su tipo societario es S.A.S."
+    },
+    {
+      "campo": "constitucion.lugar",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "En {{constitucion.lugar}}, el {{constitucion.fecha}}, comparecen las siguientes personas:"
+    },
+    {
+      "campo": "constituyente.calidad_actuacion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.domicilio",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.nacionalidad",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.nombre",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.numero_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.representacion_soporte",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.tipo_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "constituyente.tipo_persona",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{constituyente.nombre}}, {{constituyente.tipo_persona}}, de nacionalidad {{constituyente.nacionalidad}}, identificado(a) con {{constituyente.tipo_documento}} número {{constituyente.numero_documento}}, con domicilio en {{constituyente.domicilio}}, actuando {{constituyente.calidad_actuacion}}. Cuando actúe por representación, su representante y el soporte de sus facultades son: {{constituyente.representacion_soporte}}."
+    },
+    {
+      "campo": "controversias.centro_arbitraje",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las controversias susceptibles de arbitraje entre accionistas, o entre estos y la sociedad o sus administradores, derivadas del contrato social, incluida la impugnación de decisiones sociales en cuanto sea arbitrable, se resolverán por un tribunal de {{controversias.numero_arbitros}} árbitro(s), que decidirá en derecho. Será administrado por {{controversias.centro_arbitraje}}, con sede en {{controversias.sede}}, conforme a su reglamento. Los árbitros se designarán de común acuerdo dentro de {{controversias.dias_designacion}} días calendario; a falta de acuerdo serán designados por el centro conforme a su reglamento."
+    },
+    {
+      "campo": "controversias.dias_arreglo",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las partes procurarán arreglo directo durante {{controversias.dias_arreglo}} días calendario desde la comunicación escrita del conflicto, sin impedir medidas cautelares ni desconocer términos de caducidad o prescripción."
+    },
+    {
+      "campo": "controversias.dias_designacion",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las controversias susceptibles de arbitraje entre accionistas, o entre estos y la sociedad o sus administradores, derivadas del contrato social, incluida la impugnación de decisiones sociales en cuanto sea arbitrable, se resolverán por un tribunal de {{controversias.numero_arbitros}} árbitro(s), que decidirá en derecho. Será administrado por {{controversias.centro_arbitraje}}, con sede en {{controversias.sede}}, conforme a su reglamento. Los árbitros se designarán de común acuerdo dentro de {{controversias.dias_designacion}} días calendario; a falta de acuerdo serán designados por el centro conforme a su reglamento."
+    },
+    {
+      "campo": "controversias.numero_arbitros",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las controversias susceptibles de arbitraje entre accionistas, o entre estos y la sociedad o sus administradores, derivadas del contrato social, incluida la impugnación de decisiones sociales en cuanto sea arbitrable, se resolverán por un tribunal de {{controversias.numero_arbitros}} árbitro(s), que decidirá en derecho. Será administrado por {{controversias.centro_arbitraje}}, con sede en {{controversias.sede}}, conforme a su reglamento. Los árbitros se designarán de común acuerdo dentro de {{controversias.dias_designacion}} días calendario; a falta de acuerdo serán designados por el centro conforme a su reglamento."
+    },
+    {
+      "campo": "controversias.sede",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las controversias susceptibles de arbitraje entre accionistas, o entre estos y la sociedad o sus administradores, derivadas del contrato social, incluida la impugnación de decisiones sociales en cuanto sea arbitrable, se resolverán por un tribunal de {{controversias.numero_arbitros}} árbitro(s), que decidirá en derecho. Será administrado por {{controversias.centro_arbitraje}}, con sede en {{controversias.sede}}, conforme a su reglamento. Los árbitros se designarán de común acuerdo dentro de {{controversias.dias_designacion}} días calendario; a falta de acuerdo serán designados por el centro conforme a su reglamento."
+    },
+    {
+      "campo": "conversion.clase_destino",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Si ocurre {{conversion.evento}}, se convertirán en acciones de clase {{conversion.clase_destino}}, en proporción de {{conversion.relacion_canje}}, a partir de {{conversion.momento_efectos}}. Se exceptúan {{conversion.excepciones}}. La conversión preservará el capital nominal y se registrará documentalmente en el libro de accionistas con sustitución de los títulos."
+    },
+    {
+      "campo": "conversion.clase_origen",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las acciones de la clase {{conversion.clase_origen}} conservarán sus derechos particulares mientras pertenezcan a {{conversion.titulares_habilitados}}."
+    },
+    {
+      "campo": "conversion.evento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Si ocurre {{conversion.evento}}, se convertirán en acciones de clase {{conversion.clase_destino}}, en proporción de {{conversion.relacion_canje}}, a partir de {{conversion.momento_efectos}}. Se exceptúan {{conversion.excepciones}}. La conversión preservará el capital nominal y se registrará documentalmente en el libro de accionistas con sustitución de los títulos."
+    },
+    {
+      "campo": "conversion.excepciones",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Si ocurre {{conversion.evento}}, se convertirán en acciones de clase {{conversion.clase_destino}}, en proporción de {{conversion.relacion_canje}}, a partir de {{conversion.momento_efectos}}. Se exceptúan {{conversion.excepciones}}. La conversión preservará el capital nominal y se registrará documentalmente en el libro de accionistas con sustitución de los títulos."
+    },
+    {
+      "campo": "conversion.momento_efectos",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Si ocurre {{conversion.evento}}, se convertirán en acciones de clase {{conversion.clase_destino}}, en proporción de {{conversion.relacion_canje}}, a partir de {{conversion.momento_efectos}}. Se exceptúan {{conversion.excepciones}}. La conversión preservará el capital nominal y se registrará documentalmente en el libro de accionistas con sustitución de los títulos."
+    },
+    {
+      "campo": "conversion.relacion_canje",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Si ocurre {{conversion.evento}}, se convertirán en acciones de clase {{conversion.clase_destino}}, en proporción de {{conversion.relacion_canje}}, a partir de {{conversion.momento_efectos}}. Se exceptúan {{conversion.excepciones}}. La conversión preservará el capital nominal y se registrará documentalmente en el libro de accionistas con sustitución de los títulos."
+    },
+    {
+      "campo": "conversion.titulares_habilitados",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las acciones de la clase {{conversion.clase_origen}} conservarán sus derechos particulares mientras pertenezcan a {{conversion.titulares_habilitados}}."
+    },
+    {
+      "campo": "decision.aprobacion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Materia: {{decision.materia}}. Clases protegidas: {{decision.clases}}. Aprobación adicional: {{decision.aprobacion}}. Si no existen acciones en circulación de las clases protegidas, se aplicará: {{decision.regla_sin_clase}}."
+    },
+    {
+      "campo": "decision.clases",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Materia: {{decision.materia}}. Clases protegidas: {{decision.clases}}. Aprobación adicional: {{decision.aprobacion}}. Si no existen acciones en circulación de las clases protegidas, se aplicará: {{decision.regla_sin_clase}}."
+    },
+    {
+      "campo": "decision.materia",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Materia: {{decision.materia}}. Clases protegidas: {{decision.clases}}. Aprobación adicional: {{decision.aprobacion}}. Si no existen acciones en circulación de las clases protegidas, se aplicará: {{decision.regla_sin_clase}}."
+    },
+    {
+      "campo": "decision.regla_sin_clase",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Materia: {{decision.materia}}. Clases protegidas: {{decision.clases}}. Aprobación adicional: {{decision.aprobacion}}. Si no existen acciones en circulación de las clases protegidas, se aplicará: {{decision.regla_sin_clase}}."
+    },
+    {
+      "campo": "dividendos.destino_renuncias",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Una mayoría no podrá modificar para un ejercicio los derechos económicos de las clases por el solo hecho de aprobar el reparto. La renuncia individual a dividendos deberá ser expresa, libre, escrita e identificar período, cuantía o porcentaje y efectos. Su destino será {{dividendos.destino_renuncias}}, sin perjudicar derechos de terceros ni sustituir reformas o autorizaciones exigibles. Toda modificación permanente de los derechos económicos deberá cumplir el procedimiento estatutario y legal correspondiente."
+    },
+    {
+      "campo": "dividendos.forma_plazo_pago",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La asignación entre clases y titulares se sujetará al artículo 6. La forma y plazo de pago serán {{dividendos.forma_plazo_pago}}, dentro de los límites legales. El pago con acciones liberadas observará el artículo 455 del Código de Comercio y sus reglas especiales aplicables, incluida la aceptación individual cuando sea necesaria. No se eliminarán saldos por redondeo: se aplicará {{dividendos.regla_redondeo}} conservando íntegramente el total distribuido."
+    },
+    {
+      "campo": "dividendos.no_reclamados",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los dividendos decretados y exigibles se reconocerán como obligaciones a favor de sus titulares. El tratamiento de sumas no reclamadas será {{dividendos.no_reclamados}}, sin excluir los derechos e intereses imperativos que correspondan por mora imputable a la sociedad."
+    },
+    {
+      "campo": "dividendos.regimen",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Régimen económico adoptado: {{dividendos.regimen}}. Para cada conjunto de clases con acciones en circulación y derecho económico vigente, se aplicará exclusivamente el escenario correspondiente que se relaciona a continuación:"
+    },
+    {
+      "campo": "dividendos.regimen_preferencial_completo",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Antes de aplicar la distribución residual, se observará el siguiente régimen especial de dividendos mínimos, preferenciales o fijos: {{dividendos.regimen_preferencial_completo}}. En este caso los porcentajes de los escenarios se aplicarán al saldo residual definido en dicho régimen, sin duplicar asignaciones."
+    },
+    {
+      "campo": "dividendos.regla_redondeo",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La asignación entre clases y titulares se sujetará al artículo 6. La forma y plazo de pago serán {{dividendos.forma_plazo_pago}}, dentro de los límites legales. El pago con acciones liberadas observará el artículo 455 del Código de Comercio y sus reglas especiales aplicables, incluida la aceptación individual cuando sea necesaria. No se eliminarán saldos por redondeo: se aplicará {{dividendos.regla_redondeo}} conservando íntegramente el total distribuido."
+    },
+    {
+      "campo": "emision.dias_comunicacion",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal comunicará la oferta dentro de {{emision.dias_comunicacion}} días hábiles desde la aprobación del reglamento, por los medios estatutarios de convocatoria, dejando constancia de su envío y recepción cuando sea exigible."
+    },
+    {
+      "campo": "emision.plazo_oferta_texto",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La asamblea aprobará las emisiones y los reglamentos de suscripción mediante {{mayorias.emision}}. Cada reglamento precisará cantidad, clase, destinatarios, proporción, precio, prima cuando exista, plazo de oferta, adjudicación y calendario de pago. El plazo de oferta será {{emision.plazo_oferta_texto}}, respetando los límites legales aplicables. El pago no excederá de dos (2) años desde la respectiva suscripción. No podrán emitirse acciones de clases que carezcan de un régimen estatutario completo."
+    },
+    {
+      "campo": "escenario.clases_concurrentes",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Escenario {{escenario.codigo}}. Clases concurrentes: {{escenario.clases_concurrentes}}."
+    },
+    {
+      "campo": "escenario.codigo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Escenario {{escenario.codigo}}. Clases concurrentes: {{escenario.clases_concurrentes}}."
+    },
+    {
+      "campo": "exclusion.clases",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Podrán ser excluidos los titulares de las clases {{exclusion.clases}} únicamente por las causales objetivas siguientes:"
+    },
+    {
+      "campo": "exclusion.dias_defensa",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal comunicará por escrito los hechos, causal y pruebas al afectado, con una antelación mínima de {{exclusion.dias_defensa}} días hábiles a la reunión convocada para decidir. Permitirá acceder al expediente, controvertir y aportar pruebas y presentar defensa. El afectado podrá intervenir; su inasistencia o silencio no constituirán confesión ni presunción de responsabilidad."
+    },
+    {
+      "campo": "exclusion.metodo_reembolso",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El reembolso se sujetará a los artículos 14 a 16 de la Ley 222 de 1995 y, si implica reducción de capital, al artículo 145 del Código de Comercio. El valor se establecerá mediante {{exclusion.metodo_reembolso}}, sin descuentos sancionatorios automáticos. El procedimiento contractual de valoración no desplazará las garantías y mecanismos imperativos del reembolso."
+    },
+    {
+      "campo": "familia.definicion_grupo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Para las cláusulas que remitan al grupo familiar, este comprenderá {{familia.definicion_grupo}}. Esa definición no altera el parentesco legal, la vocación hereditaria ni los derechos de cónyuges, compañeros permanentes, acreedores u otros terceros."
+    },
+    {
+      "campo": "familia.funcionamiento_consejo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá un consejo de familia consultivo, integrado conforme a {{familia.integracion_consejo}}, para períodos de {{familia.periodo_consejo}}. Sus reglas de convocatoria, reuniones, decisiones y reemplazos serán {{familia.funcionamiento_consejo}} y sus funciones {{familia.funciones_consejo}}. Sus recomendaciones no sustituirán las decisiones de los órganos sociales ni conferirán representación legal."
+    },
+    {
+      "campo": "familia.funciones_consejo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá un consejo de familia consultivo, integrado conforme a {{familia.integracion_consejo}}, para períodos de {{familia.periodo_consejo}}. Sus reglas de convocatoria, reuniones, decisiones y reemplazos serán {{familia.funcionamiento_consejo}} y sus funciones {{familia.funciones_consejo}}. Sus recomendaciones no sustituirán las decisiones de los órganos sociales ni conferirán representación legal."
+    },
+    {
+      "campo": "familia.integracion_consejo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá un consejo de familia consultivo, integrado conforme a {{familia.integracion_consejo}}, para períodos de {{familia.periodo_consejo}}. Sus reglas de convocatoria, reuniones, decisiones y reemplazos serán {{familia.funcionamiento_consejo}} y sus funciones {{familia.funciones_consejo}}. Sus recomendaciones no sustituirán las decisiones de los órganos sociales ni conferirán representación legal."
+    },
+    {
+      "campo": "familia.materias_protocolo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas podrán adoptar un protocolo de familia sobre {{familia.materias_protocolo}}. Solo tendrá la eficacia contractual, estatutaria o de acuerdo de accionistas que corresponda por su contenido y formalización. Su sola existencia no modifica estos estatutos ni lo hace oponible a terceros. Las estipulaciones que reúnan los requisitos del artículo 24 de la Ley 1258 de 2008 se depositarán como acuerdos de accionistas para los efectos allí previstos."
+    },
+    {
+      "campo": "familia.periodo_consejo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá un consejo de familia consultivo, integrado conforme a {{familia.integracion_consejo}}, para períodos de {{familia.periodo_consejo}}. Sus reglas de convocatoria, reuniones, decisiones y reemplazos serán {{familia.funcionamiento_consejo}} y sus funciones {{familia.funciones_consejo}}. Sus recomendaciones no sustituirán las decisiones de los órganos sociales ni conferirán representación legal."
+    },
+    {
+      "campo": "firmante.calidad",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Calidad en que firma: {{firmante.calidad}}. Representado, si aplica: {{firmante.representado}}."
+    },
+    {
+      "campo": "firmante.nombre",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{firmante.nombre}}"
+    },
+    {
+      "campo": "firmante.numero_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{firmante.tipo_documento}} {{firmante.numero_documento}}"
+    },
+    {
+      "campo": "firmante.representado",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Calidad en que firma: {{firmante.calidad}}. Representado, si aplica: {{firmante.representado}}."
+    },
+    {
+      "campo": "firmante.tipo_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{firmante.tipo_documento}} {{firmante.numero_documento}}"
+    },
+    {
+      "campo": "junta.convocante",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.dias_convocatoria",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.funciones",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.mayoria",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.medio_convocatoria",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.numero_principales",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.periodo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.quorum",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.regimen_suplencias",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.reglas_funcionamiento",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "junta.sistema_eleccion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Existirá junta directiva integrada por {{junta.numero_principales}} miembros principales y {{junta.regimen_suplencias}}, elegidos por {{junta.sistema_eleccion}} para períodos de {{junta.periodo}}. Sus funciones serán {{junta.funciones}}. Será convocada por {{junta.convocante}}, con {{junta.dias_convocatoria}} días hábiles de anticipación, por {{junta.medio_convocatoria}}. Deliberará con {{junta.quorum}} y decidirá por {{junta.mayoria}}. Su régimen de sesiones, actas, reemplazos y desempates será {{junta.reglas_funcionamiento}}."
+    },
+    {
+      "campo": "liquidacion.causales_adicionales",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad se disolverá por las causales legales, por vencimiento del término si se pactó duración determinada, por decisión adoptada mediante {{mayorias.disolucion}} y por las siguientes causales estatutarias adicionales: {{liquidacion.causales_adicionales}}."
+    },
+    {
+      "campo": "mayorias.autorizacion_transferencias",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La transferencia de las acciones de las clases {{transferencias.clases_autorizacion}} requerirá autorización previa de la asamblea, adoptada mediante {{mayorias.autorizacion_transferencias}} y sujeta a {{transferencias.criterios_admision}}."
+    },
+    {
+      "campo": "mayorias.creacion_conversion_clases",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La creación o emisión de clases y series y la conversión voluntaria de acciones requerirán {{mayorias.creacion_conversion_clases}}, además de la reforma estatutaria cuando corresponda y las aprobaciones de clase previstas en estos estatutos o en la ley. No podrán desconocerse derechos adquiridos ni derechos mínimos imperativos."
+    },
+    {
+      "campo": "mayorias.disolucion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad se disolverá por las causales legales, por vencimiento del término si se pactó duración determinada, por decisión adoptada mediante {{mayorias.disolucion}} y por las siguientes causales estatutarias adicionales: {{liquidacion.causales_adicionales}}."
+    },
+    {
+      "campo": "mayorias.dispensa_preferencia_transferencia",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La dispensa para una operación concreta requerirá {{mayorias.dispensa_preferencia_transferencia}} y no removerá otras restricciones aplicables."
+    },
+    {
+      "campo": "mayorias.dividendos",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Solo se distribuirán utilidades justificadas en estados financieros debidamente preparados y aprobados, luego de absorber pérdidas y efectuar las apropiaciones exigibles. El monto distribuible será aprobado mediante {{mayorias.dividendos}}, con las aprobaciones adicionales de clase que procedan."
+    },
+    {
+      "campo": "mayorias.emision",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La asamblea aprobará las emisiones y los reglamentos de suscripción mediante {{mayorias.emision}}. Cada reglamento precisará cantidad, clase, destinatarios, proporción, precio, prima cuando exista, plazo de oferta, adjudicación y calendario de pago. El plazo de oferta será {{emision.plazo_oferta_texto}}, respetando los límites legales aplicables. El pago no excederá de dos (2) años desde la respectiva suscripción. No podrán emitirse acciones de clases que carezcan de un régimen estatutario completo."
+    },
+    {
+      "campo": "mayorias.enajenacion_global",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se aplicará la definición y el régimen del artículo 32 de la Ley 1258 de 2008, incluida la referencia a activos y pasivos que representen el cincuenta por ciento (50 %) o más del patrimonio líquido. La aprobación requerirá {{mayorias.enajenacion_global}}, sin disminuir la exigencia legal y con observancia de las aprobaciones de clase. Se reconocerá el retiro a ausentes y disidentes en caso de desmejora patrimonial y se efectuará la inscripción mercantil correspondiente."
+    },
+    {
+      "campo": "mayorias.exclusion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La decisión motivada requerirá {{mayorias.exclusion}}, excluyendo al afectado del voto y de la base de cálculo correspondiente, y se notificará por escrito. La decisión podrá controvertirse ante la autoridad competente."
+    },
+    {
+      "campo": "mayorias.exclusion_preferencia_suscripcion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Una emisión podrá colocarse sin preferencia mediante {{mayorias.exclusion_preferencia_suscripcion}}, respetando las protecciones de clase. Estas reglas se aplicarán a la recolocación de acciones propias cuando corresponda."
+    },
+    {
+      "campo": "mayorias.fusion_escision",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La fusión y la escisión requerirán {{mayorias.fusion_escision}}, sin perjuicio de las exigencias imperativas y de clase. La transformación de o hacia S.A.S., incluidos los tránsitos de tipo societario mediante otros negocios sujetos al artículo 31 de la Ley 1258 de 2008, requerirá unanimidad de los titulares de la totalidad de las acciones suscritas. Se garantizarán los derechos de retiro y de acreedores cuando procedan."
+    },
+    {
+      "campo": "mayorias.gravamenes",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La constitución voluntaria de prenda u otro gravamen sobre acciones requerirá {{mayorias.gravamenes}}, sin perjuicio de las formalidades y registros legales aplicables. Los derechos del acreedor serán los previstos en la ley y en el pacto válido correspondiente. Esta autorización no condiciona la eficacia de medidas decretadas por autoridad competente."
+    },
+    {
+      "campo": "mayorias.readquisicion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad podrá readquirir acciones íntegramente pagadas, con fondos provenientes de utilidades líquidas y previa aprobación mediante {{mayorias.readquisicion}}, sin reducir las exigencias legales aplicables. Los derechos de las acciones readquiridas quedarán suspendidos mientras pertenezcan a la sociedad. Su posterior destino será decidido por la asamblea con sujeción a la ley."
+    },
+    {
+      "campo": "mayorias.reformas",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Las reformas requerirán {{mayorias.reformas}}, sin perjuicio de las aprobaciones especiales o imperativas, y se documentarán e inscribirán conforme a la ley."
+    },
+    {
+      "campo": "mayorias.reservas",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La asamblea podrá crear o incrementar reservas ocasionales mediante {{mayorias.reservas}}, con destinación especial determinada y con sujeción a la ley. Su cambio de destino o liberación requerirá la aprobación correspondiente."
+    },
+    {
+      "campo": "mayorias.usufructo",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Su constitución requerirá {{mayorias.usufructo}} y las formalidades legales. Salvo reserva expresa válida, el usufructuario tendrá los derechos inherentes a la calidad de accionista, excepto enajenar o gravar las acciones y obtener su reembolso en la liquidación. Las reservas de derechos políticos o económicos a favor del nudo propietario deberán constar por escrito e inscribirse cuando corresponda. La sociedad identificará separadamente a los legitimados para votar y para recibir dividendos."
+    },
+    {
+      "campo": "nombramiento.aceptacion_soporte",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramiento.cargo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramiento.domicilio",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramiento.nombre",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramiento.numero_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramiento.tarjeta_profesional",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramiento.tipo_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cargo: {{nombramiento.cargo}}. Designado(a): {{nombramiento.nombre}}. Identificación: {{nombramiento.tipo_documento}} {{nombramiento.numero_documento}}. Domicilio: {{nombramiento.domicilio}}. Tarjeta profesional, si aplica: {{nombramiento.tarjeta_profesional}}. Aceptación: {{nombramiento.aceptacion_soporte}}."
+    },
+    {
+      "campo": "nombramientos_situacion_inicial",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La situación inicial de los cargos de suplencia y revisoría fiscal será: {{nombramientos_situacion_inicial}}. La ausencia de designación de revisor fiscal solo procederá si no existe obligación legal ni estatutaria."
+    },
+    {
+      "campo": "opcion_compra.beneficiarios_orden",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Serán beneficiarios {{opcion_compra.beneficiarios_orden}}; si concurrieren varios del mismo turno, se distribuirán las acciones entre ellos conforme a {{opcion_compra.prorrata}}."
+    },
+    {
+      "campo": "opcion_compra.clases",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas conceden, en los términos de esta cláusula, una opción de compra sobre las acciones de las clases {{opcion_compra.clases}} que sean adjudicadas a {{opcion_compra.terceros_comprendidos}} por {{opcion_compra.eventos}}."
+    },
+    {
+      "campo": "opcion_compra.costos",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El régimen de objeciones, segunda valoración y determinación final será {{opcion_compra.objeciones}}. Los costos se asumirán según {{opcion_compra.costos}}. Determinado el precio, el pago, sus garantías y el cierre de la transferencia se realizarán conforme a {{opcion_compra.pago_garantias_cierre}}."
+    },
+    {
+      "campo": "opcion_compra.dias_designacion_perito",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El precio se determinará a la fecha {{opcion_compra.fecha_valoracion}} mediante {{opcion_compra.metodo_valoracion}}, considerando los derechos económicos, políticos y de liquidación de la clase después de cualquier conversión aplicable. El valorador independiente será designado por acuerdo dentro de {{opcion_compra.dias_designacion_perito}} días hábiles; en defecto de acuerdo, lo designará {{opcion_compra.entidad_designadora}} conforme a su procedimiento. Sus requisitos de experiencia e independencia serán {{opcion_compra.requisitos_perito}}. Deberá valorar dentro de {{opcion_compra.dias_valoracion}} días hábiles desde la entrega de información suficiente."
+    },
+    {
+      "campo": "opcion_compra.dias_valoracion",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El precio se determinará a la fecha {{opcion_compra.fecha_valoracion}} mediante {{opcion_compra.metodo_valoracion}}, considerando los derechos económicos, políticos y de liquidación de la clase después de cualquier conversión aplicable. El valorador independiente será designado por acuerdo dentro de {{opcion_compra.dias_designacion_perito}} días hábiles; en defecto de acuerdo, lo designará {{opcion_compra.entidad_designadora}} conforme a su procedimiento. Sus requisitos de experiencia e independencia serán {{opcion_compra.requisitos_perito}}. Deberá valorar dentro de {{opcion_compra.dias_valoracion}} días hábiles desde la entrega de información suficiente."
+    },
+    {
+      "campo": "opcion_compra.entidad_designadora",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El precio se determinará a la fecha {{opcion_compra.fecha_valoracion}} mediante {{opcion_compra.metodo_valoracion}}, considerando los derechos económicos, políticos y de liquidación de la clase después de cualquier conversión aplicable. El valorador independiente será designado por acuerdo dentro de {{opcion_compra.dias_designacion_perito}} días hábiles; en defecto de acuerdo, lo designará {{opcion_compra.entidad_designadora}} conforme a su procedimiento. Sus requisitos de experiencia e independencia serán {{opcion_compra.requisitos_perito}}. Deberá valorar dentro de {{opcion_compra.dias_valoracion}} días hábiles desde la entrega de información suficiente."
+    },
+    {
+      "campo": "opcion_compra.eventos",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas conceden, en los términos de esta cláusula, una opción de compra sobre las acciones de las clases {{opcion_compra.clases}} que sean adjudicadas a {{opcion_compra.terceros_comprendidos}} por {{opcion_compra.eventos}}."
+    },
+    {
+      "campo": "opcion_compra.fecha_limite_eventos",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los eventos deberán ocurrir hasta {{opcion_compra.fecha_limite_eventos}}. La opción podrá ejercerse dentro de {{opcion_compra.plazo_ejercicio}} desde {{opcion_compra.inicio_computo}}, mediante comunicación escrita al adjudicatario y a la sociedad que identifique beneficiario, evento, acciones y voluntad inequívoca de compra."
+    },
+    {
+      "campo": "opcion_compra.fecha_valoracion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El precio se determinará a la fecha {{opcion_compra.fecha_valoracion}} mediante {{opcion_compra.metodo_valoracion}}, considerando los derechos económicos, políticos y de liquidación de la clase después de cualquier conversión aplicable. El valorador independiente será designado por acuerdo dentro de {{opcion_compra.dias_designacion_perito}} días hábiles; en defecto de acuerdo, lo designará {{opcion_compra.entidad_designadora}} conforme a su procedimiento. Sus requisitos de experiencia e independencia serán {{opcion_compra.requisitos_perito}}. Deberá valorar dentro de {{opcion_compra.dias_valoracion}} días hábiles desde la entrega de información suficiente."
+    },
+    {
+      "campo": "opcion_compra.inicio_computo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los eventos deberán ocurrir hasta {{opcion_compra.fecha_limite_eventos}}. La opción podrá ejercerse dentro de {{opcion_compra.plazo_ejercicio}} desde {{opcion_compra.inicio_computo}}, mediante comunicación escrita al adjudicatario y a la sociedad que identifique beneficiario, evento, acciones y voluntad inequívoca de compra."
+    },
+    {
+      "campo": "opcion_compra.metodo_valoracion",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El precio se determinará a la fecha {{opcion_compra.fecha_valoracion}} mediante {{opcion_compra.metodo_valoracion}}, considerando los derechos económicos, políticos y de liquidación de la clase después de cualquier conversión aplicable. El valorador independiente será designado por acuerdo dentro de {{opcion_compra.dias_designacion_perito}} días hábiles; en defecto de acuerdo, lo designará {{opcion_compra.entidad_designadora}} conforme a su procedimiento. Sus requisitos de experiencia e independencia serán {{opcion_compra.requisitos_perito}}. Deberá valorar dentro de {{opcion_compra.dias_valoracion}} días hábiles desde la entrega de información suficiente."
+    },
+    {
+      "campo": "opcion_compra.objeciones",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El régimen de objeciones, segunda valoración y determinación final será {{opcion_compra.objeciones}}. Los costos se asumirán según {{opcion_compra.costos}}. Determinado el precio, el pago, sus garantías y el cierre de la transferencia se realizarán conforme a {{opcion_compra.pago_garantias_cierre}}."
+    },
+    {
+      "campo": "opcion_compra.pago_garantias_cierre",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El régimen de objeciones, segunda valoración y determinación final será {{opcion_compra.objeciones}}. Los costos se asumirán según {{opcion_compra.costos}}. Determinado el precio, el pago, sus garantías y el cierre de la transferencia se realizarán conforme a {{opcion_compra.pago_garantias_cierre}}."
+    },
+    {
+      "campo": "opcion_compra.plazo_ejercicio",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los eventos deberán ocurrir hasta {{opcion_compra.fecha_limite_eventos}}. La opción podrá ejercerse dentro de {{opcion_compra.plazo_ejercicio}} desde {{opcion_compra.inicio_computo}}, mediante comunicación escrita al adjudicatario y a la sociedad que identifique beneficiario, evento, acciones y voluntad inequívoca de compra."
+    },
+    {
+      "campo": "opcion_compra.prorrata",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Serán beneficiarios {{opcion_compra.beneficiarios_orden}}; si concurrieren varios del mismo turno, se distribuirán las acciones entre ellos conforme a {{opcion_compra.prorrata}}."
+    },
+    {
+      "campo": "opcion_compra.requisitos_perito",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El precio se determinará a la fecha {{opcion_compra.fecha_valoracion}} mediante {{opcion_compra.metodo_valoracion}}, considerando los derechos económicos, políticos y de liquidación de la clase después de cualquier conversión aplicable. El valorador independiente será designado por acuerdo dentro de {{opcion_compra.dias_designacion_perito}} días hábiles; en defecto de acuerdo, lo designará {{opcion_compra.entidad_designadora}} conforme a su procedimiento. Sus requisitos de experiencia e independencia serán {{opcion_compra.requisitos_perito}}. Deberá valorar dentro de {{opcion_compra.dias_valoracion}} días hábiles desde la entrega de información suficiente."
+    },
+    {
+      "campo": "opcion_compra.terceros_comprendidos",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas conceden, en los términos de esta cláusula, una opción de compra sobre las acciones de las clases {{opcion_compra.clases}} que sean adjudicadas a {{opcion_compra.terceros_comprendidos}} por {{opcion_compra.eventos}}."
+    },
+    {
+      "campo": "opciones.aportes_especie",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.arbitraje",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.autorizacion_transferencias",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.consejo_familia",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.conversion_por_transferencia",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.dividendos_preferenciales_o_fijos",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.exclusion",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.junta_directiva",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.objeto_amplio",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.opcion_compra",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.poder_tramites",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.preferencia_suscripcion",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.preferencia_transferencia",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.prohibicion_temporal",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.protocolo_familia",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.revisor_fiscal_inicial",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Designación inicial de revisor fiscal; si existe obligación legal debe activarse."
+    },
+    {
+      "campo": "opciones.sin_arbitraje",
+      "tipo_orientativo": "booleano calculado",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.sin_conversion_por_transferencia",
+      "tipo_orientativo": "booleano calculado",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.sin_exclusion",
+      "tipo_orientativo": "booleano calculado",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.sin_opcion_compra",
+      "tipo_orientativo": "booleano calculado",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.sin_preferencia_suscripcion",
+      "tipo_orientativo": "booleano calculado",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.sin_preferencia_transferencia",
+      "tipo_orientativo": "booleano calculado",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Controla inclusión de bloque. No imprimir su nombre ni su valor."
+    },
+    {
+      "campo": "opciones.sin_revisor_fiscal_inicial",
+      "tipo_orientativo": "booleano",
+      "obligatoriedad": "Resolver siempre",
+      "contexto": "Designación inicial de revisor fiscal; si existe obligación legal debe activarse."
+    },
+    {
+      "campo": "poder.apoderado_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{poder.poderdantes}} confiere(n) poder especial a {{poder.apoderado_nombre}}, identificado(a) con {{poder.apoderado_documento}}, para {{poder.facultades}}, hasta {{poder.vencimiento}}. Su régimen de sustitución será {{poder.sustitucion}}. Este mandato no autoriza a modificar aportes, derechos accionarios o decisiones sustanciales sin autorización expresa de los otorgantes, ni permite sustituir aceptaciones personales de cargos cuando no sea legalmente procedente."
+    },
+    {
+      "campo": "poder.apoderado_nombre",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{poder.poderdantes}} confiere(n) poder especial a {{poder.apoderado_nombre}}, identificado(a) con {{poder.apoderado_documento}}, para {{poder.facultades}}, hasta {{poder.vencimiento}}. Su régimen de sustitución será {{poder.sustitucion}}. Este mandato no autoriza a modificar aportes, derechos accionarios o decisiones sustanciales sin autorización expresa de los otorgantes, ni permite sustituir aceptaciones personales de cargos cuando no sea legalmente procedente."
+    },
+    {
+      "campo": "poder.facultades",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{poder.poderdantes}} confiere(n) poder especial a {{poder.apoderado_nombre}}, identificado(a) con {{poder.apoderado_documento}}, para {{poder.facultades}}, hasta {{poder.vencimiento}}. Su régimen de sustitución será {{poder.sustitucion}}. Este mandato no autoriza a modificar aportes, derechos accionarios o decisiones sustanciales sin autorización expresa de los otorgantes, ni permite sustituir aceptaciones personales de cargos cuando no sea legalmente procedente."
+    },
+    {
+      "campo": "poder.poderdantes",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{poder.poderdantes}} confiere(n) poder especial a {{poder.apoderado_nombre}}, identificado(a) con {{poder.apoderado_documento}}, para {{poder.facultades}}, hasta {{poder.vencimiento}}. Su régimen de sustitución será {{poder.sustitucion}}. Este mandato no autoriza a modificar aportes, derechos accionarios o decisiones sustanciales sin autorización expresa de los otorgantes, ni permite sustituir aceptaciones personales de cargos cuando no sea legalmente procedente."
+    },
+    {
+      "campo": "poder.sustitucion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{poder.poderdantes}} confiere(n) poder especial a {{poder.apoderado_nombre}}, identificado(a) con {{poder.apoderado_documento}}, para {{poder.facultades}}, hasta {{poder.vencimiento}}. Su régimen de sustitución será {{poder.sustitucion}}. Este mandato no autoriza a modificar aportes, derechos accionarios o decisiones sustanciales sin autorización expresa de los otorgantes, ni permite sustituir aceptaciones personales de cargos cuando no sea legalmente procedente."
+    },
+    {
+      "campo": "poder.vencimiento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "{{poder.poderdantes}} confiere(n) poder especial a {{poder.apoderado_nombre}}, identificado(a) con {{poder.apoderado_documento}}, para {{poder.facultades}}, hasta {{poder.vencimiento}}. Su régimen de sustitución será {{poder.sustitucion}}. Este mandato no autoriza a modificar aportes, derechos accionarios o decisiones sustanciales sin autorización expresa de los otorgantes, ni permite sustituir aceptaciones personales de cargos cuando no sea legalmente procedente."
+    },
+    {
+      "campo": "preferencia_suscripcion.negociabilidad",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Cuando exista preferencia, su negociabilidad y los destinatarios permitidos serán: {{preferencia_suscripcion.negociabilidad}}. La cesión se informará por escrito al representante legal, con identificación del cesionario y del número de derechos cedidos."
+    },
+    {
+      "campo": "preferencia_suscripcion.orden",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los accionistas tendrán preferencia conforme al siguiente orden: {{preferencia_suscripcion.orden}}."
+    },
+    {
+      "campo": "preferencia_suscripcion.procedimiento",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "En cada turno participarán proporcionalmente a las acciones que cada beneficiario posea dentro del grupo llamado a suscribir; las no suscritas pasarán al turno siguiente. Los grupos inexistentes se omitirán. El procedimiento de aceptación, acrecimiento y adjudicación de remanentes será: {{preferencia_suscripcion.procedimiento}}."
+    },
+    {
+      "campo": "preferencia_transferencia.dias_aceptacion",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal trasladará la oferta a cada turno dentro de {{preferencia_transferencia.dias_traslado}} días hábiles. Cada turno dispondrá de {{preferencia_transferencia.dias_aceptacion}} días hábiles para aceptar. El silencio significará rechazo. La distribución dentro del turno será proporcional a las acciones de los aceptantes en ese grupo; los remanentes se ofrecerán a quienes aceptaron durante {{preferencia_transferencia.dias_acrecimiento}} días hábiles, antes de avanzar al siguiente turno. Se omitirán grupos sin beneficiarios y el oferente no participará como adquirente preferente de sus propias acciones."
+    },
+    {
+      "campo": "preferencia_transferencia.dias_acrecimiento",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal trasladará la oferta a cada turno dentro de {{preferencia_transferencia.dias_traslado}} días hábiles. Cada turno dispondrá de {{preferencia_transferencia.dias_aceptacion}} días hábiles para aceptar. El silencio significará rechazo. La distribución dentro del turno será proporcional a las acciones de los aceptantes en ese grupo; los remanentes se ofrecerán a quienes aceptaron durante {{preferencia_transferencia.dias_acrecimiento}} días hábiles, antes de avanzar al siguiente turno. Se omitirán grupos sin beneficiarios y el oferente no participará como adquirente preferente de sus propias acciones."
+    },
+    {
+      "campo": "preferencia_transferencia.dias_traslado",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El representante legal trasladará la oferta a cada turno dentro de {{preferencia_transferencia.dias_traslado}} días hábiles. Cada turno dispondrá de {{preferencia_transferencia.dias_aceptacion}} días hábiles para aceptar. El silencio significará rechazo. La distribución dentro del turno será proporcional a las acciones de los aceptantes en ese grupo; los remanentes se ofrecerán a quienes aceptaron durante {{preferencia_transferencia.dias_acrecimiento}} días hábiles, antes de avanzar al siguiente turno. Se omitirán grupos sin beneficiarios y el oferente no participará como adquirente preferente de sus propias acciones."
+    },
+    {
+      "campo": "preferencia_transferencia.dias_venta_tercero",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Si la sociedad participa como adquirente, solo podrá aceptar cuando cumpla los requisitos de readquisición. Agotados los turnos, la transferencia al tercero permitido podrá realizarse dentro de {{preferencia_transferencia.dias_venta_tercero}} días calendario, en condiciones que no sean más favorables que las ofrecidas. Vencido el plazo o mejoradas las condiciones, se repetirá el procedimiento."
+    },
+    {
+      "campo": "preferencia_transferencia.equivalencia_actos_no_dinerarios",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "El oferente comunicará al representante legal la clase y cantidad de acciones, adquirente proyectado si lo hay, precio, forma de pago y restantes condiciones. En actos gratuitos o con contraprestación distinta de dinero se aplicará la siguiente equivalencia y valoración: {{preferencia_transferencia.equivalencia_actos_no_dinerarios}}."
+    },
+    {
+      "campo": "preferencia_transferencia.eventos",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los eventos incluidos serán {{preferencia_transferencia.eventos}} y las excepciones serán {{preferencia_transferencia.excepciones}}."
+    },
+    {
+      "campo": "preferencia_transferencia.excepciones",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Los eventos incluidos serán {{preferencia_transferencia.eventos}} y las excepciones serán {{preferencia_transferencia.excepciones}}."
+    },
+    {
+      "campo": "preferencia_transferencia.orden",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La transferencia voluntaria de acciones estará sujeta al siguiente orden de preferencia: {{preferencia_transferencia.orden}}."
+    },
+    {
+      "campo": "representacion.denominacion_cargo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La representación legal estará a cargo de {{representacion.denominacion_cargo}}, designado por {{representacion.organo_designacion}} para {{representacion.periodo}}, reelegible y removible conforme a la ley. Su régimen de suplencias y orden de actuación será {{representacion.regimen_suplencias}}. Las facultades y limitaciones de los suplentes serán {{representacion.facultades_suplentes}}."
+    },
+    {
+      "campo": "representacion.facultades_suplentes",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La representación legal estará a cargo de {{representacion.denominacion_cargo}}, designado por {{representacion.organo_designacion}} para {{representacion.periodo}}, reelegible y removible conforme a la ley. Su régimen de suplencias y orden de actuación será {{representacion.regimen_suplencias}}. Las facultades y limitaciones de los suplentes serán {{representacion.facultades_suplentes}}."
+    },
+    {
+      "campo": "representacion.limite_cuantia",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Requerirá autorización previa de {{representacion.organo_autorizacion}} para {{representacion.operaciones_reservadas}}. El límite de cuantía y la regla de acumulación de operaciones relacionadas serán {{representacion.limite_cuantia}}."
+    },
+    {
+      "campo": "representacion.operaciones_reservadas",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Requerirá autorización previa de {{representacion.organo_autorizacion}} para {{representacion.operaciones_reservadas}}. El límite de cuantía y la regla de acumulación de operaciones relacionadas serán {{representacion.limite_cuantia}}."
+    },
+    {
+      "campo": "representacion.organo_autorizacion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Requerirá autorización previa de {{representacion.organo_autorizacion}} para {{representacion.operaciones_reservadas}}. El límite de cuantía y la regla de acumulación de operaciones relacionadas serán {{representacion.limite_cuantia}}."
+    },
+    {
+      "campo": "representacion.organo_designacion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La representación legal estará a cargo de {{representacion.denominacion_cargo}}, designado por {{representacion.organo_designacion}} para {{representacion.periodo}}, reelegible y removible conforme a la ley. Su régimen de suplencias y orden de actuación será {{representacion.regimen_suplencias}}. Las facultades y limitaciones de los suplentes serán {{representacion.facultades_suplentes}}."
+    },
+    {
+      "campo": "representacion.periodo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La representación legal estará a cargo de {{representacion.denominacion_cargo}}, designado por {{representacion.organo_designacion}} para {{representacion.periodo}}, reelegible y removible conforme a la ley. Su régimen de suplencias y orden de actuación será {{representacion.regimen_suplencias}}. Las facultades y limitaciones de los suplentes serán {{representacion.facultades_suplentes}}."
+    },
+    {
+      "campo": "representacion.politica_prestamos_garantias",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se aplicará la siguiente política sobre préstamos a accionistas o administradores y garantías de obligaciones ajenas: {{representacion.politica_prestamos_garantias}}. Los conflictos de interés y actos de competencia se someterán en todo caso al régimen legal, con revelación de información y exclusión del voto del administrador interesado cuando corresponda. El parentesco no dispensa esos deberes."
+    },
+    {
+      "campo": "representacion.regimen_suplencias",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La representación legal estará a cargo de {{representacion.denominacion_cargo}}, designado por {{representacion.organo_designacion}} para {{representacion.periodo}}, reelegible y removible conforme a la ley. Su régimen de suplencias y orden de actuación será {{representacion.regimen_suplencias}}. Las facultades y limitaciones de los suplentes serán {{representacion.facultades_suplentes}}."
+    },
+    {
+      "campo": "reservas.parametros",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se adopta el siguiente régimen de reserva: {{reservas.regimen}}. Cuando se pacte una apropiación periódica, su porcentaje, base, límite y reglas de reposición serán {{reservas.parametros}}. Esto no releva del cumplimiento de reservas impuestas por normas especiales aplicables."
+    },
+    {
+      "campo": "reservas.regimen",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se adopta el siguiente régimen de reserva: {{reservas.regimen}}. Cuando se pacte una apropiación periódica, su porcentaje, base, límite y reglas de reposición serán {{reservas.parametros}}. Esto no releva del cumplimiento de reservas impuestas por normas especiales aplicables."
+    },
+    {
+      "campo": "revisoria.periodo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad tendrá revisor fiscal cuando lo ordene la ley o lo decida la asamblea. Su período será {{revisoria.periodo}} y su régimen de suplencia {{revisoria.suplencia}}. Quienes ejerzan el cargo deberán cumplir los requisitos de idoneidad, independencia e incompatibilidades legales. Si se designa una firma, se identificarán los contadores responsables y sus tarjetas profesionales."
+    },
+    {
+      "campo": "revisoria.suplencia",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad tendrá revisor fiscal cuando lo ordene la ley o lo decida la asamblea. Su período será {{revisoria.periodo}} y su régimen de suplencia {{revisoria.suplencia}}. Quienes ejerzan el cargo deberán cumplir los requisitos de idoneidad, independencia e incompatibilidades legales. Si se designa una firma, se identificarán los contadores responsables y sus tarjetas profesionales."
+    },
+    {
+      "campo": "sociedad.departamento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad se denomina {{sociedad.nombre_completo}}, es una sociedad por acciones simplificada de nacionalidad colombiana y tiene su domicilio principal en {{sociedad.municipio}}, {{sociedad.departamento}}, República de Colombia. Se rige por estos estatutos, la Ley 1258 de 2008 y las demás normas aplicables."
+    },
+    {
+      "campo": "sociedad.duracion_texto",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La duración de la sociedad será {{sociedad.duracion_texto}}."
+    },
+    {
+      "campo": "sociedad.municipio",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad se denomina {{sociedad.nombre_completo}}, es una sociedad por acciones simplificada de nacionalidad colombiana y tiene su domicilio principal en {{sociedad.municipio}}, {{sociedad.departamento}}, República de Colombia. Se rige por estos estatutos, la Ley 1258 de 2008 y las demás normas aplicables."
+    },
+    {
+      "campo": "sociedad.nombre_completo",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "## ACTO DE CONSTITUCIÓN DE {{sociedad.nombre_completo}}"
+    },
+    {
+      "campo": "sociedad.objeto_principal",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La sociedad tendrá por objeto principal: {{sociedad.objeto_principal}}."
+    },
+    {
+      "campo": "sociedad.operaciones_conexas",
+      "tipo_orientativo": "texto estructurado / selección jurídica",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Para el desarrollo de su objeto podrá realizar los siguientes actos y operaciones conexos: {{sociedad.operaciones_conexas}}."
+    },
+    {
+      "campo": "sociedad.organo_sucursales",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La creación y cierre de agencias y sucursales en Colombia o en el exterior serán decididos por {{sociedad.organo_sucursales}}, con cumplimiento de los requisitos legales."
+    },
+    {
+      "campo": "suscripcion.accionista_documento",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.accionista_nombre",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.aporte_detalle",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.calendario_pago",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.capital_pagado",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.capital_suscrito",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.clase",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.numero_acciones",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.porcentaje_capital",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.prima_detalle",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "suscripcion.saldo",
+      "tipo_orientativo": "dinero COP",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Accionista: {{suscripcion.accionista_nombre}}. Identificación: {{suscripcion.accionista_documento}}. Clase: {{suscripcion.clase}}. Número de acciones: {{suscripcion.numero_acciones}}. Valor nominal total suscrito: COP {{suscripcion.capital_suscrito}}. Valor nominal pagado: COP {{suscripcion.capital_pagado}}. Saldo nominal: COP {{suscripcion.saldo}}. Prima de emisión y forma de pago, si existe: {{suscripcion.prima_detalle}}. Naturaleza y descripción del aporte: {{suscripcion.aporte_detalle}}. Calendario y medio de pago del saldo: {{suscripcion.calendario_pago}}. Participación en el capital suscrito total: {{suscripcion.porcentaje_capital}} %."
+    },
+    {
+      "campo": "transferencias.clases_autorizacion",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La transferencia de las acciones de las clases {{transferencias.clases_autorizacion}} requerirá autorización previa de la asamblea, adoptada mediante {{mayorias.autorizacion_transferencias}} y sujeta a {{transferencias.criterios_admision}}."
+    },
+    {
+      "campo": "transferencias.clases_restringidas",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se prohíbe negociar las acciones de las clases {{transferencias.clases_restringidas}} durante {{transferencias.prohibicion_anios}} años, contados individualmente desde su emisión, sin exceder de diez (10) años."
+    },
+    {
+      "campo": "transferencias.criterios_admision",
+      "tipo_orientativo": "texto",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "La transferencia de las acciones de las clases {{transferencias.clases_autorizacion}} requerirá autorización previa de la asamblea, adoptada mediante {{mayorias.autorizacion_transferencias}} y sujeta a {{transferencias.criterios_admision}}."
+    },
+    {
+      "campo": "transferencias.prohibicion_anios",
+      "tipo_orientativo": "número",
+      "obligatoriedad": "Si se conserva el bloque que lo contiene",
+      "contexto": "Se prohíbe negociar las acciones de las clases {{transferencias.clases_restringidas}} durante {{transferencias.prohibicion_anios}} años, contados individualmente desde su emisión, sin exceder de diez (10) años."
+    }
+  ]
+}
