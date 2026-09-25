@@ -2,6 +2,7 @@
 let currentStep = 1;
 const totalSteps = 7;
 let accionistaCount = 0;
+let ultimoZip = null;
 // apoderado toggle managed via toggleApoderado()
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2524,6 +2525,8 @@ async function generateDocuments() {
     const data = collectAllData();
     const btn = document.getElementById('btn-generate');
     const status = document.getElementById('generation-status');
+    ultimoZip = null;
+    document.getElementById('asistencia-quarta').classList.add('hidden');
 
     btn.disabled = true;
     btn.textContent = 'Generando...';
@@ -2543,21 +2546,56 @@ async function generateDocuments() {
         }
 
         const blob = await resp.blob();
+        const nombre = `Constitucion ${data.nombre_sas}.zip`;
+        ultimoZip = { blob, nombre };
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Constitucion ${data.nombre_sas}.zip`;
+        a.download = nombre;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
 
         status.innerHTML = '<p style="color: var(--success); font-size: 1.1rem; font-weight: 600;">&#10003; Documentos generados exitosamente</p>';
+        document.getElementById('asistencia-quarta').classList.remove('hidden');
     } catch (e) {
         status.innerHTML = `<p style="color: var(--error);">Error: ${e.message}</p>`;
     } finally {
         btn.disabled = false;
         btn.textContent = 'Generar Documentos';
+    }
+}
+
+async function enviarAsistenciaQuarta() {
+    if (!ultimoZip) return;
+    if (!window.confirm('Se enviarán sus documentos personales a Quarta para asistir la radicación. ¿Desea continuar?')) return;
+
+    const btn = document.getElementById('btn-enviar-asistencia');
+    const status = document.getElementById('asistencia-status');
+    const nombreSas = document.getElementById('nombre_sas').value;
+    btn.disabled = true;
+    status.className = 'upload-status';
+    status.textContent = 'Enviando solicitud a Quarta...';
+
+    try {
+        const body = new FormData();
+        body.append('zip', ultimoZip.blob, ultimoZip.nombre);
+        body.append('nombre_sas', nombreSas);
+        body.append('telefono', document.getElementById('asistencia-telefono').value);
+        body.append('mensaje', document.getElementById('asistencia-mensaje').value);
+        const resp = await fetch('/api/enviar-asistencia', { method: 'POST', body });
+        if (!resp.ok) {
+            const err = await resp.json();
+            throw new Error(err.error || 'No fue posible enviar la solicitud.');
+        }
+        status.className = 'upload-status success';
+        status.textContent = 'Solicitud enviada a Quarta. Un abogado se comunicará con usted.';
+    } catch (e) {
+        status.className = 'upload-status error';
+        status.textContent = `Error: ${e.message}`;
+    } finally {
+        btn.disabled = false;
     }
 }
 

@@ -1210,6 +1210,22 @@
                 </div>
 
                 <div id="generation-status" class="generation-status hidden"></div>
+
+                <div id="asistencia-quarta" class="hidden">
+                    <p class="hint">Puede enviar este paquete a Quarta para recibir asistencia en la radicación. Se compartirán sus documentos personales con un tercero.</p>
+                    <div class="form-group">
+                        <label for="asistencia-telefono">Teléfono (opcional)</label>
+                        <input type="tel" id="asistencia-telefono" placeholder="300 000 0000">
+                    </div>
+                    <div class="form-group">
+                        <label for="asistencia-mensaje">Mensaje (opcional)</label>
+                        <textarea id="asistencia-mensaje" rows="3" placeholder="Cuéntenos en qué necesita ayuda"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-enviar-asistencia" onclick="enviarAsistenciaQuarta()">
+                        Enviar a Quarta para asistencia en la radicación
+                    </button>
+                    <div id="asistencia-status" class="upload-status hidden"></div>
+                </div>
             </section>
 
         </form>

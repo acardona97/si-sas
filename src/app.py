@@ -7,11 +7,14 @@ Quarta Acompañamiento Legal S.A.S. — Medellín, Colombia.
 """
 import os
 import json
+import io
 import zipfile
 import tempfile
 import re
 import uuid
 import functools
+import secrets
+import urllib.request
 from datetime import date, datetime
 from dotenv import load_dotenv
 from flask import (
@@ -72,8 +75,33 @@ OUTPUT_DIR = os.path.join(PROJECT_DIR, "output")
 # Actos administrativos que habilitan una actividad restringida. Se adjuntan
 # al paquete generado.
 AUTORIZACIONES_DIR = os.path.join(OUTPUT_DIR, "_autorizaciones")
+ASISTENCIA_DIR = os.path.join(OUTPUT_DIR, "asistencia")
+ASISTENCIA_DESTINATARIO = "acardona@quarta.co"
+MAX_ZIP_ASISTENCIA_BYTES = 25 * 1024 * 1024
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
+def _multipart_asistencia(campos, archivo=None):
+    """Construye el multipart para Make sin depender de paquetes externos."""
+    boundary = "----SiSas" + secrets.token_hex(16)
+    partes = []
+    for nombre, valor in campos.items():
+        partes.extend((
+            f"--{boundary}\r\n".encode(),
+            f'Content-Disposition: form-data; name="{nombre}"\r\n\r\n'.encode(),
+            str(valor).encode("utf-8"), b"\r\n",
+        ))
+    if archivo:
+        nombre, nombre_archivo, contenido = archivo
+        partes.extend((
+            f"--{boundary}\r\n".encode(),
+            (f'Content-Disposition: form-data; name="{nombre}"; '
+             f'filename="{nombre_archivo}"\r\n').encode(),
+            b"Content-Type: application/zip\r\n\r\n", contenido, b"\r\n",
+        ))
+    partes.append(f"--{boundary}--\r\n".encode())
+    return boundary, b"".join(partes)
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
@@ -523,6 +551,79 @@ def generate():
                      "requieren cargar la tarjeta profesional de abogado."
         }), 403
     return _generar_paquete(data, archivos_soporte)
+
+
+@app.route("/api/enviar-asistencia", methods=["POST"])
+@login_required
+def enviar_asistencia():
+    """Envía el ZIP a Quarta para acompañar la radicación."""
+    webhook_url = os.environ.get("MAKE_WEBHOOK_URL", "").strip()
+    if not webhook_url:
+        return jsonify({"error": "El envío a Quarta no está configurado (MAKE_WEBHOOK_URL)."}), 503
+
+    archivo = request.files.get("zip")
+    if not archivo or not archivo.filename:
+        return jsonify({"error": "Debe adjuntar el ZIP generado."}), 400
+    if not archivo.filename.lower().endswith(".zip"):
+        return jsonify({"error": "El archivo debe tener extensión .zip."}), 400
+
+    contenido = archivo.read(MAX_ZIP_ASISTENCIA_BYTES + 1)
+    if len(contenido) > MAX_ZIP_ASISTENCIA_BYTES:
+        return jsonify({"error": "El ZIP supera el tamaño máximo de 25 MB."}), 400
+    if not zipfile.is_zipfile(io.BytesIO(contenido)):
+        return jsonify({"error": "El archivo adjunto no es un ZIP válido."}), 400
+
+    usuario = get_user_by_id(session["user_id"]) or {}
+    campos = {
+        "destinatario": ASISTENCIA_DESTINATARIO,
+        "nombre_sas": request.form.get("nombre_sas", "").strip(),
+        "telefono": request.form.get("telefono", "").strip(),
+        "mensaje": request.form.get("mensaje", "").strip(),
+        "usuario_email": usuario.get("email", ""),
+        "usuario_nombre": usuario.get("nombre", ""),
+        "fecha": datetime.now().isoformat(timespec="seconds"),
+    }
+    max_adjunto = int(os.environ.get("MAKE_MAX_ADJUNTO_BYTES", 5 * 1024 * 1024))
+    adjunto = None
+    if len(contenido) <= max_adjunto:
+        # El nombre del usuario no viaja crudo en el encabezado multipart
+        nombre_zip = re.sub(r"[^A-Za-z0-9._-]", "_", archivo.filename)[:120] or "Constitucion.zip"
+        adjunto = ("zip", nombre_zip, contenido)
+    else:
+        os.makedirs(ASISTENCIA_DIR, exist_ok=True)
+        token = secrets.token_urlsafe(24)
+        with open(os.path.join(ASISTENCIA_DIR, f"{token}.zip"), "wb") as destino:
+            destino.write(contenido)
+        campos["enlace_descarga"] = request.url_root.rstrip("/") + "/descargas/asistencia/" + token
+
+    boundary, cuerpo = _multipart_asistencia(campos, adjunto)
+    solicitud = urllib.request.Request(
+        webhook_url, data=cuerpo, method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    try:
+        with urllib.request.urlopen(solicitud, timeout=30) as respuesta:
+            codigo = getattr(respuesta, "status", None)
+            if codigo is None:
+                codigo = respuesta.getcode()
+            if not 200 <= codigo < 300:
+                raise RuntimeError(f"Make respondió HTTP {codigo}")
+    except Exception as e:
+        app.logger.warning("No se pudo enviar asistencia a Make: %s", e)
+        return jsonify({"error": "No fue posible enviar la solicitud de asistencia a Quarta."}), 502
+    return jsonify({"ok": True})
+
+
+@app.route("/descargas/asistencia/<token>")
+def descargar_asistencia(token):
+    """Sirve temporalmente un ZIP grande mediante un token no adivinable."""
+    if not re.fullmatch(r"[A-Za-z0-9_-]{20,200}", token):
+        return "", 404
+    ruta = os.path.join(ASISTENCIA_DIR, f"{token}.zip")
+    if not os.path.isfile(ruta):
+        return "", 404
+    return send_file(ruta, mimetype="application/zip", as_attachment=True,
+                     download_name="Constitucion.zip")
 
 
 def _generar_paquete(data, archivos_soporte, solo_estatutos=False):

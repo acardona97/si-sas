@@ -1021,4 +1021,30 @@ console.log('\n─── Revisor fiscal suplente (opcional)');
     console.log('  OK  el suplente viaja solo si se marca y está completo');
 }
 
+console.log('\n── Asistencia en la radicación');
+{
+    const w = nuevaApp();
+    const bloque = w.document.getElementById('asistencia-quarta');
+    assert.ok(bloque.classList.contains('hidden'), 'la asistencia debe iniciar oculta');
+    set(w, 'nombre_sas', 'ASISTENCIA S.A.S.');
+    w.URL.createObjectURL = () => 'blob:zip';
+    w.URL.revokeObjectURL = () => {};
+    const enviados = [];
+    w.fetch = async (url, opciones) => {
+        enviados.push({ url, opciones });
+        if (url === '/api/generate') {
+            return { ok: true, blob: async () => new w.Blob(['zip']) };
+        }
+        return { ok: true, json: async () => ({ ok: true }) };
+    };
+    await w.generateDocuments();
+    assert.ok(!bloque.classList.contains('hidden'), 'la asistencia aparece tras generar');
+    await w.enviarAsistenciaQuarta();
+    const asistencia = enviados.find(e => e.url === '/api/enviar-asistencia');
+    assert.ok(asistencia, 'debe enviar la solicitud a la ruta de asistencia');
+    assert.equal(asistencia.opciones.body.get('nombre_sas'), 'ASISTENCIA S.A.S.');
+    assert.equal(asistencia.opciones.body.get('zip').name, 'Constitucion ASISTENCIA S.A.S..zip');
+    console.log('  OK  muestra y envía el ZIP para asistencia');
+}
+
 console.log('\nCuestionario verificado.\n');
