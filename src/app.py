@@ -46,6 +46,9 @@ from processors.responsabilidades import (
 )
 from processors.objeto_social import generar_objeto_social
 from processors.estatutos import generar_estatutos
+from processors.modelo_propio import (
+    ModeloPropioError, MAX_BYTES as MAX_MODELO_BYTES, validar_docx, ubicar_campos, tokenizar,
+)
 from processors.soportes import armar_soportes
 from processors.disposiciones import (
     DisposicionError, generar_informe, proponer_disposiciones,
@@ -634,6 +637,15 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
     mismo documento que luego se genera. Los errores de validación se
     devuelven siempre como respuesta JSON.
     """
+    modelo = data.get('modelo_propio')
+    modelo_path = None
+    if modelo is not None and modelo is not False:
+        if not tp_abogado_vigente():
+            return jsonify({'error': 'Cargue primero la tarjeta profesional de abogado.'}), 403
+        try:
+            modelo_path = _ruta_modelo_propio(modelo)
+        except ModeloPropioError as exc:
+            return jsonify({'error': str(exc)}), 400
     tmp_dir = tempfile.mkdtemp(prefix="si_sas_")
     errors = []
 
@@ -897,6 +909,9 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
             }
             out = os.path.join(tmp_dir, f"{fecha_pfx}_{nombre_limpio}_Estatutos.docx")
             tmpl = os.path.join(PLANTILLAS_DIR, "estatutos_template.docx")
+            if modelo_path:
+                tmpl = tokenizar(modelo_path, modelo, os.path.join(tmp_dir, 'modelo_tokenizado.docx'))
+                est_data['anclas_modelo_propio'] = modelo.get('anclas', {})
             if solo_estatutos:
                 generar_estatutos(est_data, tmpl, out)
                 return out
@@ -915,6 +930,8 @@ def _generar_paquete(data, archivos_soporte, solo_estatutos=False):
             else:
                 generar_estatutos(est_data, tmpl, out)
                 generated.append(out)
+        except ModeloPropioError as e:
+            return jsonify({'error': str(e)}), 400
         except DisposicionError as e:
             return jsonify({"error": str(e)}), 409
         except Exception as e:
@@ -1401,6 +1418,60 @@ def extract_tp_abogado():
     }
     return jsonify({"valida": True, "numero_tarjeta": numero,
                     "nombre_completo": session["tp_abogado"]["nombre"]})
+
+
+def _ruta_modelo_propio(modelo):
+    """Restringe la lectura a UUID válidos y al propietario de la carga."""
+    identificador = modelo.get('modelo_id') if isinstance(modelo, dict) else None
+    if not isinstance(identificador, str) or not re.fullmatch(r'[0-9a-f]{32}', identificador):
+        raise ModeloPropioError('modelo_id inválido o ausente.')
+    carpeta = os.path.join(OUTPUT_DIR, '_modelos')
+    ruta = os.path.join(carpeta, identificador + '.docx')
+    try:
+        with open(os.path.join(carpeta, identificador + '.json'), encoding='utf-8') as f:
+            propietario = json.load(f)['user_id']
+        if propietario != session.get('user_id') or not os.path.isfile(ruta):
+            raise ValueError('Modelo no disponible')
+    except (OSError, ValueError, KeyError) as exc:
+        raise ModeloPropioError('El modelo no existe o no pertenece al usuario.') from exc
+    return ruta
+
+
+@app.route('/api/modelo-propio/preview', methods=['POST'])
+@login_required
+def modelo_propio_preview():
+    """Ubica los campos del documento del abogado sin consumir generaciones."""
+    if not tp_abogado_vigente():
+        return jsonify({'error': 'Cargue primero la tarjeta profesional de abogado.'}), 403
+    archivo = request.files.get('modelo')
+    try:
+        payload = json.loads(request.form.get('payload', ''))
+        if not isinstance(payload, dict):
+            raise ValueError('El payload debe ser un objeto JSON.')
+        if not archivo or not (archivo.filename or '').lower().endswith('.docx'):
+            raise ModeloPropioError('Cargue un archivo .docx; no se admiten .doc ni .pdf.')
+        contenido = archivo.read(MAX_MODELO_BYTES + 1)
+        validar_docx(contenido)
+    except (ValueError, TypeError) as exc:
+        return jsonify({'error': str(exc)}), 400
+    identificador = uuid.uuid4().hex
+    carpeta = os.path.join(OUTPUT_DIR, '_modelos')
+    os.makedirs(carpeta, exist_ok=True)
+    ruta = os.path.join(carpeta, identificador + '.docx')
+    metadata = os.path.join(carpeta, identificador + '.json')
+    try:
+        with open(ruta, 'xb') as f:
+            f.write(contenido)
+        resultado = ubicar_campos(ruta)
+        with open(metadata, 'x', encoding='utf-8') as f:
+            json.dump({'user_id': session['user_id']}, f)
+        return jsonify(dict(resultado, modelo_id=identificador))
+    except Exception:
+        for path in (ruta, metadata):
+            if os.path.isfile(path):
+                os.remove(path)
+        app.logger.exception('Error al ubicar campos del modelo propio')
+        return jsonify({'error': 'No se pudieron ubicar los campos del modelo.'}), 502
 
 
 @app.route("/api/disposiciones/preview", methods=["POST"])
