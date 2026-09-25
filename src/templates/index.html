@@ -779,7 +779,7 @@
 
                     <div id="junta-principales-container"></div>
 
-                    <p class="hint" style="margin-top:1rem"><strong>Miembros suplentes nominales (opcional):</strong></p>
+                    <p class="hint" style="margin-top:1rem"><strong>Miembros suplentes personales (opcional):</strong></p>
                     <div id="junta-suplentes-container"></div>
                     <button type="button" class="btn btn-outline" onclick="addJuntaSuplente()">+ Agregar suplente</button>
                 </fieldset>
@@ -934,6 +934,66 @@
                             <div class="form-group">
                                 <label for="revisor_contador_tarjeta">Tarjeta profesional de contador *</label>
                                 <input type="text" id="revisor_contador_tarjeta" placeholder="Ej: 12345-T">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Revisor fiscal suplente (opcional) -->
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+                            <input type="checkbox" id="revisor_tiene_suplente"
+                                   onchange="document.getElementById('revisor_suplente_fields').classList.toggle('hidden', !this.checked)">
+                            <span>Designar revisor fiscal suplente (opcional)</span>
+                        </label>
+                        <span class="hint">Si el revisor es una firma, es el contador que ella designa como suplente.</span>
+                    </div>
+                    <div id="revisor_suplente_fields" class="hidden">
+                        <div class="upload-doc-section">
+                            <div class="upload-doc-info">
+                                <strong>📷 Cédula del suplente</strong>
+                                <span class="upload-hint">Se completan nombre, tipo y número, y se incluye en el paquete.</span>
+                            </div>
+                            <label class="upload-doc-btn">
+                                Cargar documento
+                                <input type="file" accept="image/*,application/pdf"
+                                       onchange="extractFromCedula(this, 'revisor_suplente', 0)">
+                            </label>
+                            <span class="upload-status" id="revisor_suplente_upload_status"></span>
+                        </div>
+                        <div class="upload-doc-section">
+                            <div class="upload-doc-info">
+                                <strong>🎓 Tarjeta profesional del suplente</strong>
+                                <span class="upload-hint">Se extrae su número y se incluye en el paquete.</span>
+                            </div>
+                            <label class="upload-doc-btn">
+                                Cargar tarjeta profesional
+                                <input type="file" accept="image/*,application/pdf"
+                                       onchange="extractFromTarjeta(this, 'revisor_suplente')">
+                            </label>
+                            <span class="upload-status" id="revisor_suplente_tarjeta_upload_status"></span>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_suplente_nombre">Nombre completo del suplente *</label>
+                                <input type="text" id="revisor_suplente_nombre" placeholder="Nombre completo">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_suplente_tipo_doc">Tipo de identificación</label>
+                                <select id="revisor_suplente_tipo_doc">
+                                    <option value="CC">C.C.</option>
+                                    <option value="CE">C.E.</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="revisor_suplente_id_num">Número de identificación *</label>
+                                <input type="text" id="revisor_suplente_id_num" placeholder="No. de identificación">
+                            </div>
+                            <div class="form-group">
+                                <label for="revisor_suplente_tarjeta">Tarjeta profesional de contador *</label>
+                                <input type="text" id="revisor_suplente_tarjeta" placeholder="Ej: 54321-T">
                             </div>
                         </div>
                     </div>

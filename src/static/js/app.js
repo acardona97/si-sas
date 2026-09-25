@@ -1150,7 +1150,7 @@ async function extractFromCedula(input, prefix, n) {
             _fillByNameIfPresent(`${prefix}_cc`, data.numero_documento, filled, 'Cédula');
             _fillByNameIfPresent(`${prefix}_expedicion`, data.ciudad_expedicion, filled, 'Ciudad expedición');
             _fillByNameIfPresent(`${prefix}_genero`, data.genero, filled, 'Género');
-        } else if (prefix === 'revisor' || prefix === 'revisor_contador') {
+        } else if (['revisor', 'revisor_contador', 'revisor_suplente'].includes(prefix)) {
             // Revisor fiscal persona natural, o contador designado por la
             // persona jurídica. Estos campos van por id=, no por name=.
             _fillIfPresent(`${prefix}_nombre`, data.nombre_completo, filled, 'Nombre');
@@ -1896,7 +1896,25 @@ function toggleRevisorTipo(tipo) {
     document.getElementById('revisor_juridica_fields').classList.toggle('hidden', tipo !== 'juridica');
 }
 
+function getRevisorSuplente() {
+    if (!document.getElementById('revisor_tiene_suplente')?.checked) return null;
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    const s = {
+        nombre: v('revisor_suplente_nombre'),
+        tipo_doc: document.getElementById('revisor_suplente_tipo_doc')?.value || 'CC',
+        id_num: v('revisor_suplente_id_num'),
+        tarjeta_profesional: v('revisor_suplente_tarjeta'),
+    };
+    return (s.nombre && s.id_num && s.tarjeta_profesional) ? s : null;
+}
+
 function getRevisorData() {
+    const d = _getRevisorPrincipal();
+    if (d) d.suplente = getRevisorSuplente();
+    return d;
+}
+
+function _getRevisorPrincipal() {
     if (document.querySelector('input[name="revisor"]:checked')?.value !== 'si') return null;
     const tipo = document.querySelector('input[name="revisor_tipo"]:checked')?.value || 'natural';
     const v = id => (document.getElementById(id)?.value || '').trim();
@@ -2272,6 +2290,8 @@ function buildSummary() {
             h += f('Nombre', `${d.revisor_fiscal.nombre} (${d.revisor_fiscal.tipo_doc} ${d.revisor_fiscal.id_num})`);
             h += f('Tarjeta profesional', d.revisor_fiscal.tarjeta_profesional);
         }
+        const s = d.revisor_fiscal.suplente;
+        if (s) h += f('Suplente', `${s.nombre} (${s.tipo_doc} ${s.id_num}) — T.P. ${s.tarjeta_profesional}`);
     }
 
     h += '<h3>Documentos a Generar</h3><div class="docs-list">';

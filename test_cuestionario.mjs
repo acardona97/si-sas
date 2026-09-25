@@ -555,9 +555,10 @@ console.log('\n─── Revisor fiscal: cargas de cédula y tarjeta profesional
     // Las cargas apuntan a los endpoints correctos
     const cargas = [...w.document.querySelectorAll('#revisor-fields input[type="file"]')]
         .map(i => i.getAttribute('onchange'));
-    assert.equal(cargas.filter(c => c.includes('extractFromCedula')).length, 2, cargas.join(' | '));
-    assert.equal(cargas.filter(c => c.includes('extractFromTarjeta')).length, 2, cargas.join(' | '));
-    console.log('  OK  cuatro cargas: cédula y tarjeta, para natural y para el contador designado');
+    // natural, contador designado y suplente
+    assert.equal(cargas.filter(c => c.includes('extractFromCedula')).length, 3, cargas.join(' | '));
+    assert.equal(cargas.filter(c => c.includes('extractFromTarjeta')).length, 3, cargas.join(' | '));
+    console.log('  OK  seis cargas: cédula y tarjeta para natural, contador designado y suplente');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1000,6 +1001,24 @@ console.log('\n─── Soportes: cédulas cargadas viajan al paquete');
     assert.ok(w.document.getElementById(`acc${n}_rl_upload_status`),
         'falta la carga de cédula del RL de la persona jurídica');
     console.log('  OK  doc_key por persona, archivo guardado y carga del RL de la PJ');
+}
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── Revisor fiscal suplente (opcional)');
+{
+    const w = nuevaApp();
+    marcarRadio(w, 'revisor', 'si');
+    set(w, 'revisor_nombre', 'Persona Test');
+    set(w, 'revisor_id_num', '99999999');
+    set(w, 'revisor_tarjeta', '1-T');
+    assert.equal(w.getRevisorData().suplente, null, 'sin marcar no hay suplente');
+    w.document.getElementById('revisor_tiene_suplente').checked = true;
+    set(w, 'revisor_suplente_nombre', 'Persona Test Dos');
+    set(w, 'revisor_suplente_id_num', '99999998');
+    set(w, 'revisor_suplente_tarjeta', '2-T');
+    assert.deepEqual(JSON.parse(JSON.stringify(w.getRevisorData().suplente)),
+        { nombre: 'Persona Test Dos', tipo_doc: 'CC', id_num: '99999998', tarjeta_profesional: '2-T' });
+    console.log('  OK  el suplente viaja solo si se marca y está completo');
 }
 
 console.log('\nCuestionario verificado.\n');
