@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es"><head></head><body>﻿
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sí S.A.S. — Constitución de Sociedad</title>
+    <title>Sí S.A.S. — Sociedad de familia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css?v=20260823r">
-</head>
-<body>
+
+
 
 <div class="app-layout">
     <!-- Sidebar -->
@@ -17,12 +17,9 @@
         <div class="brand">
             <span class="brand-producto">SÍ S.A.S.</span>
             <a href="/" class="brand-anuwa">
-                <img src="/static/img/logo_anuwa_white.svg"
-                     alt="Anuwa — acompañamiento de negocios" class="sidebar-logo-img"
-                     width="140" height="40">
+                <img src="/static/img/logo_anuwa_white.svg" alt="Anuwa — acompañamiento de negocios" class="sidebar-logo-img" width="140" height="40">
             </a>
-        </div>
-        <nav aria-label="Módulos"><a class="sidebar-user-link" href="/app">Sociedad comercial</a><a class="sidebar-user-link" href="/app/familia">Sociedad de familia</a></nav>
+        </div><nav aria-label="Módulos"><a class="sidebar-user-link" href="/app">Sociedad comercial</a><a class="sidebar-user-link" href="/app/familia">Sociedad de familia</a></nav>
         <div class="brand-avance">
             <div class="brand-avance-texto">
                 <span>Paso <span id="avance-actual">1</span> de 7</span>
@@ -39,7 +36,7 @@
             </div>
             <div class="step-item" data-step="2">
                 <span class="step-num">2</span>
-                <span class="step-label">Accionistas</span>
+                <span class="step-label">Clases y accionistas</span>
             </div>
             <div class="step-item" data-step="3">
                 <span class="step-num">3</span>
@@ -92,8 +89,7 @@
 
                 <div class="form-group">
                     <label for="nombre_sas">Razón Social *</label>
-                    <input type="text" id="nombre_sas" placeholder="Ej: ACME INNOVACIONES S.A.S."
-                           oninput="onRazonSocialInput()" required>
+                    <input type="text" id="nombre_sas" placeholder="Ej: ACME INNOVACIONES S.A.S." oninput="onRazonSocialInput()" required="">
                     <span class="hint">
                         <strong>Debe terminar en S.A.S.</strong> — lo exige el artículo 5 de la
                         Ley 1258 de 2008. Sin el indicativo no se puede continuar.
@@ -130,10 +126,8 @@
                         </div>
                     </div>
 
-                    <a id="homonimia-link" class="btn btn-outline homo-btn-consultar" target="_blank"
-                       rel="noopener noreferrer" href="https://www.rues.org.co/"
-                       onclick="marcarConsultaRues()">
-                        Consultar en el RUES &#8599;
+                    <a id="homonimia-link" class="btn btn-outline homo-btn-consultar" target="_blank" rel="noopener noreferrer" href="https://www.rues.org.co/" onclick="marcarConsultaRues()">
+                        Consultar en el RUES ↗
                     </a>
                     <span class="hint" id="homonimia-estado-consulta" style="display:block;margin-top:.5rem">
                         Se abre en una pestaña nueva con la búsqueda ya escrita. No tiene que digitar nada.
@@ -247,7 +241,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="direccion">Dirección del domicilio principal *</label>
-                        <input type="text" id="direccion" placeholder="Ej: Carrera 43A #1-50, Oficina 805" required>
+                        <input type="text" id="direccion" placeholder="Ej: Carrera 43A #1-50, Oficina 805" required="">
                     </div>
                     <div class="form-group">
                         <label for="barrio">Barrio *</label>
@@ -268,8 +262,7 @@
 
                 <div class="form-group">
                     <label for="camara_ciudad">Cámara de Comercio donde se radica *</label>
-                    <input type="text" id="camara_ciudad" value="Medellín para Antioquia"
-                           list="camaras_comercio" autocomplete="off">
+                    <input type="text" id="camara_ciudad" value="Medellín para Antioquia" list="camaras_comercio" autocomplete="off">
                     <datalist id="camaras_comercio">
                         <option value="Medellín para Antioquia"></option>
                         <option value="Aburrá Sur"></option>
@@ -330,7 +323,7 @@
                     <div class="form-group">
                         <label for="zona">Zona</label>
                         <select id="zona">
-                            <option value="urbana" selected>Urbana</option>
+                            <option value="urbana" selected="">Urbana</option>
                             <option value="rural">Rural</option>
                         </select>
                     </div>
@@ -364,7 +357,7 @@
 
             <!-- ═══ PASO 2: Accionistas ═══ -->
             <section class="step hidden" id="step2">
-                <h2>Accionistas</h2>
+                <h2>Clases y accionistas</h2><fieldset><legend>Clases de acciones y dividendos</legend><div class="form-group"><label for="numero_clases">Número de clases</label><select id="numero_clases" onchange="cambiarClases()"><option>1</option><option selected="">2</option><option>3</option></select></div><div id="clases-container"></div><div id="escenarios-container"></div><p id="escenarios-status" role="status" aria-live="polite"></p></fieldset>
                 <p class="step-desc">Agregue los accionistas de la sociedad. Los porcentajes deben sumar 100%.</p>
 
                 <div id="accionistas-container"></div>
@@ -515,14 +508,12 @@
                     </span>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="rl_limitaciones" value="no" checked
-                                   onchange="toggleLimitacionesRL(false)">
+                            <input type="radio" name="rl_limitaciones" value="no" checked="" onchange="toggleLimitacionesRL(false)">
                             <span class="radio-title">No</span>
                             <span class="radio-desc">Facultades plenas, sin autorización previa</span>
                         </label>
                         <label class="radio-card">
-                            <input type="radio" name="rl_limitaciones" value="si"
-                                   onchange="toggleLimitacionesRL(true)">
+                            <input type="radio" name="rl_limitaciones" value="si" onchange="toggleLimitacionesRL(true)">
                             <span class="radio-title">Sí</span>
                             <span class="radio-desc">Requerirá autorización para ciertos contratos</span>
                         </label>
@@ -536,13 +527,11 @@
                         <label>¿Limitación en cuanto a la cuantía del contrato?</label>
                         <div class="radio-cards">
                             <label class="radio-card selected">
-                                <input type="radio" name="lim_cuantia" value="no" checked
-                                       onchange="toggleLimCuantia(false)">
+                                <input type="radio" name="lim_cuantia" value="no" checked="" onchange="toggleLimCuantia(false)">
                                 <span class="radio-title">No</span>
                             </label>
                             <label class="radio-card">
-                                <input type="radio" name="lim_cuantia" value="si"
-                                       onchange="toggleLimCuantia(true)">
+                                <input type="radio" name="lim_cuantia" value="si" onchange="toggleLimCuantia(true)">
                                 <span class="radio-title">Sí</span>
                             </label>
                         </div>
@@ -559,8 +548,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="lim_cuantia_smmlv">Cuantía del contrato (SMMLV) *</label>
-                                <input type="text" id="lim_cuantia_smmlv" placeholder="Ej: 500"
-                                       oninput="this.value = this.value.replace(/\D/g,'')">
+                                <input type="text" id="lim_cuantia_smmlv" placeholder="Ej: 500" oninput="this.value = this.value.replace(/\D/g,'')">
                                 <span class="hint">En salarios mínimos mensuales legales vigentes.</span>
                             </div>
                         </div>
@@ -570,13 +558,11 @@
                         <label>¿Limitación en cuanto a la naturaleza del contrato?</label>
                         <div class="radio-cards">
                             <label class="radio-card selected">
-                                <input type="radio" name="lim_naturaleza" value="no" checked
-                                       onchange="toggleLimNaturaleza(false)">
+                                <input type="radio" name="lim_naturaleza" value="no" checked="" onchange="toggleLimNaturaleza(false)">
                                 <span class="radio-title">No</span>
                             </label>
                             <label class="radio-card">
-                                <input type="radio" name="lim_naturaleza" value="si"
-                                       onchange="toggleLimNaturaleza(true)">
+                                <input type="radio" name="lim_naturaleza" value="si" onchange="toggleLimNaturaleza(true)">
                                 <span class="radio-title">Sí</span>
                             </label>
                         </div>
@@ -592,8 +578,7 @@
                         </div>
                         <div class="form-group">
                             <label for="lim_naturaleza_texto">Naturaleza del contrato *</label>
-                            <textarea id="lim_naturaleza_texto" rows="3"
-                                      placeholder="Ej: la enajenación o gravamen de bienes inmuebles"></textarea>
+                            <textarea id="lim_naturaleza_texto" rows="3" placeholder="Ej: la enajenación o gravamen de bienes inmuebles"></textarea>
                             <span class="hint">
                                 Descríbala en minúscula y sin punto final: se inserta dentro de la
                                 frase «actos o contratos que versen sobre ...».
@@ -613,22 +598,7 @@
                 <h2>Objeto Social y Actividad</h2>
                 <p class="step-desc">Describa la actividad económica. Si no escribe el objeto social, se genera automáticamente.</p>
 
-                <div class="form-group">
-                    <label for="ciiu_search">Código CIIU Principal *</label>
-                    <input type="text" id="ciiu_search" placeholder="Ej: 6201, restaurante, software, construcción..." oninput="searchCIIU(this.value, 'principal')" autocomplete="off">
-                    <div class="ciiu-results hidden" id="ciiu_results"></div>
-                    <span class="ciiu-tag hidden" id="ciiu_selected"></span>
-                    <input type="hidden" id="ciiu_code">
-                    <input type="hidden" id="ciiu_description">
-                    <span class="hint">
-                        🔍 Escriba mínimo 2 letras o dígitos y seleccione de la lista. El CIIU identifica su actividad económica principal ante la DIAN y Cámara de Comercio.<br>
-                        <strong>Ejemplos:</strong> <em>restaurante</em> → 5611 | <em>software</em> → 6201 | <em>construcción</em> → 4111 | <em>tienda</em> → 4711 | <em>consultoría</em> → 7020<br>
-                        ¿No sabe cuál le corresponde? Consulte al <strong>chat de Sí S.A.S.</strong> (abajo) o busque en
-                        <a href="https://www.dane.gov.co/files/nomenclaturas/CIIU_Rev4ac.pdf" target="_blank" rel="noopener">la tabla CIIU del DANE</a>.
-                        <br>Los códigos con restricciones aparecen <strong>marcados</strong> en la lista.
-                    </span>
-                    <div id="ciiu_panel" class="ciiu-panel hidden"></div>
-                </div>
+                <div class="form-group"><label for="ciiu_search">CIIU principal fijo</label><input id="ciiu_search" value="7010 — Actividades de administración empresarial" readonly=""><input type="hidden" id="ciiu_code" value="7010"><input type="hidden" id="ciiu_description" value="Actividades de administración empresarial"><div id="ciiu_panel" class="hidden"></div></div>
 
                 <div class="form-group">
                     <label for="ciiu_search_sec">Código CIIU Secundario (opcional)</label>
@@ -641,15 +611,7 @@
                     <div id="ciiu_panel_sec" class="ciiu-panel hidden"></div>
                 </div>
 
-                <div class="form-group">
-                    <label for="objeto_social">Objeto Social (opcional)</label>
-                    <textarea id="objeto_social" rows="5" onblur="reevaluarCIIU()"
-                              placeholder="Ej: Se dedicará a operar un restaurante temático inspirado en la saga Harry Potter."></textarea>
-                    <span class="hint">
-                        💡 <strong>¿No sabe cómo redactarlo?</strong> Use el <strong>chat de Sí S.A.S.</strong> (abajo) y pídale: <em>"Ayúdame a redactar el objeto social para una empresa de [su actividad]"</em> — Claude lo redacta en lenguaje jurídico listo para pegar aquí.
-                        <br><br>Si lo escribe usted, comience con <em>"Se dedicará a..."</em> o <em>"Su actividad será..."</em>. <strong>Sin importar cómo lo escriba</strong>, la IA lo reescribe en formato jurídico profesional al generar los estatutos.
-                    </span>
-                </div>
+                <div class="form-group"><label for="objeto_social">Objeto social fijo</label><textarea id="objeto_social" rows="5" readonly="">la tenencia, precautelación e inversión de activos como bienes muebles e inmuebles, acciones, bonos y cualquier otro título representativo de derechos; en mercados públicos o privados nacionales o internacionales</textarea><p class="hint">Texto del módulo de sociedad de familia.</p></div>
 
                 <div class="step-actions">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(4)">← Anterior</button>
@@ -695,7 +657,7 @@
                     <label>Régimen Tributario *</label>
                     <div class="radio-cards">
                         <label class="radio-card selected" onclick="selectRegimen('ordinario')">
-                            <input type="radio" name="regimen" id="regimen_ordinario" value="ordinario" checked>
+                            <input type="radio" name="regimen" id="regimen_ordinario" value="ordinario" checked="">
                             <span class="radio-title">Ordinario</span>
                             <span class="radio-desc">Incluye responsabilidad 05</span>
                         </label>
@@ -741,13 +703,13 @@
 
             <!-- ═══ PASO 6: Condiciones Especiales ═══ -->
             <section class="step hidden" id="step6">
-                <h2>Órganos y Condiciones Especiales</h2>
+                <h2>Órganos y Condiciones Especiales</h2><fieldset><legend>Opciones familiares</legend><p class="info-box">La opción de compra y la exclusión no se pactan en esta versión (revisión jurídica pendiente).</p><div class="form-group" id="opcion-consejo_familia"><label>Consejo de familia</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_consejo_familia" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_consejo_familia" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-protocolo_familia"><label>Protocolo de familia</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_protocolo_familia" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_protocolo_familia" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-arbitraje"><label>Arbitraje</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_arbitraje" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_arbitraje" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-prohibicion_temporal"><label>Prohibición temporal de transferencia</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_prohibicion_temporal" value="false" checked=""><span class="radio-title">No</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_prohibicion_temporal" value="true"><span class="radio-title">Sí</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-autorizacion_transferencias"><label>Autorización de transferencias</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_autorizacion_transferencias" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_autorizacion_transferencias" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-conversion_por_transferencia"><label>Conversión por transferencia</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_conversion_por_transferencia" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_conversion_por_transferencia" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-preferencia_suscripcion"><label>Preferencia en suscripción</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_preferencia_suscripcion" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_preferencia_suscripcion" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-preferencia_transferencia"><label>Preferencia en transferencia</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_preferencia_transferencia" value="true" checked=""><span class="radio-title">Sí</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_preferencia_transferencia" value="false"><span class="radio-title">No</span><span class="radio-desc"></span></label></div></div><div class="form-group" id="opcion-objeto_amplio"><label>Objeto amplio</label><div class="radio-cards"><label class="radio-card selected"><input type="radio" name="familia_objeto_amplio" value="false" checked=""><span class="radio-title">No</span><span class="radio-desc">Recomendado</span></label><label class="radio-card "><input type="radio" name="familia_objeto_amplio" value="true"><span class="radio-title">Sí</span><span class="radio-desc"></span></label></div></div><div class="form-group"><label for="grupo_familiar">Grupo familiar</label><select id="grupo_familiar"><option value="amplio">Fundadores, cónyuges y ascendientes y descendientes en primer grado</option><option value="descendencia">Fundadores y descendientes</option><option value="segundo_grado">Hasta segundo grado</option><option value="personalizado">Personalizado</option></select></div><div class="form-group"><label for="preferencia">Orden de preferencia</label><select id="preferencia"><option value="simple">Simple</option><option value="escalonado">Escalonado por clases</option></select></div><div class="form-group"><label for="prestamos">Préstamos a accionistas y administradores</label><select id="prestamos"><option value="prohibidos">Prohibidos</option><option value="autorizados">Autorizados por la asamblea</option></select></div><div class="form-group"><label for="destino_renuncias">Destino de dividendos renunciados</label><select id="destino_renuncias"><option value="clase">Titulares de la clase</option><option value="reserva">Reserva</option></select></div><div class="form-group hidden" id="grupo-personalizado-block"><label for="grupo_personalizado">Definición personalizada del grupo familiar *</label><textarea id="grupo_personalizado"></textarea></div><div class="form-group"><label for="limite_rl_pct">Límite del representante legal (% del patrimonio líquido; 0 = sin límite)</label><input type="number" id="limite_rl_pct" value="20" min="0" max="100" step="1"></div><div class="form-group" id="prohibicion-anios-block"><label for="prohibicion_anios">Años de prohibición (máximo 10)</label><input type="number" id="prohibicion_anios" value="10" min="1" max="10" step="1"></div></fieldset>
 
                 <div class="form-group">
                     <label>¿Junta Directiva?</label>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="junta" value="no" checked onchange="toggleJunta(false)">
+                            <input type="radio" name="junta" value="no" checked="" onchange="toggleJunta(false)">
                             <span class="radio-title">No</span>
                             <span class="radio-desc">Sin junta directiva (lo más común en S.A.S.)</span>
                         </label>
@@ -770,7 +732,7 @@
                         <label for="junta_num_principales">Número de miembros principales</label>
                         <select id="junta_num_principales" onchange="renderJuntaPrincipales()">
                             <option value="1">1 miembro</option>
-                            <option value="3" selected>3 miembros</option>
+                            <option value="3" selected="">3 miembros</option>
                             <option value="5">5 miembros</option>
                             <option value="7">7 miembros</option>
                             <option value="9">9 miembros</option>
@@ -789,7 +751,7 @@
                     <label>¿Revisor Fiscal?</label>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="revisor" value="no" checked onchange="toggleRevisor(false)">
+                            <input type="radio" name="revisor" value="no" checked="" onchange="toggleRevisor(false)">
                             <span class="radio-title">No</span>
                             <span class="radio-desc">Sin revisor fiscal (lo más común)</span>
                         </label>
@@ -808,7 +770,7 @@
                         <label>Tipo de revisor fiscal</label>
                         <div class="radio-cards">
                             <label class="radio-card selected">
-                                <input type="radio" name="revisor_tipo" value="natural" checked onchange="toggleRevisorTipo('natural')">
+                                <input type="radio" name="revisor_tipo" value="natural" checked="" onchange="toggleRevisorTipo('natural')">
                                 <span class="radio-title">Persona natural</span>
                                 <span class="radio-desc">Contador público con tarjeta profesional</span>
                             </label>
@@ -829,8 +791,7 @@
                             </div>
                             <label class="upload-doc-btn">
                                 Cargar documento
-                                <input type="file" accept="image/*,application/pdf"
-                                       onchange="extractFromCedula(this, 'revisor', 0)">
+                                <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'revisor', 0)">
                             </label>
                             <span class="upload-status" id="revisor_upload_status"></span>
                         </div>
@@ -841,8 +802,7 @@
                             </div>
                             <label class="upload-doc-btn">
                                 Cargar tarjeta profesional
-                                <input type="file" accept="image/*,application/pdf"
-                                       onchange="extractFromTarjeta(this, 'revisor')">
+                                <input type="file" accept="image/*,application/pdf" onchange="extractFromTarjeta(this, 'revisor')">
                             </label>
                             <span class="upload-status" id="revisor_tarjeta_upload_status"></span>
                         </div>
@@ -896,8 +856,7 @@
                             </div>
                             <label class="upload-doc-btn">
                                 Cargar documento
-                                <input type="file" accept="image/*,application/pdf"
-                                       onchange="extractFromCedula(this, 'revisor_contador', 0)">
+                                <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'revisor_contador', 0)">
                             </label>
                             <span class="upload-status" id="revisor_contador_upload_status"></span>
                         </div>
@@ -908,8 +867,7 @@
                             </div>
                             <label class="upload-doc-btn">
                                 Cargar tarjeta profesional
-                                <input type="file" accept="image/*,application/pdf"
-                                       onchange="extractFromTarjeta(this, 'revisor_contador')">
+                                <input type="file" accept="image/*,application/pdf" onchange="extractFromTarjeta(this, 'revisor_contador')">
                             </label>
                             <span class="upload-status" id="revisor_contador_tarjeta_upload_status"></span>
                         </div>
@@ -942,8 +900,7 @@
                     <!-- Revisor fiscal suplente (opcional) -->
                     <div class="form-group">
                         <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
-                            <input type="checkbox" id="revisor_tiene_suplente"
-                                   onchange="document.getElementById('revisor_suplente_fields').classList.toggle('hidden', !this.checked)">
+                            <input type="checkbox" id="revisor_tiene_suplente" onchange="document.getElementById('revisor_suplente_fields').classList.toggle('hidden', !this.checked)">
                             <span>Designar revisor fiscal suplente (opcional)</span>
                         </label>
                         <span class="hint">Si el revisor es una firma, es el contador que ella designa como suplente.</span>
@@ -956,8 +913,7 @@
                             </div>
                             <label class="upload-doc-btn">
                                 Cargar documento
-                                <input type="file" accept="image/*,application/pdf"
-                                       onchange="extractFromCedula(this, 'revisor_suplente', 0)">
+                                <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'revisor_suplente', 0)">
                             </label>
                             <span class="upload-status" id="revisor_suplente_upload_status"></span>
                         </div>
@@ -968,8 +924,7 @@
                             </div>
                             <label class="upload-doc-btn">
                                 Cargar tarjeta profesional
-                                <input type="file" accept="image/*,application/pdf"
-                                       onchange="extractFromTarjeta(this, 'revisor_suplente')">
+                                <input type="file" accept="image/*,application/pdf" onchange="extractFromTarjeta(this, 'revisor_suplente')">
                             </label>
                             <span class="upload-status" id="revisor_suplente_tarjeta_upload_status"></span>
                         </div>
@@ -1006,7 +961,7 @@
                     <div class="info-box" id="control-context"></div>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="declara_control" value="si" checked>
+                            <input type="radio" name="declara_control" value="si" checked="">
                             <span class="radio-title">Sí, declararla</span>
                             <span class="radio-desc">Se genera el Formato de Situación de Control (Decreto 667 de 2018)</span>
                         </label>
@@ -1019,11 +974,11 @@
                 </div>
 
                 <!-- ═══ Empresa familiar (Ley 2495 de 2025) ═══ -->
-                <div class="form-group">
+                <div class="form-group hidden">
                     <label>¿Es una empresa familiar? (Ley 2495 de 2025)</label>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="empresa_familiar" value="no" checked onchange="toggleEmpresaFamiliar(false)">
+                            <input type="radio" name="empresa_familiar" value="no" checked="" onchange="toggleEmpresaFamiliar(false)">
                             <span class="radio-title">No</span>
                         </label>
                         <label class="radio-card">
@@ -1053,7 +1008,7 @@
                     <label>¿Es emprendimiento social? (Ley 2234 de 2022)</label>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="emprendimiento" value="no" checked>
+                            <input type="radio" name="emprendimiento" value="no" checked="">
                             <span class="radio-title">No</span>
                         </label>
                         <label class="radio-card">
@@ -1087,7 +1042,7 @@
                     <label>¿Desea designar un apoderado para los trámites de constitución?</label>
                     <div class="radio-cards">
                         <label class="radio-card selected">
-                            <input type="radio" name="tiene_apoderado" value="no" checked onchange="toggleApoderado(false)">
+                            <input type="radio" name="tiene_apoderado" value="no" checked="" onchange="toggleApoderado(false)">
                             <span class="radio-title">No</span>
                             <span class="radio-desc">Sin apoderado (los accionistas realizan los trámites directamente)</span>
                         </label>
@@ -1109,8 +1064,7 @@
                         </div>
                         <label class="upload-doc-btn">
                             Cargar documento
-                            <input type="file" accept="image/*,application/pdf"
-                                   onchange="extractFromCedula(this, 'apoderado', 0)">
+                            <input type="file" accept="image/*,application/pdf" onchange="extractFromCedula(this, 'apoderado', 0)">
                         </label>
                         <span class="upload-status" id="apoderado_upload_status"></span>
                     </div>
@@ -1148,47 +1102,7 @@
                 </fieldset>
 
                 <!-- Funciones avanzadas: requieren tarjeta profesional de abogado -->
-                <fieldset id="avanzado-block">
-                    <legend>Disposiciones especiales (solo abogados)</legend>
-                    <div class="info-box">
-                        Para redactar disposiciones especiales en los estatutos debe acreditar que
-                        quien constituye es abogado. La tarjeta se valida para esta constitución y no
-                        se incluye en el paquete.
-                    </div>
-                    <div class="upload-doc-section">
-                        <div class="upload-doc-info">
-                            <strong>⚖️ Tarjeta profesional de abogado</strong>
-                            <span class="upload-hint">Suba la tarjeta profesional vigente (foto o PDF).</span>
-                        </div>
-                        <label class="upload-doc-btn">
-                            Cargar tarjeta profesional
-                            <input type="file" accept="image/*,application/pdf" onchange="validarTPAbogado(this)">
-                        </label>
-                        <span class="upload-status" id="tp_abogado_upload_status"></span>
-                    </div>
-                    <div id="avanzado-contenido" class="hidden">
-                        <div class="form-group solo-junta">
-                            <label for="disp_junta">Disposiciones especiales sobre la junta directiva</label>
-                            <textarea id="disp_junta" rows="3" data-disposicion="junta"
-                                      placeholder="Ej: Las reuniones de junta podrán ser virtuales y el presidente tendrá voto de desempate."></textarea>
-                            <span class="hint">Se incorporan como parágrafos o incisos de los artículos de junta directiva.</span>
-                        </div>
-                        <div class="form-group solo-revisor">
-                            <label for="disp_revisor">Disposiciones especiales sobre la revisoría fiscal</label>
-                            <textarea id="disp_revisor" rows="3" data-disposicion="revisor"
-                                      placeholder="Ej: El revisor fiscal presentará informes trimestrales a la junta directiva."></textarea>
-                            <span class="hint">Se incorporan en el artículo de revisoría fiscal.</span>
-                        </div>
-                        <p class="hint"><strong>Disposiciones adicionales</strong> — se ubican en el artículo con el que se relacionen, como parágrafo o inciso.</p>
-                        <div id="disp-adicionales"></div>
-                        <button type="button" class="btn btn-outline" onclick="addDisposicionAdicional()">+ Agregar disposición adicional</button>
-                        <div class="step-actions" style="justify-content:flex-start">
-                            <button type="button" class="btn btn-primary" id="btn-disp-preview"
-                                    onclick="previewDisposiciones()">Redactar e integrar con IA</button>
-                        </div>
-                        <div id="disp-preview"></div>
-                    </div>
-                </fieldset>
+                
 
                 <div class="step-actions">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(6)">← Anterior</button>
@@ -1240,10 +1154,10 @@
             <span class="chat-avatar">A</span>
             <div>
                 <h3>Asistente Legal</h3>
-                <span class="chat-status">Anuwa Legal &middot; Claude Sonnet</span>
+                <span class="chat-status">Anuwa Legal · Claude Sonnet</span>
             </div>
         </div>
-        <button type="button" class="chat-close" onclick="toggleChat()" title="Cerrar chat">&times;</button>
+        <button type="button" class="chat-close" onclick="toggleChat()" title="Cerrar chat">×</button>
     </div>
     <div class="chat-messages" id="chat-messages">
         <div class="chat-msg assistant">
@@ -1255,17 +1169,18 @@
     <div class="chat-input-area">
         <textarea id="chat-input" rows="1" placeholder="Escribe tu pregunta..." onkeydown="chatKeyDown(event)"></textarea>
         <button type="button" class="chat-send" id="chat-send-btn" onclick="sendChat()" title="Enviar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
     </div>
 </div>
 
 <!-- Chat Toggle Button -->
 <button type="button" class="chat-toggle" id="chat-toggle" onclick="toggleChat()" title="Asistente Legal">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
     <span class="chat-toggle-label">Asistente</span>
 </button>
 
-<script src="/static/js/app.js?v=20260823r"></script>
-</body>
-</html>
+<script src="/static/js/familia.js"></script>
+
+
+</body></html>
