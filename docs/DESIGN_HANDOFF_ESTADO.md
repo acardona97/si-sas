@@ -1,8 +1,52 @@
 # Design & Engineering Handoff — Sí S.A.S. / Anuwa
 
-Fecha: 25-sep-2026. Rama: `feature/cedulas-disposiciones-modelo-propio` (integrada en `main`,
-`main` en GitHub = `6975729`). Handoff operativo anterior: `docs/HANDOFF_v3.md`. Plan y
-decisiones: `docs/PLAN_MEJORAS.md`. Catálogo jurídico del módulo familia: `docs/FAMILIA_CATALOGO_TEXTOS.md`.
+Fecha: 26-sep-2026. Rama: `claude/awesome-turing-lkk35m`. Handoff operativo anterior:
+`docs/HANDOFF_v3.md`. Plan y decisiones: `docs/PLAN_MEJORAS.md`. Catálogo jurídico del
+módulo familia: `docs/FAMILIA_CATALOGO_TEXTOS.md`.
+
+## 0. Última sesión: rediseño tipográfico del wordmark "SÍ S.A.S."
+
+El cliente pidió corregir la tilde descuadrada de la Í y cambiar el estilo de letra a "una
+especie de cursiva" en tipografía "antigua griega o romana", más diferencial de marca.
+
+**Causa raíz de la tilde descuadrada:** el logo anterior (commit `2b4c2f5`) dibujaba la Í
+como dos trazos geométricos independientes (asta + tilde) hechos a mano; la tilde no estaba
+anclada al glifo real, por eso quedaba desalineada.
+
+**Solución aplicada:** se reemplazó el wordmark completo por contornos vectoriales reales
+extraídos de la fuente **Playfair Display Black Italic** (SIL OFL, Google Fonts) — se probaron
+tres direcciones (Playfair Display Italic, Cormorant Italic, Cinzel con inclinación forzada) y
+el cliente eligió Playfair Display por ser itálica genuina (no una inclinación simulada) y
+sostenerse mejor en tamaños chicos. Al usar el glifo `Í` real de la fuente, la tilde queda
+perfectamente anclada al asta sin ningún ajuste manual. El contorno de la tilde se separó en
+un `<path class="si-acento">` propio (igual que antes) para conservar la animación de
+"asentado" en `marca-si.css`.
+
+Proceso técnico: se descargó el `.woff2` de Google Fonts, se extrajeron los contornos de los
+glifos `S`, `Iacute`, `period`, `A` con `fontTools` (Python), se reescalaron para que la
+altura de mayúscula coincida con la altura del barquito de Quarta (que no cambió), y se
+compusieron en un único `<path>` por color (más el `<path class="si-acento">` de la tilde).
+
+Archivos actualizados: `src/static/img/si/si-logo-full.svg`, `si-logo-full-white.svg`,
+`si-logo-mono.svg`, `si-mark.svg` y la macro `src/templates/_marca.html` (que es lo que
+realmente pintan `landing.html`, `auth.html`, `index.html` y `admin.html`).
+
+**Favicon (`si-favicon.svg`) — cambio de criterio, no solo de fuente:** el favicon anterior
+era solo la "Í" (sin la S). Se probó primero extraer igual la Í de Playfair Display, pero a
+16-32px el asta se volvía casi invisible (los serifs finos de una itálica de texto no
+sobreviven a esos tamaños, a diferencia del trazo geométrico grueso hecho a mano que había
+antes). Se decidió usar el **barquito solo** (sin letra) como favicon: es la pieza más
+geométrica y de trazo grueso de la identidad, se probó a 16/24/32/48/64px y se lee con
+claridad en todos. El wordmark completo con letras sigue siendo Playfair Display en todos los
+demás usos (header, sidebar, footer, auth).
+
+Verificado en navegador real (Chromium headless) renderizando las plantillas Jinja reales
+(`_marca.html` importado igual que en `landing.html`/`auth.html`/`index.html`) con
+`style.css`/`marca-si.css` reales, en claro, oscuro, junto al logo de Anuwa y a distintos
+tamaños. No se tocó ningún otro archivo del proyecto.
+
+**Pendiente de esta sesión:** ninguno — cambio autocontenido en los 6 archivos de marca. El
+resto de fases pendientes (§4 más abajo) sigue igual.
 
 ---
 
