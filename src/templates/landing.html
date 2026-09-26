@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% from '_marca.html' import si_logo %}
 <html class="light" lang="es" style="">
 <head>
 <meta charset="utf-8">
@@ -106,6 +107,8 @@
   .plans-panel { display: none; }
   .plans-panel.active { display: grid; }
 </style>
+<link rel="icon" type="image/svg+xml" href="/static/img/si/si-favicon.svg">
+<link rel="stylesheet" href="/static/css/marca-si.css">
 </head>
 <body class="bg-anuwa-bg text-anuwa-navy font-body-md overflow-x-hidden">
 
@@ -113,8 +116,8 @@
 <header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 glass-header border-b border-outline-variant">
   <div class="flex justify-between items-center px-margin-desktop py-unit max-w-container-max mx-auto">
     <div class="flex items-center gap-3">
-      <a href="/" class="flex items-center gap-3 no-underline">
-        <span class="font-display-lg text-headline-sm font-bold text-anuwa-navy">SÍ S.A.S.</span>
+      <a href="/" class="si-endorso flex items-center gap-3 no-underline">
+        {{ si_logo() }}
         <span class="h-6 w-px bg-outline-variant" aria-hidden="true"></span>
         <img src="/static/img/logo_anuwa.svg" alt="Anuwa — acompañamiento de negocios"
              class="h-7 w-auto" width="172" height="49">
@@ -362,7 +365,7 @@
   <div class="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-gutter">
     <div class="flex flex-col">
       <div class="mb-8">
-        <div class="font-display-lg text-2xl font-bold text-anuwa-navy mb-4">SÍ S.A.S.</div>
+        <div class="mb-4">{{ si_logo() }}</div>
         <img src="/static/img/logo_anuwa.svg" alt="Anuwa — acompañamiento de negocios"
              class="h-7 w-auto" width="172" height="49">
       </div>

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% from '_marca.html' import si_logo %}
 <html class="light" lang="es">
 <head>
 <meta charset="utf-8"/>
@@ -59,13 +60,15 @@
     font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
   }
 </style>
+<link rel="icon" type="image/svg+xml" href="/static/img/si/si-favicon.svg">
+<link rel="stylesheet" href="/static/css/marca-si.css">
 </head>
 <body class="bg-anuwa-bg min-h-screen flex flex-col text-anuwa-navy antialiased">
 
 <!-- Header — Logo only (transactional focus) -->
 <header class="w-full py-unit h-24 flex items-center justify-center bg-transparent">
-  <a href="/" class="flex items-center gap-4 no-underline">
-    <span class="font-display-lg text-display-lg font-bold text-anuwa-navy tracking-tight">SÍ S.A.S.</span>
+  <a href="/" class="si-endorso flex items-center gap-4 no-underline">
+    {{ si_logo() }}
     <span class="h-8 w-px bg-outline-variant" aria-hidden="true"></span>
     <img src="/static/img/logo_anuwa.svg" alt="Anuwa — acompañamiento de negocios"
          class="h-7 w-auto" width="172" height="49">
