@@ -26,7 +26,8 @@ disposiciones especiales y ubicación de campos en modelos propios de estatutos.
 | 4 | **Modelo propio de estatutos** (.docx del abogado): si trae los tokens `{{...}}` de la plantilla se usan directo; si no, Sonnet ubica en cada párrafo el fragmento correspondiente a cada dato y las anclas estructurales (nombramientos, firmas, tabla, limitaciones); tokenización sin alterar formato de párrafo/run | `processors/modelo_propio.py`, `/api/modelo-propio/preview` | **falta el frontend** (ver §4) | ⚠️ solo backend |
 | 5 | **Módulo "sociedad de familia"**: plantilla jurídica distinta (`02_Plantilla_ajustada_alternativas`), motor propio de `[[SI]]`/`[[REPETIR]]`, textos jurídicos aprobados (no redactados por el usuario salvo la definición personalizada de grupo familiar), CIIU 7010 fijo + secundario opcional, objeto de precautelación patrimonial fijo, formato de empresa familiar siempre generado (exige parentesco por accionista PN), opción de compra y exclusión diferidas (alternativa negativa) | `processors/plantilla_familia.py`, `processors/familia.py`, `modulo:"familia"` en `/api/generate` | **en curso** (Codex, ver §7) | ⚠️ backend listo, frontend en curso |
 | 6 | **Rebranding a Anuwa**: paleta (#3641E4/#004571/#E3E3EF/#82389A), tipografía Barlow (sustituto de DIN Pro, que es de pago), logo Anuwa vectorial (trazado con potracer desde el arte original) | `static/img/logo_anuwa*.svg`, `style.css`, todas las plantillas | — | ✅ completo, **pendiente ajuste**: la A del logo claro debería ir en azul #3641E4, hoy toda navy |
-| 6b | **Identidad "SÍ S.A.S."**: en curso, ver §7 | — | — | 🔴 en curso, dirección definida por el cliente pero no implementada aún |
+| 6b | **Identidad "SÍ S.A.S."**: barquito de Quarta junto a la S, "SÍ S.A.S." como unidad homogénea, Í con tilde y asta diagonal (sin cola, por ajuste final del cliente) | `static/img/si/*.svg`, `_marca.html` | 4 plantillas | ✅ completo (commit `2b4c2f5`) |
+| 5b | **Cuestionario del módulo familia** (frontend): ruta `/app/familia`, clases 1-3, matriz de escenarios validada, parentesco obligatorio, opciones/elecciones del módulo, CIIU y objeto fijos | — | `familia.html`/`familia.js` | ✅ completo (commit `62b9b4f`) |
 | 7 | **Envío del paquete a Quarta** para asistencia en radicación, vía webhook de Make (adjunto si es ≤5 MB, si no enlace de descarga con token no adivinable) | `/api/enviar-asistencia`, `/descargas/asistencia/<token>` | bloque tras generar | ✅ completo, **probado de extremo a extremo** (correo recibido, confirmado por el usuario) |
 | — | **Casilla "Condición sociedad BIC"** en la hoja 1 del RUES, activada cuando la razón social contiene "BIC" (antes o después del indicativo societario) | `app.py`, `processors/pdf_filler.py` | ninguno (se detecta del campo existente) | ✅ completo |
 
@@ -60,7 +61,9 @@ con `node test_cuestionario.mjs`. Todos pasan sobre `main` en este momento.
 
 ## 4. Pendiente — por orden de prioridad
 
-### 4.1 Identidad visual "SÍ S.A.S." (🔴 bloqueante para la percepción de marca)
+### 4.1 Identidad visual "SÍ S.A.S." — ✅ CERRADO (commit `2b4c2f5`)
+Implementado por Codex (`gpt-6-astra`) y ajustado a mano tras revisión visual del cliente.
+Queda así, no pendiente:
 Dirección final del cliente (después de dos iteraciones de feedback):
 1. "SÍ S.A.S." es **un todo indivisible**: misma escala y mismo peso (negrilla) para ambas
    partes. Nada de wordmark grande + descriptor pequeño.
@@ -73,21 +76,24 @@ Dirección final del cliente (después de dos iteraciones de feedback):
    `C:\Users\User\Downloads\Logo Quarta2Curvas.pdf` y los `clipPath` `clip_2`/`clip_3` de
    `src/static/img/logo_quarta.svg`.
 4. Se mantienen los colores y la negrilla de la marca actual (Anuwa).
-5. **El usuario pidió explícitamente que el logo lo diseñe Codex**, no un agente Sonnet.
-   Esto está delegado y en curso — ver §7 para el estado exacto y cómo retomarlo si la
-   sesión se corta.
-Un primer intento (agente Sonnet, antes del feedback definitivo) quedó como referencia
-histórica en la rama `wip/identidad-si-sas` (commit `a56c3d2`) — **no usar tal cual**, no
-incorpora el barquito ni la dirección de "todo indivisible".
+5. **El logo lo diseñó Codex** (`gpt-6-astra`), por pedido explícito del cliente. Ajuste
+   final (quitar la cola de la base de la Í, dejarla con asta diagonal/cursiva en vez de
+   la curva) lo hizo Claude directamente sobre el SVG, con aprobación previa del cliente
+   sobre el resto del sistema.
+Resultado final en `src/static/img/si/` (wordmark completo, versión blanca, monocromo,
+marca/favicon) + macro Jinja `src/templates/_marca.html`, ya integrado en las 4 plantillas.
+Un primer intento (agente Sonnet, antes del feedback definitivo del cliente) quedó como
+referencia histórica descartada en la rama `wip/identidad-si-sas` (commit `a56c3d2`) — no
+se usó.
 
-### 4.2 Cuestionario del módulo familia (frontend)
-El backend (`processors/familia.py`, `processors/plantilla_familia.py`) está completo y
-probado; falta la pantalla. Está delegado a Codex en curso (§7). Debe cubrir: selector de
-módulo (comercial ↔ familia), clases de 1 a 3, matriz de escenarios de dividendos editable
-que valide 100 % por escenario, parentesco obligatorio por accionista persona natural,
-opciones (junta, consejo de familia, protocolo, arbitraje, preferencia simple/escalonada,
-definición de grupo familiar con opción personalizada revisada por el abogado), CIIU 7010
-fijo + secundario opcional, envío de `modulo: "familia"` en el payload.
+### 4.2 Cuestionario del módulo familia (frontend) — ✅ CERRADO (commit `62b9b4f`)
+Implementado por Codex (`gpt-6-astra`). Ruta `/app/familia`, plantilla y script propios
+(`familia.html`/`familia.js`), reutilizando el contrato de soportes y extracción del
+cuestionario comercial. Cubre clases 1-3, matriz de escenarios validada al 100 %,
+parentesco obligatorio por accionista persona natural, opciones y elecciones del módulo,
+CIIU 7010 y objeto social fijos de solo lectura. El cuestionario comercial solo ganó un
+enlace de cambio de módulo en la cabecera; su comportamiento no cambió (test_cuestionario.mjs
+y test_paquete.py siguen en verde).
 
 ### 4.3 Frontend del modelo propio de estatutos
 Falta el bloque de carga del `.docx`, la vista previa de los reemplazos propuestos por
@@ -131,17 +137,14 @@ simulación de disposiciones especiales, no corregidos por no estar en el alcanc
 
 ## 5. Fases que siguen (orden recomendado)
 
-1. **Cerrar identidad "SÍ S.A.S."** (Codex, en curso) — es lo más visible para el usuario
-   final y bloquea cualquier captura de pantalla de marketing.
-2. **Cerrar cuestionario del módulo familia** (Codex, en curso) — completa la fase 5 que
-   lleva más tiempo de trabajo jurídico invertido (catálogo de 213 campos).
-3. **Frontend del modelo propio** (fase 4) — menor volumen de trabajo, ya con contrato de
-   backend fijo y probado.
-4. **Prueba real end-to-end con Sonnet** en producción (una constitución completa con
-   disposiciones especiales, revisando el Word que sale).
-5. **Pulido de marca**: aplicar el logo definitivo de SÍ en landing/auth/admin (no solo en
-   el cuestionario), y corregir el color de la A de Anuwa en el logo claro.
-6. **Deuda técnica de Railway** (Volume, Postgres) cuando el volumen de uso lo justifique.
+1. **Frontend del modelo propio** (fase 4) — único frontend que falta; contrato de backend
+   ya fijo y probado (`processors/modelo_propio.py`, `test_modelo_propio.py`).
+2. **Prueba real end-to-end con Sonnet** en producción (una constitución completa con
+   disposiciones especiales, revisando el Word que sale), ahora que Railway tiene la clave
+   de API real.
+3. **Pulido de marca**: revisar el logo de SÍ S.A.S. en landing/auth/admin con datos reales
+   (no solo el tablero `preview.html`), y corregir el color de la A de Anuwa en el logo claro.
+4. **Deuda técnica de Railway** (Volume, Postgres) cuando el volumen de uso lo justifique.
 
 ---
 
@@ -164,33 +167,36 @@ simulación de disposiciones especiales, no corregidos por no estar en el alcanc
 
 ---
 
-## 7. Estado de los agentes en curso al cierre de esta sesión
+## 7. Cierre de sesión: ambas tareas de Codex terminadas, revisadas e integradas
 
-Dos tareas de Codex (`gpt-6-astra`) seguían corriendo en background al momento de escribir
-este handoff y **no se pudieron confirmar terminadas** antes del cierre de la sesión:
+Las dos tareas delegadas a Codex (`gpt-6-astra`) terminaron (ambas agotaron su cuota de
+Codex justo al final, con el trabajo ya escrito en disco) y quedaron **revisadas,
+probadas, commiteadas, mergeadas a `main` y desplegadas**:
 
-1. **Logo de SÍ S.A.S. + barquito** — worktree `.claude/worktrees/logo`, rama `logo-si-codex`
-   (creada desde `main` limpio). Prompt completo en el historial de esta sesión; instrucción
-   clave: extraer la geometría exacta del barquito de Quarta (PDF vectorial +
-   `logo_quarta.svg`), construir los caracteres como paths SVG (no depender de webfont en
-   el SVG), entregar el sistema completo en `src/static/img/si/` + macro Jinja
-   `_marca.html` + `docs/MARCA_SI.md`.
-2. **Cuestionario frontend del módulo familia** — worktree `.claude/worktrees/fase5c`, rama
-   `fase5-familia-frontend` (creada desde `main` limpio, con `_test_cuestionario` copiado y
-   junction a `node_modules`). Debe generar `src/templates/familia.html` +
-   `src/static/js/familia.js` + ruta `/app/familia`, sin tocar los archivos de la sociedad
-   comercial salvo un enlace de cambio de módulo.
+1. **Logo de SÍ S.A.S. + barquito** — rama `logo-si-codex` (commit `2b4c2f5`). Se revisó
+   visualmente en navegador real (los gradientes del barquito no se veían bien con el
+   rasterizador usado para una primera inspección; en Chromium se confirmó correcto). El
+   cliente pidió un ajuste: quitar la cola curva de la base de la Í y dejarla con un asta
+   diagonal/cursiva — cambio hecho a mano directamente sobre los 5 SVG y la macro Jinja
+   (reemplazo del path del asta, sin tocar el resto del sistema).
+2. **Cuestionario frontend del módulo familia** — rama `fase5-familia-frontend` (commit
+   `62b9b4f`). Se limpiaron scripts de construcción que Codex dejó sueltos en la raíz
+   (`crear_familia.cjs`, `familia_extra.js`, `.npm-cache/`) antes de commitear: su
+   contenido ya estaba incorporado en `familia.js`/`familia.html`.
 
-**Si esta sesión se cierra antes de que terminen:** revisar el estado de esos dos
-worktrees (`git -C .claude/worktrees/logo log` y `git -C .claude/worktrees/fase5c log`,
-y `git status` en cada uno). Si Codex dejó cambios sin commitear (ha pasado antes: su
-sandbox a veces no puede ejecutar `git commit` ni Python), commitear manualmente el
-contenido válido después de correr las pruebas correspondientes
-(`node test_cuestionario.mjs`, y si aplica `test_familia_frontend.mjs`), y luego
-`git merge --no-ff` esa rama sobre `main` (o sobre la rama de trabajo si sigue abierta).
-Los prompts completos que se les dio quedan en los archivos de scratch de la sesión
-(`codex_logo.md`, `codex_fase5c.md`) por si hay que relanzar la tarea con instrucciones
-idénticas.
+Ambas ramas se mergearon a `main` sin conflictos relevantes (`index.html` tuvo auto-merge
+limpio). Se corrió la suite completa sobre `main` ya fusionado — todos los `test_*.py` y
+ambos `test_*.mjs` en verde — y se hizo push a GitHub, disparando el deploy en Railway.
+
+**Incidente detectado y corregido durante la integración:** uno de los agentes de Codex
+ejecutó `npm install` dentro de su worktree, y como `node_modules` de los worktrees es una
+junction al `node_modules` real del repo, el install sobrescribió/vació el `node_modules`
+compartido (quedó con 0 paquetes, rompiendo `node test_cuestionario.mjs` en todos los
+worktrees, incluido el checkout principal). Se corrigió con `npm install` +
+`npm install jsdom --no-save` en el repo principal. **Recomendación:** si se vuelve a
+delegar trabajo de frontend a un agente en un worktree con `node_modules` en junction,
+pedirle explícitamente que NO ejecute `npm install`/`npm ci` ahí, o darle un `node_modules`
+real (copiado, no enlazado) para su worktree.
 
 ---
 
