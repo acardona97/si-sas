@@ -1,0 +1,15 @@
+/* ===== Marca SÍ S.A.S. · inicio ===== */
+.si-logo { display:inline-block; width:auto; height:32px; max-width:100%; vertical-align:middle; flex-shrink:0; overflow:visible; }
+.si-logo--oscuro { color:#fff; }
+.si-logo--claro { color:#004571; }
+.si-logo .si-acento { animation:si-asentar 240ms ease-out both; }
+.si-logo:hover .si-acento { animation:si-asentar-hover 240ms ease-out both; }
+@keyframes si-asentar { from { opacity:0; translate:0 -5px; } to { opacity:1; translate:0 0; } }
+@keyframes si-asentar-hover { from { opacity:.5; translate:0 -4px; } to { opacity:1; translate:0 0; } }
+.si-endorso { display:flex; align-items:center; gap:12px; }
+.si-endorso > img { width:auto; height:22px; }
+.brand .si-logo, .adm-brand .si-logo { display:block; height:36px; margin-bottom:14px; }
+.adm-brand .sidebar-logo-img { height:24px; margin-bottom:10px; }
+@media(max-width:480px) { .si-endorso { gap:8px; } .si-endorso .si-logo { height:26px; } .si-endorso > img { height:18px; } }
+@media(prefers-reduced-motion:reduce) { .si-logo .si-acento, .si-logo:hover .si-acento { animation:none; } }
+/* ===== Marca SÍ S.A.S. · fin ===== */
