@@ -332,6 +332,13 @@ def logout():
 # RUTAS PROTEGIDAS
 # ═══════════════════════════════════════════════════════════
 
+@app.route("/app/familia", methods=["GET"])
+@login_required
+def app_familia():
+    user = get_user_by_id(session["user_id"])
+    return render_template("familia.html", user=user)
+
+
 @app.route("/app")
 @login_required
 def app_main():
